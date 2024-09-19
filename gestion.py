@@ -3,7 +3,7 @@ import pandas as pd
 from snowflake.snowpark.functions import col
 
 cnx = st.connection("snowflake")
-session = snx.session()
+session = cnx.session()
 
 tabsm = st.tabs(["Gestion Sesiones", "Gestion Cursos", "Gestion Usuarios"])
 # Set up the Streamlit app
