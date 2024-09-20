@@ -14,7 +14,6 @@ with st.sidebar:
         client_id=client_id,
         authority=authority,
         scopes=["User.Read"],
-        redirect_uri=redirect_uri,
         connecting_label="Connecting",
         disconnected_label="Disconnected",
         sign_in_label="Sign in",
