@@ -23,20 +23,27 @@ with st.sidebar:
 
 # Check if user is authenticated and store in session state
 if auth_data:
+    st.write("Debug: auth_data received")  # Debugging message
     st.session_state["auth_data"] = auth_data
-    st.write("User authenticated.")
-    
 else:
+    st.write("Debug: No auth_data, checking session state.")  # Debugging message
+    # If not authenticated yet, stop execution or show login required message
     if "auth_data" not in st.session_state:
         st.write("Please authenticate to access the application.")
         st.stop()
 
-account = st.session_state["auth_data"]["account"]
-name = account["name"]
+# If auth_data is available, proceed
+if "auth_data" in st.session_state:
+    account = st.session_state["auth_data"]["account"]
+    name = account["name"]
 
-# Greet the authenticated user
-st.write(f"Hello {name}!")
-st.write("Protected content available.")
+    # Greet the authenticated user
+    st.write(f"Hello {name}!")
+    st.write("Protected content available.")
+
+    # Other app logic here (e.g., Snowflake connection)
+else:
+    st.write("Error: Could not retrieve user account data.")
 
 cnx = st.connection("snowflake")
 session = cnx.session()
