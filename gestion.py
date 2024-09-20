@@ -1,6 +1,33 @@
 import streamlit as st
 import pandas as pd
 from snowflake.snowpark.functions import col
+import streamlit as st
+from streamlit_msal import Msal
+
+client_id = "674d8292-6dc4-4f8f-a4d0-575f1e0837c8"
+authority = "https://login.microsoftonline.com/876969de-3b40-4648-872a-0ebecb3489e6"
+
+with st.sidebar:
+    auth_data = Msal.initialize_ui(
+        client_id=client_id,
+        authority=authority,
+        scopes=["User.Read"], 
+        connecting_label="Connecting",
+        disconnected_label="Disconnected",
+        sign_in_label="Sign in",
+        sign_out_label="Sign out"
+    )
+
+if not auth_data:
+    st.write("Please authenticate to access the application.")
+    st.stop()
+
+account = auth_data["account"]
+
+name = account["name"]
+
+st.write(f"Hello {name}!")
+st.write("Protected content available")
 
 cnx = st.connection("snowflake")
 session = cnx.session()
