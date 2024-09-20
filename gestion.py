@@ -13,16 +13,17 @@ with st.sidebar:
     auth_data = Msal.initialize_ui(
         client_id=client_id,
         authority=authority,
-        scopes=["User.Read"], 
+        scopes=["User.Read"],
+        redirect_uri=redirect_uri,
         connecting_label="Connecting",
         disconnected_label="Disconnected",
         sign_in_label="Sign in",
         sign_out_label="Sign out"
     )
 
+# Check if user is authenticated and store in session state
 if auth_data:
     st.session_state["auth_data"] = auth_data
-    st.experimental_rerun()
 else:
     if "auth_data" not in st.session_state:
         st.write("Please authenticate to access the application.")
