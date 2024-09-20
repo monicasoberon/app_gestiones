@@ -13,7 +13,6 @@ with st.sidebar:
         auth_data = Msal.initialize_ui(
             client_id=client_id,
             authority=authority,
-            scopes=["User.Read"],
             connecting_label="Connecting...",
             disconnected_label="Disconnected",
             sign_in_label="Sign in",
