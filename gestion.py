@@ -6,22 +6,20 @@ from streamlit_msal import Msal
 
 client_id="674d8292-6dc4-4f8f-a4d0-575f1e0837c8"
 authority="https://login.microsoftonline.com/876969de-3b40-4648-872a-0ebecb3489e6"
-redirect_uri="https://appgestiones-monicasoberon.streamlit.app/"
-
-
 with st.sidebar:
+    st.write("Debug: Starting MSAL UI Initialization")  # Debugging message
     auth_data = Msal.initialize_ui(
         client_id=client_id,
         authority=authority,
         scopes=["User.Read"],
-        connecting_label="Connecting",
+        connecting_label="Connecting...",
         disconnected_label="Disconnected",
         sign_in_label="Sign in",
         sign_out_label="Sign out"
     )
+    st.write("Debug: MSAL UI Initialized")  # Debugging message after MSAL initialization
 
-
-# Check if user is authenticated and store in session state
+# Debugging message to check if auth_data is returned
 if auth_data:
     st.write("Debug: auth_data received")  # Debugging message
     st.session_state["auth_data"] = auth_data
@@ -40,8 +38,6 @@ if "auth_data" in st.session_state:
     # Greet the authenticated user
     st.write(f"Hello {name}!")
     st.write("Protected content available.")
-
-    # Other app logic here (e.g., Snowflake connection)
 else:
     st.write("Error: Could not retrieve user account data.")
 
