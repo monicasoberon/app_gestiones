@@ -20,16 +20,20 @@ with st.sidebar:
         sign_out_label="Sign out"
     )
 
-if not auth_data:
-    st.write("Please authenticate to access the application.")
-    st.stop()
+if auth_data:
+    st.session_state["auth_data"] = auth_data
+else:
+    if "auth_data" not in st.session_state:
+        st.write("Please authenticate to access the application.")
+        st.stop()
 
-account = auth_data["account"]
-
+# Retrieve user account info from session state
+account = st.session_state["auth_data"]["account"]
 name = account["name"]
 
+# Greet the authenticated user
 st.write(f"Hello {name}!")
-st.write("Protected content available")
+st.write("Protected content available.")
 
 cnx = st.connection("snowflake")
 session = cnx.session()
