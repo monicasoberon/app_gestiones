@@ -19,10 +19,12 @@ with st.sidebar:
         sign_in_label="Sign in",
         sign_out_label="Sign out"
     )
+print("1")
 
 # Check if user is authenticated and store in session state
 if auth_data:
     st.session_state["auth_data"] = auth_data
+    print("2")
 else:
     if "auth_data" not in st.session_state:
         st.write("Please authenticate to access the application.")
