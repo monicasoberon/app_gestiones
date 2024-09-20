@@ -15,8 +15,8 @@ auth_data = None
 with st.sidebar:
     try:
         auth_data = Msal.initialize_ui(
-            client_id=client_id,
-            authority=authority,
+            client_id=st.secrets["client_id"],  # Access client_id from st.secrets
+            authority=st.secrets["authority"],
             scopes = ["User.Read", "User.ReadBasic.All"],
             connecting_label="Connecting...",
             disconnected_label="Disconnected",
