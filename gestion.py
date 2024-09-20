@@ -6,20 +6,24 @@ from streamlit_msal import Msal
 
 client_id="674d8292-6dc4-4f8f-a4d0-575f1e0837c8"
 authority="https://login.microsoftonline.com/876969de-3b40-4648-872a-0ebecb3489e6"
+
 with st.sidebar:
     st.write("Debug: Starting MSAL UI Initialization")  # Debugging message
-    auth_data = Msal.initialize_ui(
-        client_id=client_id,
-        authority=authority,
-        scopes=["User.Read"],
-        connecting_label="Connecting...",
-        disconnected_label="Disconnected",
-        sign_in_label="Sign in",
-        sign_out_label="Sign out"
-    )
-    st.write("Debug: MSAL UI Initialized")  # Debugging message after MSAL initialization
+    try:
+        auth_data = Msal.initialize_ui(
+            client_id=client_id,
+            authority=authority,
+            scopes=["User.Read"],
+            connecting_label="Connecting...",
+            disconnected_label="Disconnected",
+            sign_in_label="Sign in",
+            sign_out_label="Sign out"
+        )
+        st.write("Debug: MSAL UI Initialized")  # Debugging message after MSAL initialization
+    except Exception as e:
+        st.write(f"Error during MSAL initialization: {e}")
 
-# Debugging message to check if auth_data is returned
+# Check if auth_data is returned
 if auth_data:
     st.write("Debug: auth_data received")  # Debugging message
     st.session_state["auth_data"] = auth_data
@@ -40,7 +44,6 @@ if "auth_data" in st.session_state:
     st.write("Protected content available.")
 else:
     st.write("Error: Could not retrieve user account data.")
-
 cnx = st.connection("snowflake")
 session = cnx.session()
 
