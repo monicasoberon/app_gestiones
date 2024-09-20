@@ -23,7 +23,6 @@ with st.sidebar:
 
 # Check if auth_data is returned
 if auth_data:
-    st.write("Debug: auth_data received")  # Debugging message
     st.session_state["auth_data"] = auth_data
 else:
     # If not authenticated yet, stop execution or show login required message
