@@ -10,6 +10,8 @@ st.write(
     os.environ["authority"] == st.secrets["authority"],
 )
 
+auth_data = None
+
 with st.sidebar:
     try:
         auth_data = Msal.initialize_ui(
