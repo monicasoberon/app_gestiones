@@ -22,6 +22,7 @@ with st.sidebar:
 
 if auth_data:
     st.session_state["auth_data"] = auth_data
+    st.experimental_rerun()
 else:
     if "auth_data" not in st.session_state:
         st.write("Please authenticate to access the application.")
