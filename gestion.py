@@ -37,8 +37,7 @@ if "auth_data" in st.session_state:
     name = account["name"]
 
     # Greet the authenticated user
-    st.write(f"Hello {name}!")
-    st.write("Protected content available.")
+    st.write(f"Bienvenid@, {name}!")
 else:
     st.write("Error: Could not retrieve user account data.")
 cnx = st.connection("snowflake")
