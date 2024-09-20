@@ -3,6 +3,9 @@ import pandas as pd
 from snowflake.snowpark.functions import col
 from streamlit_msal import Msal
 
+os.environ["client_id"] == st.secrets["client_id"]
+os.environ["authority"] == st.secrets["authority"]
+
 with st.sidebar:
     try:
         auth_data = Msal.initialize_ui(
