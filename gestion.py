@@ -8,7 +8,6 @@ client_id = "674d8292-6dc4-4f8f-a4d0-575f1e0837c8"
 authority = "https://login.microsoftonline.com/876969de-3b40-4648-872a-0ebecb3489e6/"
 
 with st.sidebar:
-    st.write("Debug: Starting MSAL UI Initialization")  # Debugging message
     try:
         auth_data = Msal.initialize_ui(
             client_id=client_id,
@@ -19,7 +18,6 @@ with st.sidebar:
             sign_in_label="Sign in",
             sign_out_label="Sign out"
         )
-        st.write("Debug: MSAL UI Initialized")  # Debugging message after MSAL initialization
     except Exception as e:
         st.write(f"Error during MSAL initialization: {e}")
 
@@ -28,7 +26,6 @@ if auth_data:
     st.write("Debug: auth_data received")  # Debugging message
     st.session_state["auth_data"] = auth_data
 else:
-    st.write("Debug: No auth_data, checking session state.")  # Debugging message
     # If not authenticated yet, stop execution or show login required message
     if "auth_data" not in st.session_state:
         st.write("Please authenticate to access the application.")
