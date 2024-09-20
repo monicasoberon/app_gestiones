@@ -2,7 +2,7 @@ import streamlit as st
 import pandas as pd
 from snowflake.snowpark.functions import col
 import streamlit as st
-from streamlit_msal import Msal
+from streamlit-msal import Msal
 
 client_id = "674d8292-6dc4-4f8f-a4d0-575f1e0837c8"
 authority = "https://login.microsoftonline.com/876969de-3b40-4648-872a-0ebecb3489e6"
