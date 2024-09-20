@@ -3,10 +3,6 @@ import pandas as pd
 from snowflake.snowpark.functions import col
 from streamlit_msal import Msal
 
-
-client_id = "674d8292-6dc4-4f8f-a4d0-575f1e0837c8"
-authority = "https://login.microsoftonline.com/876969de-3b40-4648-872a-0ebecb3489e6/"
-
 with st.sidebar:
     try:
         auth_data = Msal.initialize_ui(
