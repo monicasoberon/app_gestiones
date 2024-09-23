@@ -150,7 +150,7 @@ with tabsm[0]:
                 
             # Insert into the database
                 insert_query = f"""
-                INSERT INTO invitados_sesion (id_sesion, id_usuario)
+                INSERT INTO invitacion_sesion (id_sesion, id_usuario)
                 SELECT {id_sesion}, c.id_usuario
                 FROM comunidad c
                 WHERE c.correo IN ({', '.join(f"'{email}'" for email in assistant_email_list)});
