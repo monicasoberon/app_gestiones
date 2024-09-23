@@ -48,8 +48,7 @@ with tabsm[0]:
     st.write(
     """Esta pantalla ayuda a registrar datos de las sesiones al igual que los invitados y los participantes.
     """
-)
-
+    )
 
 # Create tabs
     tabs = st.tabs(["Crear Sesión", "Lista de Invitados", "Lista de Asistentes"])
@@ -104,7 +103,22 @@ with tabsm[0]:
             for index, row in session_details_df.iterrows():
                     st.write(f" Nombre de la Sesión: {row['NOMBRE_SESION']}")
                     st.write(f" Fecha de la Sesión: {row['FECHA_SESION']}")
-                    
+
+            invitado_result = session.sql(f"""
+                SELECT c.NOMBRE, c.APELLIDO, c.CORREO 
+                FROM LABORATORIO.MONICA_SOBERON.COMUNIDAD c
+                JOIN LABORATORIO.MONICA_SOBERON.INVITACION_SESION r
+                ON c.ID_USUARIO = r.ID_USUARIO
+                WHERE r.ID_SESION = {id_sesion};
+            """)
+            
+            invi_df = invitado_result.to_pandas()
+            
+            # Display the registered users
+            st.write("**Usuarios Invitados:**")
+            st.dataframe(invi_df)
+
+            st.write("Agregar usuarios invitados.")
             email_input = st.text_area(
                 "Pega la lista de correos electrónicos aquí (uno por línea):",
                 height=300
@@ -159,7 +173,22 @@ with tabsm[0]:
                 st.write(f" Nombre de la Sesión: {row['NOMBRE_SESION']}")
                 st.write(f" Fecha de la Sesión: {row['FECHA_SESION']}")
                 
-            # Assistant email input
+            asis_result = session.sql(f"""
+                SELECT c.NOMBRE, c.APELLIDO, c.CORREO 
+                FROM LABORATORIO.MONICA_SOBERON.COMUNIDAD c
+                JOIN LABORATORIO.MONICA_SOBERON.ASISTENCIA_SESION r
+                ON c.ID_USUARIO = r.ID_USUARIO
+                WHERE r.ID_SESION = {id_sesion};
+            """)
+            
+            asis_df = asis_result.to_pandas()
+            
+            # Display the registered users
+            st.write("**Usuarios que Asistieron:**")
+            st.dataframe(asis_df)
+
+            st.write("Agregar usuarios que asistieron.")
+
             assistant_email_input = st.text_area(
                 "Pega la lista de correos electrónicos de los usuarios que asistieron aquí (uno por línea):",
                 height=300
@@ -756,9 +785,8 @@ with tabsm[2]:
 
             # Deletion button, only enabled if checkbox is checked
             if seguro:
-                if st.button('Eliminar Usuario'):
-                    # Delete the user from the database
+                borrar = st.button('Eliminar Usuario')
+                if borrar:
                     session.sql(f"DELETE FROM LABORATORIO.MONICA_SOBERON.COMUNIDAD WHERE CORREO = '{miembro_del}';").collect()
                     st.success(f"El usuario con correo {miembro_del} ha sido eliminado exitosamente.")
 
-        
