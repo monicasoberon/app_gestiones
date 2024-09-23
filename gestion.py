@@ -126,10 +126,22 @@ with tabsm[0]:
 
             if st.button("Procesar Correos"):
             # Process the input emails
-                assistant_email_list = [email.replace(chr(10), '').replace(chr(13), '').strip().lower() for email in assistant_email_input.split('\n') if email.strip()]
+                assistant_email_list = [email.replace(chr(10), '').replace(chr(13), '').strip().lower() for email in email_input.split('\n') if email.strip()]
             # Remove duplicates
                 assistant_email_list = list(set(assistant_email_list))
                 
+                existing_emails_query = "SELECT correo FROM comunidad WHERE correo IN ({})".format(', '.join(f"'{email}'" for email in assistant_email_list))
+                existing_emails = session.sql(existing_emails_query).collect()
+                existing_email_set = set(email['correo'] for email in existing_emails)
+                
+                # Correos no encontrados
+                not_found_emails = [email for email in assistant_email_list if email not in existing_email_set]
+
+                if not_found_emails:
+        # Mostrar popup para correos no encontrados
+                st.session_state.not_found_emails = not_found_emails
+                st.session_state.show_popup = True
+
                 df_assistants = pd.DataFrame(assistant_email_list, columns=['Correo'])
 
                 # Display the processed emails
@@ -148,6 +160,28 @@ with tabsm[0]:
                 session.sql(insert_query).collect()
                 st.success("Correos electrónicos procesados y listos para ser subidos a la base de datos.")
 
+            if st.session_state.get('show_popup', False):
+                st.write("Los siguientes correos no se encontraron en la comunidad:")
+                st.write(", ".join(st.session_state.not_found_emails))
+                
+                for email in st.session_state.not_found_emails:
+                    with st.form(f"register_{email}"):
+                        nombre = st.text_input(f"Nombre para {email}", key=f"nombre_{email}")
+                        apellido = st.text_input(f"Apellido para {email}", key=f"apellido_{email}")
+                        correo = email  # Prellenar con el correo
+                        
+                        if st.form_submit_button("Registrar"):
+                            # Insertar nuevo usuario en la tabla comunidad
+                            insert_user_query = f"""
+                            INSERT INTO comunidad (nombre, apellido, correo, status)
+                            VALUES ('{nombre}', '{apellido}', '{correo}', TRUE);
+                            """
+                            session.sql(insert_user_query).collect()
+                            st.success(f"Usuario {nombre} {apellido} registrado con éxito.")
+                
+                # Reiniciar estado del popup después de procesar
+                st.session_state.show_popup = False
+                
     with tabs[2]:
         st.header("Lista de Usuarios que Asistieron")
         
