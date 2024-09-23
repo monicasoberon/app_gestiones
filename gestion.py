@@ -139,8 +139,8 @@ with tabsm[0]:
 
                 if not_found_emails:
         # Mostrar popup para correos no encontrados
-                st.session_state.not_found_emails = not_found_emails
-                st.session_state.show_popup = True
+                    st.session_state.not_found_emails = not_found_emails
+                    st.session_state.show_popup = True
 
                 df_assistants = pd.DataFrame(assistant_email_list, columns=['Correo'])
 
@@ -181,7 +181,7 @@ with tabsm[0]:
                 
                 # Reiniciar estado del popup después de procesar
                 st.session_state.show_popup = False
-                
+
     with tabs[2]:
         st.header("Lista de Usuarios que Asistieron")
         
