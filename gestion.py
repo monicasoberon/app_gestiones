@@ -149,11 +149,17 @@ with tabsm[0]:
                     else:
                         # Insertar los correos que sí están en la comunidad
                         insert_query = f"""
-                        INSERT INTO invitacion_sesion (id_sesion, id_usuario)
-                        SELECT {id_sesion}, c.id_usuario
-                        FROM LABORATORIO.MONICA_SOBERON.comunidad c
-                        WHERE c.correo IN ({email_list_str});
+                            INSERT INTO invitacion_sesion (id_sesion, id_usuario)
+                            SELECT {id_sesion}, c.id_usuario
+                            FROM LABORATORIO.MONICA_SOBERON.comunidad c
+                            WHERE c.correo IN ({email_list_str})
+                            AND NOT EXISTS (
+                                SELECT 1
+                                FROM invitacion_sesion is
+                                WHERE is.id_sesion = {id_sesion} AND is.id_usuario = c.id_usuario
+                            );
                         """
+
                         session.sql(insert_query).collect()
                         st.success("Correos electrónicos procesados y subidos a la base de datos.")
 
@@ -173,12 +179,8 @@ with tabsm[0]:
                         # Get the name and surname using text input fields
                         nombre = st.text_input(f"Nombre para {email}", key=f"nombre_{email}")
                         apellido = st.text_input(f"Apellido para {email}", key=f"apellido_{email}")
-                        correo = email  # Email is directly assigned
-                        
-                        # Debug: Print values to check if they're being captured
-                        st.write(f"Processing user: {nombre} {apellido} - {correo}")
-                        
-                        # Submit button for each form
+                        correo = email  
+
                         if st.form_submit_button(f"Registrar {email}"):
                             # Validate that both nombre and apellido are filled
                             if not nombre or not apellido:
@@ -574,16 +576,21 @@ with tabsm[1]:
                         user_id = user_id_df['ID_USUARIO'].iloc[0]
 
                         insert_query = f"""
-                    INSERT INTO LABORATORIO.MONICA_SOBERON.INVITACION_CURSO (ID_CURSO, ID_USUARIO)
-                    VALUES ({course_id}, {user_id});
-                    """
+                            INSERT INTO LABORATORIO.MONICA_SOBERON.INVITACION_CURSO (ID_CURSO, ID_USUARIO)
+                            SELECT {course_id}, {user_id}
+                            WHERE NOT EXISTS (
+                            SELECT 1 
+                            FROM LABORATORIO.MONICA_SOBERON.INVITACION_CURSO 
+                            WHERE ID_CURSO = {course_id} 
+                            AND ID_USUARIO = {user_id}
+                        );
+                        """
                         session.sql(insert_query).collect()
 
                     st.success("Usuarios registrados agregados con éxito.")
 
     with tabs[4]:
         st.header("Lista de Usuarios Registrados")
-
         # Query for course information
         course_result = session.sql("SELECT NOMBRE_CURSO FROM LABORATORIO.MONICA_SOBERON.CURSO;")
         course_df = course_result.to_pandas()
