@@ -125,41 +125,44 @@ with tabsm[0]:
             )       
 
             if st.button("Procesar Correos"):
-            # Process the input emails
+    # Procesar los correos electrónicos
                 assistant_email_list = [email.replace(chr(10), '').replace(chr(13), '').strip().lower() for email in email_input.split('\n') if email.strip()]
-            # Remove duplicates
+                
+                # Remover duplicados
                 assistant_email_list = list(set(assistant_email_list))
                 
-                existing_emails_query = "SELECT correo FROM comunidad WHERE correo IN ({})".format(', '.join(f"'{email}'" for email in assistant_email_list))
-                existing_emails = session.sql(existing_emails_query).collect()
-                existing_email_set = set(email['correo'] for email in existing_emails)
-                
-                # Correos no encontrados
-                not_found_emails = [email for email in assistant_email_list if email not in existing_email_set]
+                # Consultar correos existentes en la tabla comunidad
+                if assistant_email_list:
+                    email_list_str = ', '.join(f"'{email}'" for email in assistant_email_list)
+                    existing_emails_query = f"SELECT correo FROM LABORATORIO.MONICA_SOBERON.comunidad WHERE correo IN ({email_list_str})"
+                    existing_emails = session.sql(existing_emails_query).collect()
+                    existing_email_set = set(email['CORREO'] for email in existing_emails)  # Ajuste del nombre de la columna
 
-                if not_found_emails:
-        # Mostrar popup para correos no encontrados
-                    st.session_state.not_found_emails = not_found_emails
-                    st.session_state.show_popup = True
+                    # Correos no encontrados
+                    not_found_emails = [email for email in assistant_email_list if email not in existing_email_set]
 
-                df_assistants = pd.DataFrame(assistant_email_list, columns=['Correo'])
+                    # Si hay correos no encontrados, se muestra el formulario para registrar nuevos usuarios
+                    if not_found_emails:
+                        st.session_state.not_found_emails = not_found_emails
+                        st.session_state.show_popup = True
+                        st.warning("Algunos correos no están registrados en la comunidad. Regístralos antes de continuar.")
+                    else:
+                        # Insertar los correos que sí están en la comunidad
+                        insert_query = f"""
+                        INSERT INTO invitacion_sesion (id_sesion, id_usuario)
+                        SELECT {id_sesion}, c.id_usuario
+                        FROM LABORATORIO.MONICA_SOBERON.comunidad c
+                        WHERE c.correo IN ({email_list_str});
+                        """
+                        session.sql(insert_query).collect()
+                        st.success("Correos electrónicos procesados y subidos a la base de datos.")
 
-                # Display the processed emails
-                st.write("Correos electrónicos de asistentes procesados:")
-                st.dataframe(df_assistants)
-                
-            # Insert into the database
-                insert_query = f"""
-                INSERT INTO invitacion_sesion (id_sesion, id_usuario)
-                SELECT {id_sesion}, c.id_usuario
-                FROM comunidad c
-                WHERE c.correo IN ({', '.join(f"'{email}'" for email in assistant_email_list)});
-                """
+                    # Mostrar correos procesados
+                    df_assistants = pd.DataFrame(assistant_email_list, columns=['Correo'])
+                    st.write("Correos electrónicos de asistentes procesados:")
+                    st.dataframe(df_assistants)
 
-                # Execute the query
-                session.sql(insert_query).collect()
-                st.success("Correos electrónicos procesados y listos para ser subidos a la base de datos.")
-
+            # Mostrar formulario para registrar nuevos usuarios si hay correos no encontrados
             if st.session_state.get('show_popup', False):
                 st.write("Los siguientes correos no se encontraron en la comunidad:")
                 st.write(", ".join(st.session_state.not_found_emails))
@@ -178,6 +181,7 @@ with tabsm[0]:
                             session.sql(insert_user_query).collect()
                             st.success(f"Usuario {nombre} {apellido} registrado con éxito.")
                 
+                # Reiniciar estado del popup después de procesar
                 st.session_state.show_popup = False
 
     with tabs[2]:
