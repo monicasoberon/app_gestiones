@@ -174,12 +174,19 @@ with tabsm[0]:
                         correo = email  
                         
                         if st.form_submit_button("Registrar"):
-                            insert_user_query = f"""
-                            INSERT INTO LABORATORIO.MONICA_SOBERON.comunidad (nombre, apellido, correo, status)
-                            VALUES ('{nombre}', '{apellido}', '{correo}', TRUE);
-                            """
-                            session.sql(insert_user_query).collect()
-                            st.success(f"Usuario {nombre} {apellido} registrado con éxito.")
+                            if nombre and apellido:
+                                try:
+                                    # Insert the new user into the comunidad table
+                                    insert_user_query = f"""
+                                    INSERT INTO LABORATORIO.MONICA_SOBERON.comunidad (nombre, apellido, correo, status)
+                                    VALUES ('{nombre}', '{apellido}', '{correo}', TRUE);
+                                    """
+                                    # Execute the query (use execute instead of collect for inserts)
+                                    session.sql(insert_user_query).execute()
+                                    st.success(f"Usuario {nombre} {apellido} registrado con éxito.")
+                                except Exception as e:
+                                    # Catch any SQL errors and display an error message
+                                    st.error(f"Error al registrar el usuario {correo}: {e}")
                 
                 # Reiniciar estado del popup después de procesar
                 st.session_state.show_popup = False
