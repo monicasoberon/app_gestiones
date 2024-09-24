@@ -168,18 +168,16 @@ with tabsm[0]:
                     with st.form(f"register_{email}"):
                         nombre = st.text_input(f"Nombre para {email}", key=f"nombre_{email}")
                         apellido = st.text_input(f"Apellido para {email}", key=f"apellido_{email}")
-                        correo = email  # Prellenar con el correo
+                        correo = email  
                         
                         if st.form_submit_button("Registrar"):
-                            # Insertar nuevo usuario en la tabla comunidad
                             insert_user_query = f"""
-                            INSERT INTO comunidad (nombre, apellido, correo, status)
+                            INSERT INTO LABORATORIO.MONICA_SOBERON.comunidad (nombre, apellido, correo, status)
                             VALUES ('{nombre}', '{apellido}', '{correo}', TRUE);
                             """
                             session.sql(insert_user_query).collect()
                             st.success(f"Usuario {nombre} {apellido} registrado con éxito.")
                 
-                # Reiniciar estado del popup después de procesar
                 st.session_state.show_popup = False
 
     with tabs[2]:
