@@ -672,7 +672,27 @@ with tabsm[1]:
 
                     st.success("Usuarios registrados agregados con éxito.")
     with tabs[4]:
-        
+        st.write("Registrar Asistencias")
+        # Query for course information
+        course_result = session.sql("SELECT NOMBRE_CURSO FROM LABORATORIO.MONICA_SOBERON.CURSO;")
+        course_df = course_result.to_pandas()
+        course_names = course_df['NOMBRE_CURSO'].tolist()
+
+        # Display course select box
+        selected_course = st.selectbox('Selecciona un Curso:', course_names)
+        if selected_course:
+            id_curso_result = session.sql(f"""
+                SELECT ID_CURSO 
+                FROM LABORATORIO.MONICA_SOBERON.CURSO 
+                WHERE NOMBRE_CURSO = '{selected_course}';
+            """)
+            
+            course_details_df = course_details_result.to_pandas()
+            id_curso_df = id_curso_result.to_pandas()
+            id_curso = id_curso_df['ID_CURSO'].iloc[0]
+            st.write(f"Nombre del Curso: {selected_course}")
+
+            clases_result = 
 
 with tabsm[2]:
 
