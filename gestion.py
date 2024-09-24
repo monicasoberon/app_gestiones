@@ -194,7 +194,7 @@ with tabsm[0]:
                                     st.write(f"SQL Query: {insert_user_query}")
                                     
                                     # Execute the query
-                                    session.sql(insert_user_query).execute()
+                                    session.sql(insert_user_query).collect()
 
                                     # Debug: Display success message
                                     st.success(f"Usuario {nombre} {apellido} registrado con éxito.")
