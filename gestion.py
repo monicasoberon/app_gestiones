@@ -167,29 +167,44 @@ with tabsm[0]:
                 st.write("Los siguientes correos no se encontraron en la comunidad:")
                 st.write(", ".join(st.session_state.not_found_emails))
                 
+                # Loop over not found emails
                 for email in st.session_state.not_found_emails:
                     with st.form(f"register_{email}"):
+                        # Get the name and surname using text input fields
                         nombre = st.text_input(f"Nombre para {email}", key=f"nombre_{email}")
                         apellido = st.text_input(f"Apellido para {email}", key=f"apellido_{email}")
-                        correo = email  
+                        correo = email  # Email is directly assigned
                         
-                        if st.form_submit_button("Registrar"):
-                            if nombre and apellido:
+                        # Debug: Print values to check if they're being captured
+                        st.write(f"Processing user: {nombre} {apellido} - {correo}")
+                        
+                        # Submit button for each form
+                        if st.form_submit_button(f"Registrar {email}"):
+                            # Validate that both nombre and apellido are filled
+                            if not nombre or not apellido:
+                                st.warning(f"Por favor, completa todos los campos para {email}.")
+                            else:
+                                # Try inserting into the database
                                 try:
-                                    # Insert the new user into the comunidad table
                                     insert_user_query = f"""
                                     INSERT INTO LABORATORIO.MONICA_SOBERON.comunidad (nombre, apellido, correo, status)
                                     VALUES ('{nombre}', '{apellido}', '{correo}', TRUE);
                                     """
-                                    # Execute the query (use execute instead of collect for inserts)
+                                    # Debug: Check the SQL query
+                                    st.write(f"SQL Query: {insert_user_query}")
+                                    
+                                    # Execute the query
                                     session.sql(insert_user_query).execute()
+
+                                    # Debug: Display success message
                                     st.success(f"Usuario {nombre} {apellido} registrado con éxito.")
+                                    
                                 except Exception as e:
-                                    # Catch any SQL errors and display an error message
+                                    # Display error message if SQL fails
                                     st.error(f"Error al registrar el usuario {correo}: {e}")
-                
-                # Reiniciar estado del popup después de procesar
-                st.session_state.show_popup = False
+                                
+                                # Reiniciar estado del popup después de procesar
+                                st.session_state.show_popup = False
 
     with tabs[2]:
         st.header("Lista de Usuarios que Asistieron")
