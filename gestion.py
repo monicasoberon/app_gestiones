@@ -161,7 +161,7 @@ with tabsm[0]:
                         """
 
                         session.sql(insert_query).collect()
-                        st.success("Correos electrónicos procesados y subidos a la base de datos.")
+                        st.success("Correos electrónicos nuevos procesados y subidos a la base de datos.")
 
                     # Mostrar correos procesados
                     df_assistants = pd.DataFrame(assistant_email_list, columns=['Correo'])
@@ -267,17 +267,23 @@ with tabsm[0]:
                 st.write("Correos electrónicos de asistentes procesados:")
                 st.dataframe(df_assistants)
                 
-            # Insert into the database
+                # Insert into the database
                 insert_query = f"""
                 INSERT INTO asistencia_sesion (id_sesion, id_usuario)
                 SELECT {id_sesion}, c.id_usuario
                 FROM comunidad c
-                WHERE c.correo IN ({', '.join(f"'{email}'" for email in assistant_email_list)});
+                WHERE c.correo IN ({', '.join(f"'{email}'" for email in assistant_email_list)})
+                AND NOT EXISTS (
+                    SELECT 1
+                    FROM asistencia_sesion a
+                    WHERE a.id_sesion = {id_sesion} AND a.id_usuario = c.id_usuario
+                );
                 """
 
                 # Execute the query
                 session.sql(insert_query).collect()
                 st.success("Asistencias registradas con éxito.")
+
         
 with tabsm[1]:
     # Set up the Streamlit app
@@ -285,7 +291,7 @@ with tabsm[1]:
     st.write("Esta aplicación te ayuda a gestionar cursos, invitados y sesiones.")
 
     # Create tabs
-    tabs = st.tabs(["Crear Curso", "Editar Curso", "Registrar Instructor", "Lista de Invitados", "Lista de Registrados"])
+    tabs = st.tabs(["Crear Curso", "Editar Curso", "Lista de Invitados", "Lista de Registrados", "Registrar Asistencia"])
 
     with tabs[0]:
         st.header("Crear Nuevo Curso")
@@ -459,30 +465,7 @@ with tabsm[1]:
         else:
             st.info("Selecciona un curso para editar.")
 
-            
     with tabs[2]:
-        st.header("Crear Nuevo Instructor")
-        
-        with st.form(key='new_instructor_form'):
-            first_name = st.text_input("Nombre del Instructor")
-            last_name = st.text_input("Apellido del Instructor")
-            instructor_email = st.text_input("Correo Electrónico del Instructor")
-            
-            submit_instructor_button = st.form_submit_button(label='Crear Instructor')
-            
-            if submit_instructor_button:
-                if first_name and last_name and instructor_email:
-                    # Insert new instructor into the database
-                    query = f"""
-                    INSERT INTO LABORATORIO.MONICA_SOBERON.INSTRUCTOR (NOMBRE_INSTRUCTOR, APELLIDO_INSTRUCTOR, CORREO_INSTRUCTOR)
-                    VALUES ('{first_name}', '{last_name}', '{instructor_email}');
-                    """
-                    session.sql(query).collect()
-                    st.success(f"Instructor '{first_name} {last_name}' creado con éxito.")
-                else:
-                    st.error("Por favor, ingrese el nombre, apellido y correo del instructor.")
-        
-    with tabs[3]:
         st.header("Lista de Invitados")
 
         # Query for course information
@@ -587,9 +570,9 @@ with tabsm[1]:
                         """
                         session.sql(insert_query).collect()
 
-                    st.success("Usuarios registrados agregados con éxito.")
+                    st.success("Usuarios invitados nuevos agregados con éxito.")
 
-    with tabs[4]:
+    with tabs[3]:
         st.header("Lista de Usuarios Registrados")
         # Query for course information
         course_result = session.sql("SELECT NOMBRE_CURSO FROM LABORATORIO.MONICA_SOBERON.CURSO;")
@@ -676,12 +659,20 @@ with tabsm[1]:
 
                     # Insert the user and course relationship into REGISTRADOS_CURSO
                             insert_query = f"""
-                    INSERT INTO LABORATORIO.MONICA_SOBERON.REGISTRADOS_CURSO (ID_CURSO, ID_USUARIO)
-                    VALUES ({course_id}, {user_id});
-                    """
+                                INSERT INTO LABORATORIO.MONICA_SOBERON.REGISTRADOS_CURSO (ID_CURSO, ID_USUARIO)
+                                SELECT {course_id}, {user_id}
+                                WHERE NOT EXISTS (
+                                    SELECT 1
+                                    FROM LABORATORIO.MONICA_SOBERON.REGISTRADOS_CURSO r
+                                    WHERE r.ID_CURSO = {course_id} AND r.ID_USUARIO = {user_id}
+                                );
+                            """
+
                             session.sql(insert_query).collect()
 
                     st.success("Usuarios registrados agregados con éxito.")
+    with tabs[4]:
+        
 
 with tabsm[2]:
 
@@ -692,7 +683,7 @@ with tabsm[2]:
             al igual que su estatus y detalles sobre sus cursos.
             """
         )
-    tab1, tab2, tab3 = st.tabs(["Usuario Existente", "Nuevo Usuario", "Eliminar Usuario"])
+    tab1, tab2, tab3, tab4 = st.tabs(["Usuario Existente", "Nuevo Usuario", "Registrar Instructor", "Eliminar Usuario"])
 
     with tab1:
         st.header("Editar Usuarios")
@@ -819,6 +810,28 @@ with tabsm[2]:
                 st.success("Usuario creado exitosamente.")
 
     with tab3:
+        st.header("Crear Nuevo Instructor")
+        
+        with st.form(key='new_instructor_form'):
+            first_name = st.text_input("Nombre del Instructor")
+            last_name = st.text_input("Apellido del Instructor")
+            instructor_email = st.text_input("Correo Electrónico del Instructor")
+            
+            submit_instructor_button = st.form_submit_button(label='Crear Instructor')
+            
+            if submit_instructor_button:
+                if first_name and last_name and instructor_email:
+                    # Insert new instructor into the database
+                    query = f"""
+                    INSERT INTO LABORATORIO.MONICA_SOBERON.INSTRUCTOR (NOMBRE_INSTRUCTOR, APELLIDO_INSTRUCTOR, CORREO_INSTRUCTOR)
+                    VALUES ('{first_name}', '{last_name}', '{instructor_email}');
+                    """
+                    session.sql(query).collect()
+                    st.success(f"Instructor '{first_name} {last_name}' creado con éxito.")
+                else:
+                    st.error("Por favor, ingrese el nombre, apellido y correo del instructor.")
+
+    with tab4:
         st.header("Eliminar Usuario")
         st.write(
             """Eliminar un usuario es algo definitivo. Se borrarán todos sus datos."""
