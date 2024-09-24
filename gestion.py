@@ -155,8 +155,8 @@ with tabsm[0]:
                             WHERE c.correo IN ({email_list_str})
                             AND NOT EXISTS (
                                 SELECT 1
-                                FROM invitacion_sesion is
-                                WHERE is.id_sesion = {id_sesion} AND is.id_usuario = c.id_usuario
+                                FROM invitacion_sesion i
+                                WHERE i.id_sesion = {id_sesion} AND i.id_usuario = c.id_usuario
                             );
                         """
 
