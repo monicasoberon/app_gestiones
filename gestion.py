@@ -982,7 +982,29 @@ with tabsm[3]:
         st.header("Añadir Usuarios Faltantes")
         st.write("""Esta sección sirve para pegar los correos copiados al seleccionar reply all en outlook. 
                  Aquí se formatean los correos y se añaden a la comunidad los que aún no se encuentran en ella.""")
-        
+        # Input for emails
+        correos_input = st.text_area("Pega aquí los correos:")
+
+        if st.button("Añadir Usuarios", key="usuario"):
+            if correos_input:
+                # Process the input emails
+                correos = correos_input.split(";")  # Split by semicolon
+                correos_formateados = []
+
+                for correo in correos:
+                    # Clean and extract email from the format
+                    correo_limpio = correo.split("<")[-1].strip().rstrip(">") 
+                    correo_final = correo_limpio.replace(chr(10), '').replace(chr(13), '').strip().lower()
+                    correos_formateados.append(correo_final)
+
+                # Get the existing community emails from the database
+                comunidad_result = session.sql("SELECT CORREO FROM LABORATORIO.MONICA_SOBERON.COMUNIDAD;")
+                comunidad_df = comunidad_result.to_pandas()
+                comunidad_correos = set(comunidad_df['CORREO'].tolist())
+
+                # Filter new emails that are not in the community
+                nuevos_correos = set(correos_formateados) - comunidad_correos
+            
 
     with tab3:
         st.header("Crear Nuevo Instructor")
