@@ -291,7 +291,7 @@ with tabsm[1]:
     st.write("Esta aplicación te ayuda a gestionar cursos, invitados y sesiones.")
 
     # Create tabs
-    tabs = st.tabs(["Crear Curso", "Editar Curso", "Lista de Invitados", "Lista de Registrados", "Registrar Asistencia"])
+    tabs = st.tabs(["Crear Curso", "Editar Curso", "Lista de Invitados", "Lista de Registrados"])
 
     with tabs[0]:
         st.header("Crear Nuevo Curso")
@@ -741,10 +741,11 @@ with tabsm[2]:
                     WHERE curso.id_curso = {id_curso};""").to_pandas()
 
                     if not clases_result.empty:
-                        for index, row in clases_result.iterrows():
-                            id_clase = row['id_clase']
-                            fecha_clase = row['fecha']
-                            st.write(f"Clase ID: {id_clase}, Fecha: {fecha_clase}")
+                        clases_dict = {f"Clase ID: {row['id_clase']}, Fecha: {row['fecha']}": row['id_clase'] for index, row in clases_result.iterrows()}
+                        selected_class = st.selectbox("Selecciona una Clase:", list(clases_dict.keys()), key='class_select_asistencia')
+                        
+                        if selected_class:
+                            id_clase = clases_dict[selected_class]
 
                             # Query for students who attended the class
                             students_result = session.sql(f"""
