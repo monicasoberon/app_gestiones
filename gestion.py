@@ -745,12 +745,17 @@ with tabsm[2]:
                     st.write(clases_result)
 
                     if not clases_result.empty:
-                        # Create a dictionary mapping dates to class IDs
-                        clases_dict = {row['FECHA'] for index, row in clases_result.iterrows()}
+                        # Muestra el contenido de clases_result para depuración
+                        st.write(clases_result)
+
+                        # Crea un diccionario que mapea las fechas a los ID de clase
+                        clases_dict = {row['FECHA']: row['ID_CLASE'] for index, row in clases_result.iterrows()}
+
+                        # Selecciona la fecha de la clase usando el diccionario
                         selected_class_date = st.selectbox("Selecciona una Fecha de Clase:", list(clases_dict.keys()), key='class_select_asistencia3')
                         
                         if selected_class_date:
-                            id_clase = clases_dict[selected_class_date]
+                            id_clase = clases_dict[selected_class_dat
 
                             # Now you can proceed with further processing using `id_clase`
                             # Query for students who attended the class
