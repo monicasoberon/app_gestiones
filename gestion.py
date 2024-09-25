@@ -716,7 +716,7 @@ with tabsm[2]:
                     else:
                         st.error("Por favor, completa todos los campos.")
 
-            with tab2:
+        with tab2:
                 course_result = session.sql("SELECT NOMBRE_CURSO FROM LABORATORIO.MONICA_SOBERON.CURSO;")
                 course_df = course_result.to_pandas()
                 course_names = course_df['NOMBRE_CURSO'].tolist()
@@ -820,7 +820,7 @@ with tabsm[2]:
                                     st.error("No se proporcionaron correos electrónicos válidos.")
                     else:
                         st.write("No hay clases registradas para este curso.")
-
+    
             
 
 with tabsm[3]:
