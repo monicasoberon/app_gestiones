@@ -746,7 +746,7 @@ with tabsm[2]:
 
                     if not clases_result.empty:
                         # Create a dictionary mapping dates to class IDs
-                        clases_dict = {row['fecha']: row['id_clase'] for index, row in clases_result.iterrows()}
+                        clases_dict = {row['FECHA'] for index, row in clases_result.iterrows()}
                         selected_class_date = st.selectbox("Selecciona una Fecha de Clase:", list(clases_dict.keys()), key='class_select_asistencia3')
                         
                         if selected_class_date:
