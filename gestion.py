@@ -692,6 +692,27 @@ with tabsm[1]:
             id_curso = id_curso_df['ID_CURSO'].iloc[0]
             st.write(f"Nombre del Curso: {selected_course}")
 
+            st.write("Registrar una clase")
+            fecha_clase =st.date_input("Fecha de la Clase")
+
+            if st.button("Crear Clase"):
+                if fecha_clase:
+                # Convertir la fecha al formato adecuado para SQL
+                    fecha_clase_str = fecha_clase.strftime('%Y-%m-%d')
+                
+                # Query para insertar la nueva clase
+                    insert_class_query = f"""
+                    INSERT INTO LABORATORIO.MONICA_SOBERON.CLASE (ID_CURSO, FECHA)
+                    VALUES ({id_curso}, '{fecha_clase_str}');
+                """
+                
+                # Ejecutar la query
+                    session.sql(insert_class_query).collect()
+                  # Mensaje de éxito
+                    st.success(f"Clase creada exitosamente para el curso {selected_course_name} en la fecha {fecha_clase_str}.")
+                else:
+                    st.error("Por favor, completa todos los campos.")
+
             clases_result = session.sql(f"""SELECT clase.id_clase, clase.fecha 
             FROM LABORATORIO.MONICA_SOBERON.CLASE clase
             INNER JOIN LABORATORIO.MONICA_SOBERON.CURSO curso 
