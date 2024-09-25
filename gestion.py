@@ -755,7 +755,7 @@ with tabsm[2]:
                         selected_class_date = st.selectbox("Selecciona una Fecha de Clase:", list(clases_dict.keys()), key='class_select_asistencia3')
                         
                         if selected_class_date:
-                            id_clase = clases_dict[selected_class_dat
+                            id_clase = clases_dict[selected_class_date]
 
                             # Now you can proceed with further processing using `id_clase`
                             # Query for students who attended the class
