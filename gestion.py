@@ -832,7 +832,6 @@ with tabsm[2]:
 
 with tabsm[3]:
 
-        # Write directly to the app
     st.title("Gestión de Usuarios")
     st.write(
             """Esta pantalla permite la gestión de los datos personales de los usuarios,
@@ -852,7 +851,11 @@ with tabsm[3]:
         miembro = st.selectbox('Selecciona un miembro:', comunidad_correos)
         if miembro:
             # Query to get individual member details
-            miembro_sql = session.sql(f"SELECT NOMBRE, APELLIDO, CORREO, STATUS FROM LABORATORIO.MONICA_SOBERON.COMUNIDAD WHERE CORREO = '{miembro}';")
+            miembro_sql = session.sql(f"""
+                SELECT NOMBRE, APELLIDO, CORREO, STATUS, NEGOCIO, AREA, PAIS 
+                FROM LABORATORIO.MONICA_SOBERON.COMUNIDAD 
+                WHERE CORREO = '{miembro}';
+            """)
             miembro_df = miembro_sql.to_pandas()
 
             # Display member details
@@ -862,6 +865,9 @@ with tabsm[3]:
                 st.write(f" Apellido: {row['APELLIDO']}")
                 st.write(f" Correo: {row['CORREO']}")
                 st.write(f" Estatus: {row['STATUS']}")
+                st.write(f" Negocio: {row['NEGOCIO']}")
+                st.write(f" Área: {row['AREA']}")
+                st.write(f" País: {row['PAIS']}")
 
             st.write("**Actualización de Datos Personales:**")
             # Form to update user details
@@ -870,6 +876,9 @@ with tabsm[3]:
                 apellido_nuevo = st.text_input('Apellido Nuevo:', value=row['APELLIDO'])
                 correo_nuevo = st.text_input('Correo Nuevo:', value=row['CORREO'])
                 estatus_nuevo = st.checkbox('Estatus (Activo = True, Inactivo = False)', value=row['STATUS'])
+                negocio_nuevo = st.text_input('Negocio Nuevo (opcional):', value=row['NEGOCIO'])  # New optional field
+                area_nueva = st.text_input('Área Nueva (opcional):', value=row['AREA'])  # New optional field
+                pais_nuevo = st.text_input('País Nuevo (opcional):', value=row['PAIS'])  # New optional field
 
                 submit_button = st.form_submit_button(label='Actualizar Detalles')
 
@@ -877,12 +886,15 @@ with tabsm[3]:
                     # Update the user details in the database
                     session.sql(f"""
                         UPDATE LABORATORIO.MONICA_SOBERON.COMUNIDAD
-                        SET NOMBRE = '{nombre_nuevo}', APELLIDO = '{apellido_nuevo}', STATUS = '{estatus_nuevo}', CORREO = '{correo_nuevo}'
+                        SET NOMBRE = '{nombre_nuevo}', APELLIDO = '{apellido_nuevo}', 
+                            STATUS = {1 if estatus_nuevo else 0}, CORREO = '{correo_nuevo}',
+                            NEGOCIO = '{negocio_nuevo}', AREA = '{area_nueva}', PAIS = '{pais_nuevo}'
                         WHERE CORREO = '{miembro}';
                     """).collect()
                     
                     st.success("Detalles actualizados exitosamente.")
 
+            # Fetch registered courses for the member
             registrados = session.sql(f""" 
                 SELECT C.NOMBRE_CURSO, C.FECHA_INICIO, C.FECHA_FIN, R.SOLICITUD_APROBADA, R.CURSO_APROBADO
                 FROM LABORATORIO.MONICA_SOBERON.REGISTRADOS_CURSO AS R 
@@ -895,15 +907,13 @@ with tabsm[3]:
             st.write("**Cursos Registrados:**")
             st.write(registrados_df)
 
-
             updated_rows = []
 
-    # Loop through the DataFrame and create checkboxes for each course
+            # Loop through the DataFrame and create checkboxes for each course
             for index, row in registrados_df.iterrows():
                 st.write(f"**Curso:** {row['NOMBRE_CURSO']}")
 
-        
-        # Create checkboxes for 'Solicitud Aprobada' and 'Curso Aprobado' and store their state
+                # Create checkboxes for 'Solicitud Aprobada' and 'Curso Aprobado' and store their state
                 solicitud_aprobada = st.checkbox(
                     'Solicitud Aprobada', 
                     value=bool(row['SOLICITUD_APROBADA']), 
@@ -913,43 +923,45 @@ with tabsm[3]:
                     'Curso Aprobado', 
                     value=bool(row['CURSO_APROBADO']), 
                     key=f'curso_{index}'
-            )
-        
-        # Append the updated data to the list
+                )
+            
+                # Append the updated data to the list
                 updated_rows.append({
                     'NOMBRE_CURSO': row['NOMBRE_CURSO'],
                     'SOLICITUD_APROBADA': solicitud_aprobada,
                     'CURSO_APROBADO': curso_aprobado
                 })
-                
 
-    # When the user clicks the button, apply all the updates
-        if st.button('Guardar Cambios'):
-            for updated_row in updated_rows:
-                query = f"""
-                UPDATE LABORATORIO.MONICA_SOBERON.REGISTRADOS_CURSO
-                SET SOLICITUD_APROBADA = {1 if updated_row['SOLICITUD_APROBADA'] else 0},
-                    CURSO_APROBADO = {1 if updated_row['CURSO_APROBADO'] else 0}
-                WHERE ID_USUARIO = (SELECT ID_USUARIO FROM LABORATORIO.MONICA_SOBERON.COMUNIDAD WHERE CORREO = '{miembro}')
-                AND ID_CURSO = (SELECT ID_CURSO 
-                    FROM LABORATORIO.MONICA_SOBERON.CURSO 
-                    WHERE NOMBRE_CURSO'{updated_row['NOMBRE_CURSO']}');
-                """
-                session.sql(query)
-        
-            st.success("Cambios guardados exitosamente.")
+            # When the user clicks the button, apply all the updates
+            if st.button('Guardar Cambios'):
+                for updated_row in updated_rows:
+                    query = f"""
+                    UPDATE LABORATORIO.MONICA_SOBERON.REGISTRADOS_CURSO
+                    SET SOLICITUD_APROBADA = {1 if updated_row['SOLICITUD_APROBADA'] else 0},
+                        CURSO_APROBADO = {1 if updated_row['CURSO_APROBADO'] else 0}
+                    WHERE ID_USUARIO = (SELECT ID_USUARIO FROM LABORATORIO.MONICA_SOBERON.COMUNIDAD WHERE CORREO = '{miembro}')
+                    AND ID_CURSO = (SELECT ID_CURSO 
+                        FROM LABORATORIO.MONICA_SOBERON.CURSO 
+                        WHERE NOMBRE_CURSO = '{updated_row['NOMBRE_CURSO']}');
+                    """
+                    session.sql(query)
+
+                st.success("Cambios guardados exitosamente.")
+
             
     with tab2:
         # Write directly to the app
         st.header("Creación de Usuarios")
         st.write("**Ingresa los Datos Personales:**")
 
-        # Form to create a new user
         with st.form(key='create_form'):
             nombre_nuevo = st.text_input('Nombre:', value='')
             apellido_nuevo = st.text_input('Apellido:', value='')
             correo_nuevo = st.text_input('Correo:', value='')  # Add an input for the email
             estatus_nuevo = st.checkbox('Estatus (Activo = True, Inactivo = False)', value=False)
+            negocio_nuevo = st.text_input('Negocio (opcional):', value='')  # New optional field
+            area_nueva = st.text_input('Área (opcional):', value='')  # New optional field
+            pais_nuevo = st.text_input('País (opcional):', value='')  # New optional field
 
             submit_button = st.form_submit_button(label='Crear Usuario')
 
@@ -959,11 +971,13 @@ with tabsm[3]:
 
                 # Insert the new user into the database
                 session.sql(f"""
-                    INSERT INTO LABORATORIO.MONICA_SOBERON.COMUNIDAD (NOMBRE, APELLIDO, CORREO, STATUS)
-                    VALUES ('{nombre_nuevo}', '{apellido_nuevo}', '{correo_nuevo}', {estatus_value});
+                    INSERT INTO LABORATORIO.MONICA_SOBERON.COMUNIDAD (NOMBRE, APELLIDO, CORREO, STATUS, NEGOCIO, AREA, PAIS)
+                    VALUES ('{nombre_nuevo}', '{apellido_nuevo}', '{correo_nuevo}', {estatus_value}, 
+                            '{negocio_nuevo}', '{area_nueva}', '{pais_nuevo}');
                 """).collect()
                     
                 st.success("Usuario creado exitosamente.")
+
 
     with tab3:
         st.header("Crear Nuevo Instructor")
