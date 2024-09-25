@@ -124,7 +124,7 @@ with tabsm[0]:
                 height=300
             )       
 
-            if st.button("Procesar Correos"):
+            if st.button("Procesar Correos", key= "process2"):
     # Procesar los correos electrónicos
                 assistant_email_list = [email.replace(chr(10), '').replace(chr(13), '').strip().lower() for email in email_input.split('\n') if email.strip()]
                 
@@ -254,7 +254,7 @@ with tabsm[0]:
                 height=300
             )
 
-            if st.button("Procesar Correos Asistentes"):
+            if st.button("Procesar Correos Asistentes", key = "process3"):
                 # Process the input emails
                 assistant_email_list = [email.replace(chr(10), '').replace(chr(13), '').strip().lower() for email in assistant_email_input.split('\n') if email.strip()]
 
@@ -527,7 +527,7 @@ with tabsm[1]:
                 key="text4"
             )
             
-            if st.button("Procesar Correos de Invitados"):
+            if st.button("Procesar Correos de Invitados", key = "process4"):
                 # Process the input emails
                 email_list = [email.strip().lower() for email in email_input.split('\n') if email.strip()]
                 email_list = list(set(email_list))  # Remove duplicates
@@ -624,7 +624,7 @@ with tabsm[1]:
         height=300,  key='email_input_key'  
     )
 
-            if st.button("Procesar Correos de Registrados"):
+            if st.button("Procesar Correos de Registrados", key = "process5"):
         # Process the input emails
                 email_list = [email.strip().lower() for email in email_input2.split('\n') if email.strip()]
                 email_list = list(set(email_list))  # Remove duplicates
@@ -698,7 +698,7 @@ with tabsm[2]:
                 st.write("Registrar una clase")
                 fecha_clase =st.date_input("Fecha de la Clase")
 
-                if st.button("Crear Clase"):
+                if st.button("Crear Clase", key="process6"):
                     if fecha_clase:
                     # Convertir la fecha al formato adecuado para SQL
                         fecha_clase_str = fecha_clase.strftime('%Y-%m-%d')
@@ -838,7 +838,7 @@ with tabsm[3]:
             al igual que su estatus y detalles sobre sus cursos.
             """
         )
-    tab1, tab2, tab3, tab4 = st.tabs(["Usuario Existente", "Nuevo Usuario", "Registrar Instructor", "Eliminar Usuario"])
+    tab1, tab2, tab5, tab3, tab4 = st.tabs(["Usuario Existente", "Nuevo Usuario", "Pegar correos Outlook", "Registrar Instructor", "Eliminar Usuario"])
 
     with tab1:
         st.header("Editar Usuarios")
@@ -933,7 +933,7 @@ with tabsm[3]:
                 })
 
             # When the user clicks the button, apply all the updates
-            if st.button('Guardar Cambios'):
+            if st.button('Guardar Cambios', key = "process7"):
                 for updated_row in updated_rows:
                     query = f"""
                     UPDATE LABORATORIO.MONICA_SOBERON.REGISTRADOS_CURSO
@@ -978,6 +978,11 @@ with tabsm[3]:
                     
                 st.success("Usuario creado exitosamente.")
 
+    with tab5:
+        st.header("Añadir Usuarios Faltantes")
+        st.write("""Esta sección sirve para pegar los correos copiados al seleccionar reply all en outlook. 
+                 Aquí se formatean los correos y se añaden a la comunidad los que aún no se encuentran en ella.""")
+        
 
     with tab3:
         st.header("Crear Nuevo Instructor")
@@ -1033,7 +1038,7 @@ with tabsm[3]:
 
             # Deletion button, only enabled if checkbox is checked
             if seguro:
-                borrar = st.button('Eliminar Usuario')
+                borrar = st.button('Eliminar Usuario', key = "process8")
                 if borrar:
                     session.sql(f"DELETE FROM LABORATORIO.MONICA_SOBERON.COMUNIDAD WHERE CORREO = '{miembro_del}';").collect()
                     st.success(f"El usuario con correo {miembro_del} ha sido eliminado exitosamente.")
