@@ -692,7 +692,31 @@ with tabsm[1]:
             id_curso = id_curso_df['ID_CURSO'].iloc[0]
             st.write(f"Nombre del Curso: {selected_course}")
 
-            clases_result = 
+            clases_result = session.sql(f"""Select id_clase, fecha from clase inner join curso on 
+            clase.id_curso = curso.id_curso where id_curso = {id_curso};""").to_pandas()
+
+            if not clases_result.empty:
+                for index, row in clases_result.iterrows():
+                    id_clase = row['id_clase']
+                    fecha_clase = row['fecha']
+                    st.write(f"Clase ID: {id_clase}, Fecha: {fecha_clase}")
+
+                    # Query for students who attended the class
+                    students_result = session.sql(f"""
+                        SELECT id_usuario 
+                        FROM LABORATORIO.MONICA_SOBERON.ASISTENCIA_CLASE 
+                        WHERE id_clase = {id_clase};
+                    """).to_pandas()
+                    
+                    if not students_result.empty:
+                        st.write("Estudiantes que asistieron a la clase:")
+                        st.dataframe(students_result)
+                    else:
+                        st.write(f"No hay estudiantes registrados para la clase {id_clase}.")
+            else:
+                st.write("No hay clases registradas para este curso.")
+
+            
 
 with tabsm[2]:
 
