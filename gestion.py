@@ -722,7 +722,7 @@ with tabsm[2]:
                 course_names = course_df['NOMBRE_CURSO'].tolist()
 
                 # Display course select box
-                selected_course = st.selectbox('Selecciona un Curso:', course_names, key='course_select_asistencia')
+                selected_course = st.selectbox('Selecciona un Curso:', course_names, key='course_select_asistencia2')
                 if selected_course:
                     id_curso_result = session.sql(f"""
                         SELECT ID_CURSO 
