@@ -773,7 +773,7 @@ with tabsm[2]:
                             
                             email_input = st.text_area(
                                 "Pega la lista de correos electrónicos aquí (uno por línea):",
-                                height=300
+                                height=300, key = "asistencia_text"
                             )       
 
                             if st.button("Procesar Correos"):
