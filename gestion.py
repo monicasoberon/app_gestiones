@@ -776,7 +776,7 @@ with tabsm[2]:
                                 height=300, key = "asistencia_text"
                             )       
 
-                            if st.button("Procesar Correos"):
+                            if st.button("Procesar Correos", key="correos_asistencias"):
                                 assistant_email_list = [email.replace(chr(10), '').replace(chr(13), '').strip().lower() for email in email_input.split('\n') if email.strip()]
                                 assistant_email_list = list(set(assistant_email_list))
                                 if assistant_email_list:
