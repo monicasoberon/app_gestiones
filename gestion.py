@@ -692,7 +692,7 @@ with tabsm[1]:
             id_curso = id_curso_df['ID_CURSO'].iloc[0]
             st.write(f"Nombre del Curso: {selected_course}")
 
-            clases_result = session.sql(f"""ELECT clase.id_clase, clase.fecha 
+            clases_result = session.sql(f"""SELECT clase.id_clase, clase.fecha 
             FROM LABORATORIO.MONICA_SOBERON.CLASE clase
             INNER JOIN LABORATORIO.MONICA_SOBERON.CURSO curso 
             ON clase.id_curso = curso.id_curso
