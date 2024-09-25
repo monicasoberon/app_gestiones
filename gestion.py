@@ -41,7 +41,7 @@ else:
 cnx = st.connection("snowflake")
 session = cnx.session()
 
-tabsm = st.tabs(["Gestion Sesiones", "Gestion Cursos", "Gestion Usuarios"])
+tabsm = st.tabs(["Gestion Sesiones", "Gestion Cursos", "Gestion Clases", "Gestion Usuarios"])
 # Set up the Streamlit app
 with tabsm[0]:
     st.title("Datos de Invitados y Asistencias de Sesiones")
@@ -671,78 +671,154 @@ with tabsm[1]:
                             session.sql(insert_query).collect()
 
                     st.success("Usuarios registrados agregados con éxito.")
-    with tabs[4]:
-        st.write("Registrar Asistencias")
-        # Query for course information
-        course_result = session.sql("SELECT NOMBRE_CURSO FROM LABORATORIO.MONICA_SOBERON.CURSO;")
-        course_df = course_result.to_pandas()
-        course_names = course_df['NOMBRE_CURSO'].tolist()
-
-        # Display course select box
-        selected_course = st.selectbox('Selecciona un Curso:', course_names, key='course_select_asistencia')
-        if selected_course:
-            id_curso_result = session.sql(f"""
-                SELECT ID_CURSO 
-                FROM LABORATORIO.MONICA_SOBERON.CURSO 
-                WHERE NOMBRE_CURSO = '{selected_course}';
-            """)
-            
-            course_details_df = course_details_result.to_pandas()
-            id_curso_df = id_curso_result.to_pandas()
-            id_curso = id_curso_df['ID_CURSO'].iloc[0]
-            st.write(f"Nombre del Curso: {selected_course}")
-
-            st.write("Registrar una clase")
-            fecha_clase =st.date_input("Fecha de la Clase")
-
-            if st.button("Crear Clase"):
-                if fecha_clase:
-                # Convertir la fecha al formato adecuado para SQL
-                    fecha_clase_str = fecha_clase.strftime('%Y-%m-%d')
-                
-                # Query para insertar la nueva clase
-                    insert_class_query = f"""
-                    INSERT INTO LABORATORIO.MONICA_SOBERON.CLASE (ID_CURSO, FECHA)
-                    VALUES ({id_curso}, '{fecha_clase_str}');
-                """
-                
-                # Ejecutar la query
-                    session.sql(insert_class_query).collect()
-                  # Mensaje de éxito
-                    st.success(f"Clase creada exitosamente para el curso {selected_course_name} en la fecha {fecha_clase_str}.")
-                else:
-                    st.error("Por favor, completa todos los campos.")
-
-            clases_result = session.sql(f"""SELECT clase.id_clase, clase.fecha 
-            FROM LABORATORIO.MONICA_SOBERON.CLASE clase
-            INNER JOIN LABORATORIO.MONICA_SOBERON.CURSO curso 
-            ON clase.id_curso = curso.id_curso
-            WHERE curso.id_curso = {id_curso};""").to_pandas()
-
-            if not clases_result.empty:
-                for index, row in clases_result.iterrows():
-                    id_clase = row['id_clase']
-                    fecha_clase = row['fecha']
-                    st.write(f"Clase ID: {id_clase}, Fecha: {fecha_clase}")
-
-                    # Query for students who attended the class
-                    students_result = session.sql(f"""
-                        SELECT id_usuario 
-                        FROM LABORATORIO.MONICA_SOBERON.ASISTENCIA_CLASE 
-                        WHERE id_clase = {id_clase};
-                    """).to_pandas()
-                    
-                    if not students_result.empty:
-                        st.write("Estudiantes que asistieron a la clase:")
-                        st.dataframe(students_result)
-                    else:
-                        st.write(f"No hay estudiantes registrados para la clase {id_clase}.")
-            else:
-                st.write("No hay clases registradas para este curso.")
-
-            
-
 with tabsm[2]:
+        st.write("Registrar Asistencias")
+
+        tab1, tab2 = st.tabs(["Registrar Clase", "Registrar Asistencia"])
+
+        with tab1:
+            # Query for course information
+            course_result = session.sql("SELECT NOMBRE_CURSO FROM LABORATORIO.MONICA_SOBERON.CURSO;")
+            course_df = course_result.to_pandas()
+            course_names = course_df['NOMBRE_CURSO'].tolist()
+
+            # Display course select box
+            selected_course = st.selectbox('Selecciona un Curso:', course_names, key='course_select_asistencia')
+            if selected_course:
+                id_curso_result = session.sql(f"""
+                    SELECT ID_CURSO 
+                    FROM LABORATORIO.MONICA_SOBERON.CURSO 
+                    WHERE NOMBRE_CURSO = '{selected_course}';
+                """)
+                
+                course_details_df = course_details_result.to_pandas()
+                id_curso_df = id_curso_result.to_pandas()
+                id_curso = id_curso_df['ID_CURSO'].iloc[0]
+
+                st.write("Registrar una clase")
+                fecha_clase =st.date_input("Fecha de la Clase")
+
+                if st.button("Crear Clase"):
+                    if fecha_clase:
+                    # Convertir la fecha al formato adecuado para SQL
+                        fecha_clase_str = fecha_clase.strftime('%Y-%m-%d')
+                    
+                    # Query para insertar la nueva clase
+                        insert_class_query = f"""
+                        INSERT INTO LABORATORIO.MONICA_SOBERON.CLASE (ID_CURSO, FECHA)
+                        VALUES ({id_curso}, '{fecha_clase_str}');
+                    """
+                    
+                    # Ejecutar la query
+                        session.sql(insert_class_query).collect()
+                    # Mensaje de éxito
+                        st.success(f"Clase creada exitosamente para el curso {selected_course_name} en la fecha {fecha_clase_str}.")
+                    else:
+                        st.error("Por favor, completa todos los campos.")
+
+            with tab2:
+                course_result = session.sql("SELECT NOMBRE_CURSO FROM LABORATORIO.MONICA_SOBERON.CURSO;")
+                course_df = course_result.to_pandas()
+                course_names = course_df['NOMBRE_CURSO'].tolist()
+
+                # Display course select box
+                selected_course = st.selectbox('Selecciona un Curso:', course_names, key='course_select_asistencia')
+                if selected_course:
+                    id_curso_result = session.sql(f"""
+                        SELECT ID_CURSO 
+                        FROM LABORATORIO.MONICA_SOBERON.CURSO 
+                        WHERE NOMBRE_CURSO = '{selected_course}';
+                    """)
+                
+                    course_details_df = course_details_result.to_pandas()
+                    id_curso_df = id_curso_result.to_pandas()
+                    id_curso = id_curso_df['ID_CURSO'].iloc[0]
+
+                    clases_result = session.sql(f"""SELECT clase.id_clase, clase.fecha 
+                    FROM LABORATORIO.MONICA_SOBERON.CLASE clase
+                    INNER JOIN LABORATORIO.MONICA_SOBERON.CURSO curso 
+                    ON clase.id_curso = curso.id_curso
+                    WHERE curso.id_curso = {id_curso};""").to_pandas()
+
+                    if not clases_result.empty:
+                        for index, row in clases_result.iterrows():
+                            id_clase = row['id_clase']
+                            fecha_clase = row['fecha']
+                            st.write(f"Clase ID: {id_clase}, Fecha: {fecha_clase}")
+
+                            # Query for students who attended the class
+                            students_result = session.sql(f"""
+                                SELECT id_usuario 
+                                FROM LABORATORIO.MONICA_SOBERON.ASISTENCIA_CLASE 
+                                WHERE id_clase = {id_clase};
+                            """).to_pandas()
+                            
+                            if not students_result.empty:
+                                st.write("Estudiantes que asistieron a la clase:")
+                                st.dataframe(students_result)
+                            else:
+                                st.write(f"No hay estudiantes registrados para la clase {id_clase}.")
+                            email_input = st.text_area(
+                                "Pega la lista de correos electrónicos aquí (uno por línea):",
+                                height=300
+                            )       
+
+                            if st.button("Procesar Correos"):
+                                assistant_email_list = [email.replace(chr(10), '').replace(chr(13), '').strip().lower() for email in email_input.split('\n') if email.strip()]
+                                assistant_email_list = list(set(assistant_email_list))
+                                if assistant_email_list:
+                                    # Convertir lista de correos en string para la consulta
+                                    email_list_str = ', '.join(f"'{email}'" for email in assistant_email_list)
+
+                                    # Consulta para verificar qué correos ya están en la comunidad
+                                    existing_emails_query = f"""
+                                        SELECT correo 
+                                        FROM LABORATORIO.MONICA_SOBERON.comunidad 
+                                        WHERE correo IN ({email_list_str})
+                                    """
+                                    existing_emails = session.sql(existing_emails_query).collect()
+                                    existing_email_set = set(email['CORREO'] for email in existing_emails)
+
+                                    # Mostrar los correos procesados
+                                    st.write("Correos electrónicos procesados:")
+                                    st.write(assistant_email_list)
+
+                                    # Mostrar los correos que ya están en la comunidad
+                                    if existing_email_set:
+                                        st.write("Correos encontrados en la comunidad de analítica:")
+                                        st.write(existing_email_set)
+
+                                        # Marcar como asistentes a los correos encontrados
+                                        for email in existing_email_set:
+                                            # Obtener el ID del usuario según el correo
+                                            user_id_query = f"""
+                                                SELECT id_usuario 
+                                                FROM LABORATORIO.MONICA_SOBERON.comunidad 
+                                                WHERE correo = '{email}'
+                                            """
+                                            user_id_result = session.sql(user_id_query).collect()
+                                            user_id = user_id_result[0]['ID_USUARIO'] if user_id_result else None
+
+                                            # Registrar asistencia si se encuentra el ID
+                                            if user_id:
+                                                insert_attendance_query = f"""
+                                                    INSERT INTO LABORATORIO.MONICA_SOBERON.asistencia_clase (id_clase, id_usuario) 
+                                                    VALUES ({id_clase}, {user_id});
+                                                """
+                                                session.sql(insert_attendance_query).collect()
+
+                                        st.success("Asistencias registradas con éxito para los correos encontrados.")
+                                    else:
+                                        st.warning("Ninguno de los correos está registrado en la comunidad de analítica.")
+
+                                else:
+                                    st.error("No se proporcionaron correos electrónicos válidos.")
+                    else:
+                        st.write("No hay clases registradas para este curso.")
+
+            
+
+with tabsm[3]:
 
         # Write directly to the app
     st.title("Gestión de Usuarios")
