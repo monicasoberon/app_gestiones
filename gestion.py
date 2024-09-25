@@ -729,24 +729,28 @@ with tabsm[2]:
                         FROM LABORATORIO.MONICA_SOBERON.CURSO 
                         WHERE NOMBRE_CURSO = '{selected_course}';
                     """)
-                
-                    course_details_df = course_details_result.to_pandas()
+                    
                     id_curso_df = id_curso_result.to_pandas()
                     id_curso = id_curso_df['ID_CURSO'].iloc[0]
 
-                    clases_result = session.sql(f"""SELECT clase.id_clase, clase.fecha 
-                    FROM LABORATORIO.MONICA_SOBERON.CLASE clase
-                    INNER JOIN LABORATORIO.MONICA_SOBERON.CURSO curso 
-                    ON clase.id_curso = curso.id_curso
-                    WHERE curso.id_curso = {id_curso};""").to_pandas()
+                    # Query to get only class dates
+                    clases_result = session.sql(f"""
+                        SELECT clase.id_clase, clase.fecha 
+                        FROM LABORATORIO.MONICA_SOBERON.CLASE clase
+                        INNER JOIN LABORATORIO.MONICA_SOBERON.CURSO curso 
+                        ON clase.id_curso = curso.id_curso
+                        WHERE curso.id_curso = {id_curso};
+                    """).to_pandas()
 
                     if not clases_result.empty:
-                        clases_dict = {f"Clase ID: {row['id_clase']}, Fecha: {row['fecha']}": row['id_clase'] for index, row in clases_result.iterrows()}
-                        selected_class = st.selectbox("Selecciona una Clase:", list(clases_dict.keys()), key='class_select_asistencia')
+                        # Create a dictionary mapping dates to class IDs
+                        clases_dict = {row['fecha']: row['id_clase'] for index, row in clases_result.iterrows()}
+                        selected_class_date = st.selectbox("Selecciona una Fecha de Clase:", list(clases_dict.keys()), key='class_select_asistencia')
                         
-                        if selected_class:
-                            id_clase = clases_dict[selected_class]
+                        if selected_class_date:
+                            id_clase = clases_dict[selected_class_date]
 
+                            # Now you can proceed with further processing using `id_clase`
                             # Query for students who attended the class
                             students_result = session.sql(f"""
                                 SELECT id_usuario 
@@ -759,6 +763,7 @@ with tabsm[2]:
                                 st.dataframe(students_result)
                             else:
                                 st.write(f"No hay estudiantes registrados para la clase {id_clase}.")
+                            
                             email_input = st.text_area(
                                 "Pega la lista de correos electrónicos aquí (uno por línea):",
                                 height=300
@@ -811,7 +816,6 @@ with tabsm[2]:
                                         st.success("Asistencias registradas con éxito para los correos encontrados.")
                                     else:
                                         st.warning("Ninguno de los correos está registrado en la comunidad de analítica.")
-
                                 else:
                                     st.error("No se proporcionaron correos electrónicos válidos.")
                     else:
