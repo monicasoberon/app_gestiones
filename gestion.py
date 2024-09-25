@@ -742,7 +742,7 @@ with tabsm[2]:
                         WHERE curso.id_curso = {id_curso};
                     """).to_pandas()
 
-                    print(clases_result)
+                    st.write(clases_result)
 
                     if not clases_result.empty:
                         # Create a dictionary mapping dates to class IDs
