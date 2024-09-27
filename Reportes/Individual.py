@@ -9,12 +9,6 @@ session = cnx.session()
 if "auth_data" not in st.session_state:
     st.write("Please authenticate to access this page.")
     st.stop()  # Stop the execution of this page
-    
-st.title("Datos de Invitados y Asistencias de Sesiones")
-st.write(
-"""Esta pantalla ayuda a registrar datos de las sesiones al igual que los invitados y los participantes.
-"""
-)
 
 st.title("Reporte Actividad Individual")
 st.write(
