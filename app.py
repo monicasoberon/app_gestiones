@@ -31,6 +31,10 @@ def authenticate():
 
     return st.session_state.get("auth_data")
 
+cnx = st.connection("snowflake")
+session = cnx.session()
+
+
 # Main function
 def main():
     auth_data = authenticate()
@@ -46,7 +50,7 @@ def main():
         st.markdown(f"**Bienvenid@, {name}!**")
         st.markdown("Ya estás autenticado. Navega las páginas de la aplicación usando los botones en la barra lateral.")
 
-        cursos = st.Page("Gestiones/Cursos.py", title="Cursos")
+        cursos = st.Page("Gestiones/Cursos.py", title="Cursos", default=True)
 
         clases = st.Page("Gestiones/Clases.py", title="Clases")
 
@@ -70,5 +74,3 @@ def main():
 if __name__ == "__main__":
     main()
 
-cnx = st.connection("snowflake")
-session = cnx.session()
