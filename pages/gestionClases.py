@@ -11,7 +11,7 @@ def run():
     if "auth_data" not in st.session_state:
         st.write("Please authenticate to access this page.")
         st.stop()  # Stop the execution of this page
-        
+
     st.write("Registrar Asistencias")
 
     tab1, tab2 = st.tabs(["Registrar Clase", "Registrar Asistencia"])
@@ -30,8 +30,7 @@ def run():
                 FROM LABORATORIO.MONICA_SOBERON.CURSO 
                 WHERE NOMBRE_CURSO = '{selected_course}';
             """)
-            
-            course_details_df = course_details_result.to_pandas()
+        
             id_curso_df = id_curso_result.to_pandas()
             id_curso = id_curso_df['ID_CURSO'].iloc[0]
 
@@ -52,7 +51,7 @@ def run():
                 # Ejecutar la query
                     session.sql(insert_class_query).collect()
                 # Mensaje de éxito
-                    st.success(f"Clase creada exitosamente para el curso {selected_course_name} en la fecha {fecha_clase_str}.")
+                    st.success(f"Clase creada exitosamente para el curso {selected_course} en la fecha {fecha_clase_str}.")
                 else:
                     st.error("Por favor, completa todos los campos.")
 
