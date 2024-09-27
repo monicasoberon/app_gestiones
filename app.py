@@ -40,14 +40,14 @@ if auth_data:
     name = account["name"]
 
     # Header and Subheader
-    st.title("Gestión de Cursos")
-    st.subheader("Bienvenido a la Plataforma de Gestión")
+    st.title("Gestión y Reportes")
+    st.subheader("Bienvenido a la Plataforma de Gestión y Reportes.")
 
     # Greet the user
     st.markdown(f"**Bienvenid@, {name}!**")
     st.markdown("Ya estás autenticado. Navega las páginas de la aplicación usando los botones en la barra lateral.")
 
-    cursos = st.Page("Gestiones/Cursos.py", title="Cursos", default=True)
+    cursos = st.Page("Gestiones/Cursos.py", title="Cursos")
 
     clases = st.Page("Gestiones/Clases.py", title="Clases")
 
