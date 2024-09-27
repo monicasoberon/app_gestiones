@@ -46,11 +46,6 @@ def main():
         st.markdown(f"**Bienvenid@, {name}!**")
         st.markdown("Ya estás autenticado. Navega las páginas de la aplicación usando los botones en la barra lateral.")
 
-        # Sidebar for navigation using buttons
-        for page_name, page_file in pages.items():
-            if st.sidebar.button(page_name):
-                exec(open(page_file).read())
-
 # Run the main function
 if __name__ == "__main__":
     main()
