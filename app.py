@@ -46,6 +46,22 @@ def main():
         st.markdown(f"**Bienvenid@, {name}!**")
         st.markdown("Ya estás autenticado. Navega las páginas de la aplicación usando los botones en la barra lateral.")
 
+        # Page navigation with buttons in the sidebar
+        st.sidebar.markdown("### Navegación:")
+        pages = {
+            "Gestión Clases": "pages/gestionClases.py",
+            "Gestión Cursos": "pages/gestionCursos.py",
+            "Gestión Sesión": "pages/gestionSesion.py",
+            "Gestión Usuarios": "pages/gestionUsuarios.py",
+        }
+
+        # Create a button for each page
+        for page_name, page_file in pages.items():
+            if st.sidebar.button(page_name):
+                # Clear the output before executing a new page
+                st.experimental_rerun()
+                exec(open(page_file).read())
+
 # Run the main function
 if __name__ == "__main__":
     main()
