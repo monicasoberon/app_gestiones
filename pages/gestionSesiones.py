@@ -1,3 +1,8 @@
+import os
+import streamlit as st
+import pandas as pd
+from snowflake.snowpark.functions import col
+
 st.title("Datos de Invitados y Asistencias de Sesiones")
 st.write(
 """Esta pantalla ayuda a registrar datos de las sesiones al igual que los invitados y los participantes.
