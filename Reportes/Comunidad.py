@@ -106,6 +106,7 @@ with tabs[1]:
                 ON I.ID_SESION = A.ID_SESION AND C.ID_USUARIO = A.ID_USUARIO
                 WHERE A.ID_USUARIO IS NULL;
             """).to_pandas()
+            st.write(f"**Cantidad de Invitados que No Asistieron:** {invited_count - attended_count}")
             toggle_dataframe_visibility('Mostrar/Ocultar Invitados que No Asistieron', 'show_no_attended_df', no_attended_df)
 
 # Tab 3: Buscar Curso
@@ -179,4 +180,5 @@ with tabs[2]:
                 ON I.ID_CURSO = R.ID_CURSO AND C.ID_USUARIO = R.ID_USUARIO
                 WHERE R.ID_USUARIO IS NULL;
             """).to_pandas()
+            st.write(f"**Cantidad de Invitados que No se Registraron:** {invited_count_course - registered_count}")
             toggle_dataframe_visibility('Mostrar/Ocultar Invitados que No Registraron', 'show_no_registered_df', not_registered_df)
