@@ -38,11 +38,15 @@ def main():
         account = auth_data["account"]
         name = account["name"]
 
+        # Header and Subheader
+        st.title("Gestión de Cursos")
+        st.subheader("Bienvenido a la Plataforma de Gestión")
+
         # Greet the user
-        st.write(f"Bienvenid@, {name}!")
-        st.write("Ya estas autenticado.")
-        
-        # Page navigation
+        st.markdown(f"**Bienvenid@, {name}!**")
+        st.markdown("Ya estás autenticado. Navega las páginas de la aplicación usando los botones a continuación.")
+
+        # Page navigation with buttons
         pages = {
             "Gestión Clases": "pages/gestionClases.py",
             "Gestión Cursos": "pages/gestionCursos.py",
@@ -51,16 +55,16 @@ def main():
         }
 
         # Sidebar for navigation
-        selection = st.sidebar.selectbox("Ir a:", list(pages.keys()))
-        page = pages[selection]
+        selection = st.sidebar.radio("Ir a:", list(pages.keys()))
 
-        # Import and run the selected page
-        exec(open(page).read())
+        # Button to navigate to selected page
+        if st.sidebar.button("Ir"):
+            page = pages[selection]
+            exec(open(page).read())
 
 # Run the main function
 if __name__ == "__main__":
     main()
-
 
 cnx = st.connection("snowflake")
 session = cnx.session()
