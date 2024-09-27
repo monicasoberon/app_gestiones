@@ -55,10 +55,9 @@ def main():
         }
 
         # Sidebar for navigation using buttons
-        for page_name in pages.keys():
+        for page_name, page_file in pages.items():
             if st.sidebar.button(page_name):
-                page = pages[page_name]
-                exec(open(page).read())
+                exec(open(page_file).read())
 
 # Run the main function
 if __name__ == "__main__":
