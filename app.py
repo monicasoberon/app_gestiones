@@ -44,15 +44,7 @@ def main():
 
         # Greet the user
         st.markdown(f"**Bienvenid@, {name}!**")
-        st.markdown("Ya estás autenticado. Navega las páginas de la aplicación usando los botones a continuación.")
-
-        # Page navigation with buttons
-        pages = {
-            "Gestión Clases": "pages/gestionClases.py",
-            "Gestión Cursos": "pages/gestionCursos.py",
-            "Gestión Sesión": "pages/gestionSesion.py",
-            "Gestión Usuarios": "pages/gestionUsuarios.py",
-        }
+        st.markdown("Ya estás autenticado. Navega las páginas de la aplicación usando los botones en la barra lateral.")
 
         # Sidebar for navigation using buttons
         for page_name, page_file in pages.items():
