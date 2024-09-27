@@ -20,7 +20,7 @@ st.write(
 tabs = st.tabs(["Crear Sesión", "Editar Sesión", "Registrar Invitados", "Registrar Asistentes"])
 
 with tabs[0]:
-    st.header("Crear Nueva Sesión")
+    st.header("Crear Sesión")
     with st.form(key='new_session_form'):
         session_name = st.text_input("Nombre de la Sesión")
         session_date = st.date_input("Fecha de la Sesión")
@@ -41,8 +41,36 @@ with tabs[0]:
                 st.error("Por favor, ingrese el nombre y la fecha de la sesión.")
 
 with tabs[1]:
-
     st.header("Editar Sesión")
+
+    # Query for session information
+    session_result = session.sql("SELECT NOMBRE_SESION FROM LABORATORIO.MONICA_SOBERON.SESION;")
+    session_df = session_result.to_pandas()
+    session_names = session_df['NOMBRE_SESION'].tolist()
+
+        # Display session select box
+    selected_session = st.selectbox('Selecciona una Sesión:', session_names)
+    if selected_session:
+        # Query for session details based on the selected session
+        session_details_result = session.sql(f"SELECT NOMBRE_SESION, FECHA_SESION, LINK_SESION_INFORMATIVA FROM LABORATORIO.MONICA_SOBERON.SESION WHERE NOMBRE_SESION = '{selected_session}';")
+        id_sesion = session.sql(f"select id_sesion FROM LABORATORIO.MONICA_SOBERON.SESION WHERE NOMBRE_SESION = '{selected_session}';")
+    
+        session_details_df = session_details_result.to_pandas()
+        session_id_result = session.sql(f"""
+            SELECT ID_SESION
+            FROM LABORATORIO.MONICA_SOBERON.SESION
+            WHERE NOMBRE_SESION = '{selected_session}';
+                """)
+        session_id_df = session_id_result.to_pandas()
+        id_sesion = session_id_df['ID_SESION'].iloc[0]
+            
+            # Display the session details as a list
+        st.write("**Detalles de la Sesión:**")
+        for index, row in session_details_df.iterrows():
+                st.write(f" Nombre de la Sesión: {row['NOMBRE_SESION']}")
+                st.write(f" Fecha de la Sesión: {row['FECHA_SESION']}")
+
+
 with tabs[2]:
     st.header("Lista de Invitados")
 
