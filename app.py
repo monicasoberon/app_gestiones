@@ -42,7 +42,7 @@ if auth_data:
     # Header and Subheader
     st.title("Gestión y Reportes")
  
-    st.markdown(f"**Bienvenid@, {name},  a la Plataforma de Gestión y Reportes.!**")
+    st.markdown(f"**Bienvenid@, {name},  a la Plataforma de Gestión y Reportes!**")
     st.markdown("Ya estás autenticado. Navega las páginas de la aplicación usando los botones en la barra lateral.")
 
     cursos = st.Page("Gestiones/Cursos.py", title="Cursos")
@@ -64,19 +64,4 @@ if auth_data:
     }
     )
     pg.run()
-
-    pages = {
-    "Your account": [
-        st.Page("create_account.py", title="Create your account"),
-        st.Page("manage_account.py", title="Manage your account"),
-    ],
-    "Resources": [
-        st.Page("learn.py", title="Learn about us"),
-        st.Page("trial.py", title="Try it out"),
-    ],
-    }
-
-    pg = st.navigation(pages)
-    pg.run()
-
 
