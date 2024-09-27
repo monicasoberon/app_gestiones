@@ -39,9 +39,6 @@ if auth_data:
     account = auth_data["account"]
     name = account["name"]
 
-    # Header and Subheader
-    st.title("Gestión y Reportes")
- 
     st.markdown(f"**Bienvenid@, {name},  a la Plataforma de Gestión y Reportes!**")
     st.markdown("Ya estás autenticado. Navega las páginas de la aplicación usando los botones en la barra lateral.")
 
