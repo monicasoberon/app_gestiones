@@ -10,7 +10,7 @@ if "auth_data" not in st.session_state:
     st.write("Please authenticate to access this page.")
     st.stop()  # Stop the execution of this page
 
-st.write("Registrar Asistencias")
+st.title("Registrar Clases y Asistencias")
 
 tab1, tab2 = st.tabs(["Registrar Clase", "Registrar Asistencia"])
 
