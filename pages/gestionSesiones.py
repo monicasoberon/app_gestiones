@@ -3,7 +3,15 @@ import streamlit as st
 import pandas as pd
 from snowflake.snowpark.functions import col
 
+cnx = st.connection("snowflake")
+session = cnx.session()
+
 def run():
+
+    if "auth_data" not in st.session_state:
+        st.write("Please authenticate to access this page.")
+        st.stop()  # Stop the execution of this page
+        
     st.title("Datos de Invitados y Asistencias de Sesiones")
     st.write(
     """Esta pantalla ayuda a registrar datos de las sesiones al igual que los invitados y los participantes.

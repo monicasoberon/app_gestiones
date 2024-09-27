@@ -3,7 +3,15 @@ import streamlit as st
 import pandas as pd
 from snowflake.snowpark.functions import col
 
+cnx = st.connection("snowflake")
+session = cnx.session()
+
 def run():
+
+    if "auth_data" not in st.session_state:
+        st.write("Please authenticate to access this page.")
+        st.stop()  # Stop the execution of this page
+        
     st.write("Registrar Asistencias")
 
     tab1, tab2 = st.tabs(["Registrar Clase", "Registrar Asistencia"])
@@ -159,7 +167,7 @@ def run():
                                 st.error("No se proporcionaron correos electrónicos válidos.")
                 else:
                     st.write("No hay clases registradas para este curso.")
-                    
+
 if __name__ == "__main__":
     run()
         
