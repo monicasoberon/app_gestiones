@@ -42,22 +42,22 @@ if auth_data:
     st.markdown(f"**¡Bienvenid@, {name},  a la Plataforma de Gestión y Reportes!**")
     st.write("Ya estás autenticado. Navega las páginas de la aplicación usando los botones en la barra lateral.")
 
+    sesiones = st.Page("Gestiones/Sesiones.py", title="Sesiones")
+
     cursos = st.Page("Gestiones/Cursos.py", title="Cursos")
 
     clases = st.Page("Gestiones/Clases.py", title="Clases")
 
-    sesiones = st.Page("Gestiones/Sesiones.py", title="Sesiones")
-
     usuarios = st.Page("Gestiones/Usuarios.py", title="Usuarios")
+    
+    individual = st.Page("Reportes/Individual.py", title="Individual")
 
     comunidad = st.Page("Reportes/Comunidad.py", title="Comunidad")
 
-    individual = st.Page("Reportes/Individual.py", title="Individual")
-
     pg = st.navigation(
     {
-        "Gestiones": [cursos, clases, sesiones, usuarios],
-        "Reportes": [comunidad, individual],
+        "Gestiones": [sesiones, cursos, clases, usuarios],
+        "Reportes": [individual, comunidad],
     }
     )
     pg.run()
