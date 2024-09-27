@@ -34,8 +34,6 @@ def toggle_dataframe_visibility(button_text, session_state_key, dataframe, key=N
     if st.session_state[session_state_key]:
         st.write(dataframe)
 
-# Get the current credentials
-session = get_active_session()
 
 # Execute SQL query and get results
 result = session.sql("SELECT NOMBRE, APELLIDO, CORREO, STATUS FROM LABORATORIO.MONICA_SOBERON.COMUNIDAD;")
