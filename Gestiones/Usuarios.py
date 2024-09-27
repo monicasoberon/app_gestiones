@@ -16,9 +16,66 @@ st.write(
         al igual que su estatus y detalles sobre sus cursos.
         """
     )
-tab1, tab2, tab5, tab3, tab4 = st.tabs(["Usuario Existente", "Nuevo Usuario", "Pegar correos Outlook", "Registrar Instructor", "Eliminar Usuario"])
+tab1, tab2, tab5, tab3, tab4 = st.tabs(["Crear Usuario", "Editar Usuario", "Pegar correos Outlook", "Registrar Instructor", "Eliminar Usuario"])
 
 with tab1:
+# Write directly to the app
+    st.header("Creación de Usuarios")
+    st.write("**Ingresa los Datos Personales:**")
+
+    with st.form(key='create_form'):
+        nombre_nuevo = st.text_input('Nombre:', value='')
+        apellido_nuevo = st.text_input('Apellido:', value='')
+        correo_nuevo = st.text_input('Correo:', value='')  # Add an input for the email
+        estatus_nuevo = st.checkbox('Estatus (Activo = True, Inactivo = False)', value=False)
+        negocio_nuevo = st.text_input('Negocio (opcional):', value='')  # New optional field
+        area_nueva = st.text_input('Área (opcional):', value='')  # New optional field
+        pais_nuevo = st.text_input('País (opcional):', value='')  # New optional field
+
+        submit_button = st.form_submit_button(label='Crear Usuario')
+
+        if submit_button:
+            # Convert the checkbox value (True/False) to 1/0 for the database
+            estatus_value = 1 if estatus_nuevo else 0
+
+            # Insert the new user into the database
+            session.sql(f"""
+                INSERT INTO LABORATORIO.MONICA_SOBERON.COMUNIDAD (NOMBRE, APELLIDO, CORREO, STATUS, NEGOCIO, AREA, PAIS)
+                VALUES ('{nombre_nuevo}', '{apellido_nuevo}', '{correo_nuevo}', {estatus_value}, 
+                        '{negocio_nuevo}', '{area_nueva}', '{pais_nuevo}');
+            """).collect()
+                
+            st.success("Usuario creado exitosamente.")
+
+with tab5:
+    st.header("Añadir Usuarios Faltantes")
+    st.write("""Esta sección sirve para pegar los correos copiados al seleccionar reply all en outlook. 
+                Aquí se formatean los correos y se añaden a la comunidad los que aún no se encuentran en ella.""")
+    # Input for emails
+    correos_input = st.text_area("Pega aquí los correos:")
+
+    if st.button("Añadir Usuarios", key="usuario"):
+        if correos_input:
+            # Process the input emails
+            correos = correos_input.split(";")  # Split by semicolon
+            correos_formateados = []
+
+            for correo in correos:
+                # Clean and extract email from the format
+                correo_limpio = correo.split("<")[-1].strip().rstrip(">") 
+                correo_final = correo_limpio.replace(chr(10), '').replace(chr(13), '').strip().lower()
+                correos_formateados.append(correo_final)
+
+            # Get the existing community emails from the database
+            comunidad_result = session.sql("SELECT CORREO FROM LABORATORIO.MONICA_SOBERON.COMUNIDAD;")
+            comunidad_df = comunidad_result.to_pandas()
+            comunidad_correos = set(comunidad_df['CORREO'].tolist())
+
+            # Filter new emails that are not in the community
+            nuevos_correos = set(correos_formateados) - comunidad_correos
+        
+with tab2:
+
     st.header("Editar Usuarios")
     # Query to get a list of community members
     comunidad_result = session.sql("SELECT CORREO FROM LABORATORIO.MONICA_SOBERON.COMUNIDAD;")
@@ -124,65 +181,7 @@ with tab1:
                 """
                 session.sql(query)
 
-            st.success("Cambios guardados exitosamente.")
-
-        
-with tab2:
-    # Write directly to the app
-    st.header("Creación de Usuarios")
-    st.write("**Ingresa los Datos Personales:**")
-
-    with st.form(key='create_form'):
-        nombre_nuevo = st.text_input('Nombre:', value='')
-        apellido_nuevo = st.text_input('Apellido:', value='')
-        correo_nuevo = st.text_input('Correo:', value='')  # Add an input for the email
-        estatus_nuevo = st.checkbox('Estatus (Activo = True, Inactivo = False)', value=False)
-        negocio_nuevo = st.text_input('Negocio (opcional):', value='')  # New optional field
-        area_nueva = st.text_input('Área (opcional):', value='')  # New optional field
-        pais_nuevo = st.text_input('País (opcional):', value='')  # New optional field
-
-        submit_button = st.form_submit_button(label='Crear Usuario')
-
-        if submit_button:
-            # Convert the checkbox value (True/False) to 1/0 for the database
-            estatus_value = 1 if estatus_nuevo else 0
-
-            # Insert the new user into the database
-            session.sql(f"""
-                INSERT INTO LABORATORIO.MONICA_SOBERON.COMUNIDAD (NOMBRE, APELLIDO, CORREO, STATUS, NEGOCIO, AREA, PAIS)
-                VALUES ('{nombre_nuevo}', '{apellido_nuevo}', '{correo_nuevo}', {estatus_value}, 
-                        '{negocio_nuevo}', '{area_nueva}', '{pais_nuevo}');
-            """).collect()
-                
-            st.success("Usuario creado exitosamente.")
-
-with tab5:
-    st.header("Añadir Usuarios Faltantes")
-    st.write("""Esta sección sirve para pegar los correos copiados al seleccionar reply all en outlook. 
-                Aquí se formatean los correos y se añaden a la comunidad los que aún no se encuentran en ella.""")
-    # Input for emails
-    correos_input = st.text_area("Pega aquí los correos:")
-
-    if st.button("Añadir Usuarios", key="usuario"):
-        if correos_input:
-            # Process the input emails
-            correos = correos_input.split(";")  # Split by semicolon
-            correos_formateados = []
-
-            for correo in correos:
-                # Clean and extract email from the format
-                correo_limpio = correo.split("<")[-1].strip().rstrip(">") 
-                correo_final = correo_limpio.replace(chr(10), '').replace(chr(13), '').strip().lower()
-                correos_formateados.append(correo_final)
-
-            # Get the existing community emails from the database
-            comunidad_result = session.sql("SELECT CORREO FROM LABORATORIO.MONICA_SOBERON.COMUNIDAD;")
-            comunidad_df = comunidad_result.to_pandas()
-            comunidad_correos = set(comunidad_df['CORREO'].tolist())
-
-            # Filter new emails that are not in the community
-            nuevos_correos = set(correos_formateados) - comunidad_correos
-        
+            st.success("Cambios guardados exitosamente.")        
 
 with tab3:
     st.header("Crear Nuevo Instructor")

@@ -190,7 +190,7 @@ with tabs[1]:
         st.info("Selecciona un curso para editar.")
 
 with tabs[2]:
-    st.header("Lista de Invitados")
+    st.header("Registrar Invitados")
 
     # Query for course information
     course_result = session.sql("SELECT NOMBRE_CURSO FROM LABORATORIO.MONICA_SOBERON.CURSO;")
@@ -297,7 +297,7 @@ with tabs[2]:
                 st.success("Usuarios invitados nuevos agregados con éxito.")
 
 with tabs[3]:
-    st.header("Lista de Usuarios Registrados")
+    st.header("Registrar Alumnos")
     # Query for course information
     course_result = session.sql("SELECT NOMBRE_CURSO FROM LABORATORIO.MONICA_SOBERON.CURSO;")
     course_df = course_result.to_pandas()
