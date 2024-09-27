@@ -49,13 +49,13 @@ def main():
         # Sidebar for navigation with custom sections
         st.sidebar.header("Menú Principal")
 
-        cursos = st.Page("gestionCursos.py", title="Cursos")
+        cursos = st.Page("pages/gestionCursos.py", title="Cursos")
 
-        clase = st.Page("gestionClases.py", title="Clases")
+        clase = st.Page("pages/gestionClases.py", title="Clases")
 
-        sesiones = st.Page("gestionSesiones.py", title="Sesiones")
+        sesiones = st.Page("pages/gestionSesiones.py", title="Sesiones")
 
-        usuarios = st.Page("gestionUsuarios.py", title="Usuarios")
+        usuarios = st.Page("pages/gestionUsuarios.py", title="Usuarios")
 
 
 # Run the main function
