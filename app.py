@@ -50,7 +50,7 @@ def main():
         st.markdown(f"**Bienvenid@, {name}!**")
         st.markdown("Ya estás autenticado. Navega las páginas de la aplicación usando los botones en la barra lateral.")
 
-        cursos = st.Page("/Gestiones/Cursos.py", title="Cursos", default=True)
+        cursos = st.Page("Gestiones/Cursos.py", title="Cursos", default=True)
 
         clases = st.Page("Gestiones/Clases.py", title="Clases")
 
