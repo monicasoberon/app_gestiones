@@ -3,6 +3,7 @@ import streamlit as st
 from snowflake.snowpark.functions import col
 import pandas as pd
 from streamlit_msal import Msal
+from st_pages import Page, show_pages, add_page_title
 
 # Authentication
 def authenticate():
@@ -46,22 +47,15 @@ def main():
         st.markdown(f"**Bienvenid@, {name}!**")
         st.markdown("Ya estás autenticado. Navega las páginas de la aplicación usando los botones en la barra lateral.")
 
-        # Disable automatic navigation
-        st.sidebar.header("Navegación:")
-        
-        # Page navigation with buttons in the sidebar
-        pages = {
-            "Gestión Clases": "pages/gestionClases.py",
-            "Gestión Cursos": "pages/gestionCursos.py",
-            "Gestión Sesión": "pages/gestionSesion.py",
-            "Gestión Usuarios": "pages/gestionUsuarios.py",
-        }
-
-        # Create a button for each page
-        for page_name, page_file in pages.items():
-            if st.sidebar.button(page_name):
-                # Clear the output before executing a new page
-                exec(open(page_file).read())
+        # Define your pages with custom names and icons
+        show_pages(
+            [
+                Page("pages/gestionClases.py", "Clases 📚"),
+                Page("pages/gestionCursos.py", "Cursos 📖"),
+                Page("pages/gestionSesion.py", "Sesión 🔑"),
+                Page("pages/gestionUsuarios.py", "Usuarios 👥"),
+            ]
+        )
 
 # Run the main function
 if __name__ == "__main__":
