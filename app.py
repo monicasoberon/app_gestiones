@@ -39,7 +39,7 @@ if auth_data:
     account = auth_data["account"]
     name = account["name"]
 
-    st.markdown(f"**Bienvenid@, {name},  a la Plataforma de Gestión y Reportes!**")
+    st.markdown(f"**¡Bienvenid@, {name},  a la Plataforma de Gestión y Reportes!**")
     st.write("Ya estás autenticado. Navega las páginas de la aplicación usando los botones en la barra lateral.")
 
     cursos = st.Page("Gestiones/Cursos.py", title="Cursos")
