@@ -46,6 +46,14 @@ def main():
         st.markdown(f"**Bienvenid@, {name}!**")
         st.markdown("Ya estás autenticado. Navega las páginas de la aplicación usando los botones en la barra lateral.")
 
+        cursos = st.Page("page/Cursos.py", title="Cursos")
+
+        clase = st.Page("page/Clases.py", title="Clases")
+
+        sesiones = st.Page("page/Sesiones.py", title="Sesiones")
+
+        usuarios = st.Page("page/Usuarios.py", title="Usuarios")
+
 # Run the main function
 if __name__ == "__main__":
     main()
