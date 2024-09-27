@@ -54,13 +54,11 @@ def main():
             "Gestión Usuarios": "pages/gestionUsuarios.py",
         }
 
-        # Sidebar for navigation
-        selection = st.sidebar.radio("Ir a:", list(pages.keys()))
-
-        # Button to navigate to selected page
-        if st.sidebar.button("Ir"):
-            page = pages[selection]
-            exec(open(page).read())
+        # Sidebar for navigation using buttons
+        for page_name in pages.keys():
+            if st.sidebar.button(page_name):
+                page = pages[page_name]
+                exec(open(page).read())
 
 # Run the main function
 if __name__ == "__main__":
