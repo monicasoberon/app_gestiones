@@ -49,20 +49,14 @@ def main():
         # Sidebar for navigation with custom sections
         st.sidebar.header("Menú Principal")
 
-        st.sidebar.subheader("Gestión")
-        pages = {
-            "Clases": "pages/gestionClases.py",
-            "Cursos": "pages/gestionCursos.py",
-            "Sesiones": "pages/gestionSesion.py",
-            "Usuarios": "pages/gestionUsuarios.py",
-        }
+        cursos = st.Page("gestionCursos.py", title="Cursos")
 
-        selection = st.sidebar.radio("Ir a:", list(pages.keys()))
+        clase = st.Page("gestionClases.py", title="Clases")
 
-        # Button to navigate to the selected page
-        if st.sidebar.button("Ir"):
-            page = pages[selection]
-            exec(open(page).read())
+        sesiones = st.Page("gestionSesiones.py", title="Sesiones")
+
+        usuarios = st.Page("gestionUsuarios.py", title="Usuarios")
+
 
 # Run the main function
 if __name__ == "__main__":
