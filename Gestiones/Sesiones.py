@@ -17,7 +17,7 @@ st.write(
 )
 
 # Create tabs
-tabs = st.tabs(["Crear Sesión", "Lista de Invitados", "Lista de Asistentes"])
+tabs = st.tabs(["Crear Sesión", "Editar Sesión", "Registrar Invitados", "Registrar Asistentes"])
 
 with tabs[0]:
     st.header("Crear Nueva Sesión")
@@ -41,6 +41,9 @@ with tabs[0]:
                 st.error("Por favor, ingrese el nombre y la fecha de la sesión.")
 
 with tabs[1]:
+
+    st.header("Editar Sesión")
+with tabs[2]:
     st.header("Lista de Invitados")
 
     # Query for session information
