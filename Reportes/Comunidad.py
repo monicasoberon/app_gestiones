@@ -194,8 +194,16 @@ with tabs[3]:
         GROUP BY MES
         ORDER BY MES;
     """).to_pandas()
-    sns.barplot(data=sessions_per_month, x='MES', y='CANTIDAD')
-    st.pyplot()
+    fig, ax = plt.subplots(figsize=(6, 4))  # Smaller figure size
+    sns.barplot(data=sessions_per_month, x='MES', y='CANTIDAD', ax=ax)
+
+    # Reduce font size for labels and title to make it more compact
+    ax.set_xlabel('Mes', fontsize=10)
+    ax.set_ylabel('Cantidad', fontsize=10)
+    ax.set_title('Cantidad de Sesiones por Mes', fontsize=12)
+
+    # Display plot
+    st.pyplot(fig)
 
     st.write('Cantidad de Invitados vs. Asistentes por Sesión:')
     invited_vs_attended = session.sql("""
@@ -221,8 +229,8 @@ with tabs[3]:
         GROUP BY C.NOMBRE_CURSO
         ORDER BY CANTIDAD DESC;
     """).to_pandas()
-    sns.barplot(data=registered_per_course, x='CANTIDAD', y='NOMBRE_CURSO')
-    st.pyplot()
+    fig2 = sns.barplot(data=registered_per_course, x='CANTIDAD', y='NOMBRE_CURSO')
+    st.pyplot(fig2)
 
     st.write('Cantidad de Invitados vs. Registrados por Curso:')
     invited_vs_registered = session.sql("""
@@ -235,6 +243,7 @@ with tabs[3]:
         GROUP BY C.NOMBRE_CURSO
         ORDER BY INVITADOS DESC;
     """).to_pandas()
+
     sns.barplot(data=invited_vs_registered, x='INVITADOS', y='NOMBRE_CURSO', color='blue', label='Invitados')
     sns.barplot(data=invited_vs_registered, x='REGISTRADOS', y='NOMBRE_CURSO', color='green', label='Registrados')
 
