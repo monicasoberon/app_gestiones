@@ -195,7 +195,7 @@ with tabs[3]:
         GROUP BY MES
         ORDER BY MES;
     """).to_pandas()
-    fig, ax = plt.subplots(figsize=(4, 5))
+    fig, ax = plt.subplots(figsize=(2, 3))
     sns.barplot(data=sessions_per_month, x='MES', y='CANTIDAD', ax=ax)
     st.pyplot(fig)
 
@@ -223,7 +223,8 @@ with tabs[3]:
         GROUP BY C.NOMBRE_CURSO
         ORDER BY CANTIDAD DESC;
     """).to_pandas()
-    fig2 = sns.barplot(data=registered_per_course, x='CANTIDAD', y='NOMBRE_CURSO')
+    fig2, ax = plt.subplots(figsize=(2, 3))
+    sns.barplot(data=registered_per_course, x='CANTIDAD', y='NOMBRE_CURSO', ax=ax)
     st.pyplot(fig2)
 
     st.write('Cantidad de Invitados vs. Registrados por Curso:')
