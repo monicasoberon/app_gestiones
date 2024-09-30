@@ -195,7 +195,7 @@ with tabs[3]:
         GROUP BY MES
         ORDER BY MES;
     """).to_pandas()
-    fig, ax = plt.subplots(figsize=(2, 3))
+    fig, ax = plt.subplots(figsize=(0.5, 2))
     sns.barplot(data=sessions_per_month, x='MES', y='CANTIDAD', ax=ax)
     st.pyplot(fig)
 
