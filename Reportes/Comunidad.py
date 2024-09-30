@@ -199,7 +199,7 @@ with tabs[3]:
     sns.barplot(data=sessions_per_month, x='MES', y='CANTIDAD', ax=ax)
     ax.set_xlabel('Mes', fontsize=6)  # Change the font size of the x-axis label
     ax.set_ylabel('Cantidad', fontsize=6)  # Change the font size of the y-axis label
-    ax.set_title('Cantidad de Sesiones por Mes', fontsize=8)  # Change the font size of the title
+    ax.tick_params(axis='both', labelsize=4)
 
     st.pyplot(fig)
 
