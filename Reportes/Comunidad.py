@@ -3,7 +3,7 @@ import streamlit as st
 import pandas as pd
 from snowflake.snowpark.functions import col
 import seaborn as sns
-import matplotlib as plt
+import matplotlib.pyplot as plt
 
 cnx = st.connection("snowflake")
 session = cnx.session()
@@ -195,14 +195,8 @@ with tabs[3]:
         GROUP BY MES
         ORDER BY MES;
     """).to_pandas()
-    fig, ax = plt.subplots(figsize=(6, 4))  # Smaller figure size
-    sns.barplot(data=sessions_per_month, x='MES', y='CANTIDAD', ax=ax)
-
-    # Reduce font size for labels and title to make it more compact
-    ax.set_xlabel('Mes', fontsize=10)
-    ax.set_ylabel('Cantidad', fontsize=10)
-    ax.set_title('Cantidad de Sesiones por Mes', fontsize=12)
-
+    fig = plt.subplots(figsize = (4,5))
+    sns.barplot(data = sessions_per_month, x= 'SESIONES', y = 'MES')
     # Display plot
     st.pyplot(fig)
 

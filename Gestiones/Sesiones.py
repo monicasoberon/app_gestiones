@@ -49,7 +49,7 @@ with tabs[1]:
     session_names = session_df['NOMBRE_SESION'].tolist()
 
         # Display session select box
-    selected_session = st.selectbox('Selecciona una Sesión:', session_names)
+    selected_session = st.selectbox('Selecciona una Sesión:', session_names, key="edit")
     if selected_session:
         # Query for session details based on the selected session
         session_details_result = session.sql(f"SELECT NOMBRE_SESION, FECHA_SESION, LINK_SESION_INFORMATIVA FROM LABORATORIO.MONICA_SOBERON.SESION WHERE NOMBRE_SESION = '{selected_session}';")
