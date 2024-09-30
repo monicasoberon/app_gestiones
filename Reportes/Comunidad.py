@@ -208,9 +208,9 @@ with tabs[3]:
         GROUP BY S.NOMBRE_SESION
         ORDER BY INVITADOS DESC;
     """).to_pandas()
-
-    sns.histplot(data=invited_vs_attended, x='NOMBRE_SESION', y='Cantidad', hue='Tipo', multiple='stack')
-    st.pyplot()
+    print(invited_vs_attended)
+    #sns.histplot(data=invited_vs_attended, x='NOMBRE_SESION', y='Cantidad', hue='Tipo', multiple='stack')
+    #st.pyplot()
     
     st.write('Cantidad de Usuarios Registrados por Curso:')
     registered_per_course = session.sql("""
