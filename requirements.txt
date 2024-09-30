@@ -2,6 +2,5 @@
 snowflake-snowpark-python
 streamlit
 streamlit_msal
-seaborn
-matplotlib
-matplotlib.pyplot
+seaborn==0.13.2
+matplotlib==3.9.2
