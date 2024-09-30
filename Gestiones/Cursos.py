@@ -19,8 +19,24 @@ tabs = st.tabs(["Crear Curso", "Editar Curso", "Lista de Invitados", "Lista de R
 
 with tabs[0]:
     st.header("Crear Nuevo Curso")
-    with st.form(key='new_course_form'):
+
+    st.write("Curso Nuevo")
+    with st.form(key='new_course'):
         course_name = st.text_input("Nombre del Curso")
+
+        submit_button = st.form_submit_button(label='Crear Curso')
+        
+        if submit_button:
+            if course_name:
+                insert_course_name_query = f"""
+                INSERT INTO LABORATORIO.MONICA_SOBERON.NOMBRE_CURSO (NOMBRE_CURSO)
+                VALUES ('{course_name}');
+                """
+                session.sql(insert_course_name_query).collect()
+
+    with st.form(key='new_course_form'):
+
+        course_name = st.select
         course_start_date = st.date_input("Fecha de Inicio")
         course_end_date = st.date_input("Fecha de Fin")
         course_provider = st.text_input("Proveedor")
