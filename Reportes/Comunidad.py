@@ -3,6 +3,7 @@ import streamlit as st
 import pandas as pd
 from snowflake.snowpark.functions import col
 import seaborn as sns
+import matplotlib as plt
 
 cnx = st.connection("snowflake")
 session = cnx.session()

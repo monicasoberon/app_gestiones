@@ -3,3 +3,4 @@ snowflake-snowpark-python
 streamlit
 streamlit_msal
 seaborn
+matplotlib
