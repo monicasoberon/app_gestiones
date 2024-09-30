@@ -36,7 +36,8 @@ with tabs[0]:
 
     with st.form(key='new_course_form'):
 
-        course_name = st.select
+        nombres = session.sql("SELECT NOMBRE_CURSO FROM LABORATORIO.MONICA_SOBERON.NOMBRE_CURSO;")
+        course_name = st.selectbox("Nombre del Curso", nombres.to_pandas()['NOMBRE_CURSO'].tolist())
         course_start_date = st.date_input("Fecha de Inicio")
         course_end_date = st.date_input("Fecha de Fin")
         course_provider = st.text_input("Proveedor")
@@ -106,9 +107,9 @@ with tabs[1]:
     st.header("Editar Curso Existente")
     
     # Get list of existing courses for selection
-    course_result = session.sql("SELECT ID_CURSO, NOMBRE_CURSO FROM LABORATORIO.MONICA_SOBERON.CURSO;")
+    course_result = session.sql("SELECT ID_CURSO, NOMBRE_CURSO, FECHA_INICIO, FECHA_FIN FROM LABORATORIO.MONICA_SOBERON.CURSO;")
     course_df = course_result.to_pandas()
-    course_names = course_df['NOMBRE_CURSO'].tolist()
+    course_names = course_df['NOMBRE_CURSO', 'FECHA_INICIO', 'FECHA_FIN'].tolist()
     selected_course_name = st.selectbox("Selecciona el Curso a Editar:", course_names)
     
     if selected_course_name:
