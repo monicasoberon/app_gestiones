@@ -208,8 +208,11 @@ with tabs[3]:
         GROUP BY S.NOMBRE_SESION
         ORDER BY INVITADOS DESC;
     """).to_pandas()
-    sns.barplot(data=invited_vs_attended, x='INVITADOS', y='NOMBRE_SESION', color='blue', label='Invitados')
-    sns.barplot(data=invited_vs_attended, x='ASISTENTES', y='NOMBRE_SESION', color='green', label='Asistentes')
+    invited_vs_attended_long = invited_vs_attended.melt(id_vars='NOMBRE_SESION', value_vars=['INVITADOS', 'ASISTENTES'], var_name='Tipo', value_name='Cantidad')
+
+# Plot with sns.histplot
+    sns.histplot(data=invited_vs_attended_long, x='Cantidad', y='NOMBRE_SESION', hue='Tipo', multiple='stack')
+    st.pyplot()
     
     st.write('Cantidad de Usuarios Registrados por Curso:')
     registered_per_course = session.sql("""
@@ -237,6 +240,6 @@ with tabs[3]:
     sns.barplot(data=invited_vs_registered, x='INVITADOS', y='NOMBRE_CURSO', color='blue', label='Invitados')
     sns.barplot(data=invited_vs_registered, x='REGISTRADOS', y='NOMBRE_CURSO', color='green', label='Registrados')
 
-    
+
 
     
