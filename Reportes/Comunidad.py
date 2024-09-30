@@ -208,10 +208,8 @@ with tabs[3]:
         GROUP BY S.NOMBRE_SESION
         ORDER BY INVITADOS DESC;
     """).to_pandas()
-    invited_vs_attended_long = invited_vs_attended.melt(id_vars='NOMBRE_SESION', value_vars=['INVITADOS', 'ASISTENTES'], var_name='Tipo', value_name='Cantidad')
 
-# Plot with sns.histplot
-    sns.histplot(data=invited_vs_attended_long, x='NOMBRE_SESION', y='Cantidad', hue='Tipo', multiple='stack')
+    sns.histplot(data=invited_vs_attended, x='NOMBRE_SESION', y='Cantidad', hue='Tipo', multiple='stack')
     st.pyplot()
     
     st.write('Cantidad de Usuarios Registrados por Curso:')
