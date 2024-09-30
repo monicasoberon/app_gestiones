@@ -195,9 +195,8 @@ with tabs[3]:
         GROUP BY MES
         ORDER BY MES;
     """).to_pandas()
-    fig = plt.subplots(figsize = (4,5))
-    sns.barplot(data = sessions_per_month, x= 'MES', y = 'CANTIDAD')
-    # Display plot
+    fig, ax = plt.subplots(figsize=(4, 5))
+    sns.barplot(data=sessions_per_month, x='MES', y='CANTIDAD', ax=ax)
     st.pyplot(fig)
 
     st.write('Cantidad de Invitados vs. Asistentes por Sesión:')
