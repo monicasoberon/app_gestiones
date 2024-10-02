@@ -121,7 +121,8 @@ with tabs[1]:
         st.error("No se encontraron cursos.")
     else:
         # Combine course name with start and end dates for display
-        nombres_df['course_name_with_dates'] = nombres_df.apply(lambda row: f"{row['NOMBRE_CURSO']} ({row['FECHA_INICIO'].strftime('%d/%m/%Y')} - {row['FECHA_FIN'].strftime('%d/%m/%Y')})", axis=1)
+        nombres_df['course_name_with_dates'] = nombres_df.apply(
+            lambda row: f"{row['NOMBRE_CURSO']} ({row['FECHA_INICIO'].strftime('%d/%m/%Y')} - {row['FECHA_FIN'].strftime('%d/%m/%Y')})", axis=1)
 
         # Use the selectbox to display the combined name and dates
         selected_course_name_with_dates = st.selectbox("Selecciona el Curso:", nombres_df['course_name_with_dates'])
@@ -129,12 +130,12 @@ with tabs[1]:
         # Get the ID_CURSO for the selected course
         selected_course_id = nombres_df.loc[nombres_df['course_name_with_dates'] == selected_course_name_with_dates, 'ID_CURSO'].values[0]
 
-    # Fetch course details and allow editing if a course is selected
-    if selected_course_id:
-        # Get the details of the selected course
-        course_details_result = session.sql(f"SELECT * FROM LABORATORIO.MONICA_SOBERON.CURSO WHERE ID_CURSO = {selected_course_id};")
-        course_details_df = course_details_result.to_pandas()
-        course_details = course_details_df.iloc[0]
+        # Fetch course details and allow editing if a course is selected
+        if selected_course_id:
+            # Get the details of the selected course
+            course_details_result = session.sql(f"SELECT * FROM LABORATORIO.MONICA_SOBERON.CURSO WHERE ID_CURSO = {selected_course_id};")
+            course_details_df = course_details_result.to_pandas()
+            course_details = course_details_df.iloc[0]
         
         st.write("**Actualización de Datos del Curso:**")
         with st.form(key='edit_course_form'):
