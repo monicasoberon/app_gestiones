@@ -58,9 +58,9 @@ with tabs[0]:
         instructor_names = [f"{row['NOMBRE_INSTRUCTOR']} {row['APELLIDO_INSTRUCTOR']}" for index, row in instructor_df.iterrows()]
         selected_instructor = st.selectbox("Selecciona el Instructor del Curso:", instructor_names)
         
-        submit_button = st.form_submit_button(label='Crear Curso')
+        submit_button2 = st.form_submit_button(label='Crear Curso2')
         
-        if submit_button:
+        if submit_button2:
             if course_name and course_start_date and course_end_date:
                 # Insert new course into the CURSO table
                 insert_course_query = f"""
