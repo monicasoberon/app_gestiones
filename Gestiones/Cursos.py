@@ -69,10 +69,10 @@ with tabs[0]:
                 session.sql(insert_course_query).collect()
 
                 # Get the ID of the newly inserted course
-                course_id_result = session.sql(f"SELECT ID_CURSO FROM LABORATORIO.MONICA_SOBERON.CURSO as c
+                course_id_result = session.sql(f"""SELECT ID_CURSO FROM LABORATORIO.MONICA_SOBERON.CURSO as c
                                                INNER JOIN LABORATORIO.MONICA_SOBERON.NOMBRE_CURSO as n
                                                ON n.id_nombre = c.id_nombre
-                                               WHERE n.NOMBRE_CURSO = '{course_name}';")
+                                               WHERE n.NOMBRE_CURSO = '{course_name}';""")
                 course_id_df = course_id_result.to_pandas()
                 course_id = course_id_df['ID_CURSO'].iloc[0]
                 
