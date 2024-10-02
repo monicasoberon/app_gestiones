@@ -107,28 +107,27 @@ with tabs[0]:
 with tabs[1]:
     st.header("Editar Curso Existente")
     
-    # Query to get the course details along with the course name and full dates
-    course_result = session.sql("""
-        SELECT c.ID_CURSO, n.nombre_curso, c.FECHA_INICIO, c.FECHA_FIN
-        FROM LABORATORIO.MONICA_SOBERON.CURSO AS c
-        JOIN LABORATORIO.MONICA_SOBERON.NOMBRE_CURSO AS n
-        ON c.nombre_curso = n.id_nombre
-    """)
+    nombres_result = session.sql("""
+    SELECT n.NOMBRE_CURSO, c.ID_CURSO 
+    FROM LABORATORIO.MONICA_SOBERON.NOMBRE_CURSO AS n 
+    INNER JOIN LABORATORIO.MONICA_SOBERON.CURSO AS c ON n.id_nombre = c.id_nombre;
+""")
 
-    # Convert to pandas DataFrame
-    course_df = course_result.to_pandas()
+    # Convert result to pandas DataFrame
+    nombres_df = nombres_result.to_pandas()
 
-    # Format the course display with course name and dates
-    course_df['display_name'] = course_df.apply(
-        lambda row: f"{row['nombre_curso']}, {row['FECHA_INICIO'].strftime('%d/%m/%Y')} - {row['FECHA_FIN'].strftime('%d/%m/%Y')}",
-        axis=1
-    )
+    # Check if the DataFrame is empty before accessing it
+    if nombres_df.empty:
+        st.error("No se encontraron cursos.")
+    else:
+        # Combine course name and dates
+        nombres_df['course_name_with_dates'] = nombres_df.apply(lambda row: f"{row['NOMBRE_CURSO']} ({row['ID_CURSO']})", axis=1)
 
-    # Create the list for the selectbox
-    course_names = course_df['display_name'].tolist()
+        # Use the selectbox with the combined name and ID
+        selected_course_name = st.selectbox("Selecciona el Curso:", nombres_df['course_name_with_dates'])
 
-    # Use selectbox to allow the user to select a course
-    selected_course_name = st.selectbox("Selecciona el Curso a Editar:", course_names)
+        # Get the ID_CURSO for the selected course
+        selected_course_id = nombres_df.loc[nombres_df['course_name_with_dates'] == selected_course_name, 'ID_CURSO'].values[0]
 
     # Get the ID of the selected course
     if selected_course_name:
