@@ -107,41 +107,43 @@ with tabs[0]:
 with tabs[1]:
     st.header("Editar Curso Existente")
     
+    # Fetch course names, IDs, and dates along with the `id_nombre` to link them
     nombres_result = session.sql("""
-    SELECT n.NOMBRE_CURSO, c.ID_CURSO 
-    FROM LABORATORIO.MONICA_SOBERON.NOMBRE_CURSO AS n 
-    INNER JOIN LABORATORIO.MONICA_SOBERON.CURSO AS c ON n.id_nombre = c.id_nombre;
-""")
-
-    # Convert result to pandas DataFrame
+        SELECT n.NOMBRE_CURSO, c.ID_CURSO, c.FECHA_INICIO, c.FECHA_FIN
+        FROM LABORATORIO.MONICA_SOBERON.NOMBRE_CURSO AS n 
+        INNER JOIN LABORATORIO.MONICA_SOBERON.CURSO AS c ON n.ID_NOMBRE = c.ID_NOMBRE;
+    """)
     nombres_df = nombres_result.to_pandas()
 
     # Check if the DataFrame is empty before accessing it
     if nombres_df.empty:
         st.error("No se encontraron cursos.")
     else:
-        # Combine course name and dates
-        nombres_df['course_name_with_dates'] = nombres_df.apply(lambda row: f"{row['NOMBRE_CURSO']} ({row['ID_CURSO']})", axis=1)
+        # Combine course name with start and end dates for display
+        nombres_df['course_name_with_dates'] = nombres_df.apply(lambda row: f"{row['NOMBRE_CURSO']} ({row['FECHA_INICIO'].strftime('%d/%m/%Y')} - {row['FECHA_FIN'].strftime('%d/%m/%Y')})", axis=1)
 
-        # Use the selectbox with the combined name and ID
-        selected_course_name = st.selectbox("Selecciona el Curso:", nombres_df['course_name_with_dates'])
+        # Use the selectbox to display the combined name and dates
+        selected_course_name_with_dates = st.selectbox("Selecciona el Curso:", nombres_df['course_name_with_dates'])
 
         # Get the ID_CURSO for the selected course
-        selected_course_id = nombres_df.loc[nombres_df['course_name_with_dates'] == selected_course_name, 'ID_CURSO'].values[0]
+        selected_course_id = nombres_df.loc[nombres_df['course_name_with_dates'] == selected_course_name_with_dates, 'ID_CURSO'].values[0]
 
-    # Get the ID of the selected course
-    if selected_course_name:
-        selected_course_row = course_df[course_df['display_name'] == selected_course_name].iloc[0]
-        course_id = selected_course_row['ID_CURSO']
-
+    # Fetch course details and allow editing if a course is selected
+    if selected_course_id:
         # Get the details of the selected course
-        course_details_result = session.sql(f"SELECT * FROM LABORATORIO.MONICA_SOBERON.CURSO WHERE ID_CURSO = {course_id};")
+        course_details_result = session.sql(f"SELECT * FROM LABORATORIO.MONICA_SOBERON.CURSO WHERE ID_CURSO = {selected_course_id};")
         course_details_df = course_details_result.to_pandas()
         course_details = course_details_df.iloc[0]
         
         st.write("**Actualización de Datos del Curso:**")
         with st.form(key='edit_course_form'):
-            new_course_name = st.text_input("Nombre del Curso", value=course_details['NOMBRE_CURSO'])
+            new_course_name_id = course_details['ID_NOMBRE']
+            # Fetch the current name of the course
+            course_name_result = session.sql(f"SELECT NOMBRE_CURSO FROM LABORATORIO.MONICA_SOBERON.NOMBRE_CURSO WHERE ID_NOMBRE = {new_course_name_id};")
+            course_name_df = course_name_result.to_pandas()
+            current_course_name = course_name_df['NOMBRE_CURSO'].iloc[0]
+            
+            new_course_name = st.text_input("Nombre del Curso", value=current_course_name)
             new_course_start_date = st.date_input("Fecha de Inicio", value=course_details['FECHA_INICIO'])
             new_course_end_date = st.date_input("Fecha de Fin", value=course_details['FECHA_FIN'])
             new_course_provider = st.text_input("Proveedor", value=course_details['PROVEEDOR'])
@@ -155,10 +157,10 @@ with tabs[1]:
             
             # Fetch current sessions for the selected course
             course_sessions_result = session.sql(f"""
-            SELECT s.NOMBRE_SESION
-            FROM LABORATORIO.MONICA_SOBERON.TIENE_SESION ts
-            JOIN LABORATORIO.MONICA_SOBERON.SESION s ON ts.ID_SESION = s.ID_SESION
-            WHERE ts.ID_CURSO = {course_details['ID_CURSO']};
+                SELECT s.NOMBRE_SESION
+                FROM LABORATORIO.MONICA_SOBERON.TIENE_SESION ts
+                JOIN LABORATORIO.MONICA_SOBERON.SESION s ON ts.ID_SESION = s.ID_SESION
+                WHERE ts.ID_CURSO = {selected_course_id};
             """)
             course_sessions_df = course_sessions_result.to_pandas()
             current_sessions = course_sessions_df['NOMBRE_SESION'].tolist()
@@ -169,7 +171,7 @@ with tabs[1]:
             instructor_result = session.sql("SELECT ID_INSTRUCTOR, NOMBRE_INSTRUCTOR, APELLIDO_INSTRUCTOR FROM LABORATORIO.MONICA_SOBERON.INSTRUCTOR;")
             instructor_df = instructor_result.to_pandas()
             instructor_names = [f"{row['NOMBRE_INSTRUCTOR']} {row['APELLIDO_INSTRUCTOR']}" for index, row in instructor_df.iterrows()]
-            selected_instructor = st.selectbox("Selecciona el Instructor del Curso:", instructor_names, index=instructor_names.index(f"{course_details['INSTRUCTOR_NOMBRE']} {course_details['INSTRUCTOR_APELLIDO']}") if 'INSTRUCTOR_NOMBRE' in course_details and 'INSTRUCTOR_APELLIDO' in course_details else 0)
+            selected_instructor = st.selectbox("Selecciona el Instructor del Curso:", instructor_names)
             
             update_button = st.form_submit_button(label='Actualizar Curso')
             
@@ -178,31 +180,32 @@ with tabs[1]:
                     # Update course details
                     update_course_query = f"""
                     UPDATE LABORATORIO.MONICA_SOBERON.CURSO
-                    SET NOMBRE_CURSO = '{new_course_name}',
+                    SET ID_NOMBRE = (SELECT ID_NOMBRE FROM LABORATORIO.MONICA_SOBERON.NOMBRE_CURSO WHERE NOMBRE_CURSO = '{new_course_name}'),
                         FECHA_INICIO = '{new_course_start_date}',
                         FECHA_FIN = '{new_course_end_date}',
                         PROVEEDOR = '{new_course_provider}',
                         REQUIERE_CASO_USO = {new_requires_case},
                         CORREO_CONTACTO = '{new_course_contact_email}'
-                    WHERE ID_CURSO = {course_details['ID_CURSO']};
+                    WHERE ID_CURSO = {selected_course_id};
                     """
                     session.sql(update_course_query).collect()
 
                     # Update the TIENE_SESION table
                     session_id_result = session.sql(f"""
-                    SELECT ID_SESION FROM LABORATORIO.MONICA_SOBERON.SESION WHERE NOMBRE_SESION IN ({', '.join(f"'{s}'" for s in selected_sessions)});""")
+                    SELECT ID_SESION FROM LABORATORIO.MONICA_SOBERON.SESION WHERE NOMBRE_SESION IN ({', '.join(f"'{s}'" for s in selected_sessions)});
+                    """)
                     session_id_df = session_id_result.to_pandas()
                     session_ids = session_id_df['ID_SESION'].tolist()
                     
                     # Remove existing session links
-                    delete_sessions_query = f"DELETE FROM LABORATORIO.MONICA_SOBERON.TIENE_SESION WHERE ID_CURSO = {course_details['ID_CURSO']};"
+                    delete_sessions_query = f"DELETE FROM LABORATORIO.MONICA_SOBERON.TIENE_SESION WHERE ID_CURSO = {selected_course_id};"
                     session.sql(delete_sessions_query).collect()
                     
                     # Insert new session links
                     for session_id in session_ids:
                         insert_session_query = f"""
                         INSERT INTO LABORATORIO.MONICA_SOBERON.TIENE_SESION (ID_CURSO, ID_SESION)
-                        VALUES ({course_details['ID_CURSO']}, {session_id});
+                        VALUES ({selected_course_id}, {session_id});
                         """
                         session.sql(insert_session_query).collect()
 
@@ -217,15 +220,13 @@ with tabs[1]:
                     update_instructor_query = f"""
                     UPDATE LABORATORIO.MONICA_SOBERON.IMPARTE
                     SET ID_INSTRUCTOR = {instructor_id}
-                    WHERE ID_CURSO = {course_details['ID_CURSO']};
+                    WHERE ID_CURSO = {selected_course_id};
                     """
                     session.sql(update_instructor_query).collect()
 
                     st.success(f"Curso '{new_course_name}' actualizado con éxito.")
                 else:
                     st.error("Por favor, completa toda la información del curso.")
-    else:
-        st.info("Selecciona un curso para editar.")
 
 with tabs[2]:
     st.header("Registrar Invitados")
