@@ -230,12 +230,6 @@ with tabs[1]:
 
 with tabs[2]:
     st.header("Registrar Invitados")
-
-    # Query for course information
-    course_result = session.sql("SELECT NOMBRE_CURSO FROM LABORATORIO.MONICA_SOBERON.NOMBRE_CURSO;")
-    course_df = course_result.to_pandas()
-    course_names = course_df['NOMBRE_CURSO'].tolist()
-
     # Display course select box
     selected_course = st.selectbox('Selecciona un Curso:', course_names)
     if selected_course:
@@ -342,26 +336,6 @@ with tabs[2]:
                 st.success("Usuarios invitados nuevos agregados con éxito.")
 
 with tabs[3]:
-    # Query to get the course details along with the course name and full dates
-    course_result = session.sql("""
-        SELECT c.ID_CURSO, n.nombre_curso, c.FECHA_INICIO, c.FECHA_FIN
-        FROM LABORATORIO.MONICA_SOBERON.CURSO AS c
-        JOIN LABORATORIO.MONICA_SOBERON.NOMBRE_CURSO AS n
-        ON c.nombre_curso = n.id_nombre
-    """)
-
-    # Convert to pandas DataFrame
-    course_df = course_result.to_pandas()
-
-    # Format the course display with course name and dates
-    course_df['display_name'] = course_df.apply(
-        lambda row: f"{row['nombre_curso']}, {row['FECHA_INICIO'].strftime('%d/%m/%Y')} - {row['FECHA_FIN'].strftime('%d/%m/%Y')}",
-        axis=1
-    )
-
-    # Create the list for the selectbox
-    course_names = course_df['display_name'].tolist()
-
     # Display course select box
     selected_course = st.selectbox('Selecciona un Curso: ', course_names)
     if selected_course:

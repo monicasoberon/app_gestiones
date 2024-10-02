@@ -15,10 +15,25 @@ st.title("Registrar Clases y Asistencias")
 tab1, tab2 = st.tabs(["Registrar Clase", "Registrar Asistencia"])
 
 with tab1:
-    # Query for course information
-    course_result = session.sql("SELECT NOMBRE_CURSO FROM LABORATORIO.MONICA_SOBERON.CURSO;")
+     # Query to get the course details along with the course name and full dates
+    course_result = session.sql("""
+        SELECT c.ID_CURSO, n.nombre_curso, c.FECHA_INICIO, c.FECHA_FIN
+        FROM LABORATORIO.MONICA_SOBERON.CURSO AS c
+        JOIN LABORATORIO.MONICA_SOBERON.NOMBRE_CURSO AS n
+        ON c.nombre_curso = n.id_nombre
+    """)
+
+    # Convert to pandas DataFrame
     course_df = course_result.to_pandas()
-    course_names = course_df['NOMBRE_CURSO'].tolist()
+
+    # Format the course display with course name and dates
+    course_df['display_name'] = course_df.apply(
+        lambda row: f"{row['nombre_curso']}, {row['FECHA_INICIO'].strftime('%d/%m/%Y')} - {row['FECHA_FIN'].strftime('%d/%m/%Y')}",
+        axis=1
+    )
+
+    # Create the list for the selectbox
+    course_names = course_df['display_name'].tolist()
 
     # Display course select box
     selected_course = st.selectbox('Selecciona un Curso:', course_names, key='course_select_asistencia')
@@ -54,10 +69,6 @@ with tab1:
                 st.error("Por favor, completa todos los campos.")
 
 with tab2:
-        course_result = session.sql("SELECT NOMBRE_CURSO FROM LABORATORIO.MONICA_SOBERON.CURSO;")
-        course_df = course_result.to_pandas()
-        course_names = course_df['NOMBRE_CURSO'].tolist()
-
         # Display course select box
         selected_course = st.selectbox('Selecciona un Curso:', course_names, key='course_select_asistencia2')
         if selected_course:
