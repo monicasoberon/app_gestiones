@@ -33,7 +33,7 @@ def toggle_dataframe_visibility(button_text, session_state_key, dataframe, key=N
 
 
 # Create Tabs for navigation
-tabs = st.tabs(["Listado Comunidad", "Buscar Sesión", "Buscar Curso", "Visualizaciones"])
+tabs = st.tabs(["Listado Comunidad", "Buscar Sesión", "Buscar Curso"])
 
 # Tab 1: Listado Comunidad
 with tabs[0]:
@@ -185,7 +185,7 @@ with tabs[2]:
             st.write(f"**Cantidad de Invitados que No se Registraron:** {invited_count_course - registered_count}")
             toggle_dataframe_visibility('Mostrar/Ocultar Invitados que No Registraron', 'show_no_registered_df', not_registered_df)
 
-# Tab 4: Visualizaciones
+''' #Tab 4: Visualizaciones
 with tabs[3]:
     st.write('Visualizaciones:')
     st.write('Cantidad de Sesiones por Mes:')
@@ -244,7 +244,7 @@ with tabs[3]:
 
     sns.barplot(data=invited_vs_registered, x='INVITADOS', y='NOMBRE_CURSO', color='blue', label='Invitados')
     sns.barplot(data=invited_vs_registered, x='REGISTRADOS', y='NOMBRE_CURSO', color='green', label='Registrados')
-
+'''
 
 
     
