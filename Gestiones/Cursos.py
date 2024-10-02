@@ -36,14 +36,15 @@ with tabs[0]:
 
     with st.form(key='new_course_form'):
 
-        nombres = session.sql("SELECT NOMBRE_CURSO FROM LABORATORIO.MONICA_SOBERON.NOMBRE_CURSO;")
+        nombres = session.sql("""SELECT n.NOMBRE_CURSO FROM LABORATORIO.MONICA_SOBERON.NOMBRE_CURSO as n inner join 
+                              LABORATORIO.MONICA_SOBERON.CURSO as c ON n.id_nombre = c.id_nombre;""")
         course_name = st.selectbox("Nombre del Curso", nombres.to_pandas()['NOMBRE_CURSO'].tolist())
+        course_name_id = session.sql(f"SELECT ID_NOMBRE FROM LABORATORIO.MONICA_SOBERON.NOMBRE_CURSO WHERE NOMBRE_CURSO = '{course_name}';").to_pandas()['ID_NOMBRE'].iloc[0]
         course_start_date = st.date_input("Fecha de Inicio")
         course_end_date = st.date_input("Fecha de Fin")
         course_provider = st.text_input("Proveedor")
         requires_case = st.checkbox("¿Requiere Caso de Uso?")
         course_contact_email = st.text_input("Correo de Contacto")
-
         
         # Select multiple sessions for the course
         session_result = session.sql("SELECT ID_SESION, NOMBRE_SESION FROM LABORATORIO.MONICA_SOBERON.SESION;")
@@ -63,8 +64,8 @@ with tabs[0]:
             if course_name and course_start_date and course_end_date:
                 # Insert new course into the CURSO table
                 insert_course_query = f"""
-                INSERT INTO LABORATORIO.MONICA_SOBERON.CURSO (NOMBRE_CURSO, FECHA_INICIO, FECHA_FIN, PROVEEDOR, REQUIERE_CASO_USO, CORREO_CONTACTO)
-                VALUES ('{course_name}', '{course_start_date}', '{course_end_date}', '{course_provider}', {requires_case}, '{course_contact_email}');
+                INSERT INTO LABORATORIO.MONICA_SOBERON.CURSO (ID_NOMBRE, FECHA_INICIO, FECHA_FIN, PROVEEDOR, REQUIERE_CASO_USO, CORREO_CONTACTO)
+                VALUES ('{course_name_id}', '{course_start_date}', '{course_end_date}', '{course_provider}', {requires_case}, '{course_contact_email}');
                 """
                 session.sql(insert_course_query).collect()
 
@@ -231,7 +232,7 @@ with tabs[2]:
     st.header("Registrar Invitados")
 
     # Query for course information
-    course_result = session.sql("SELECT NOMBRE_CURSO FROM LABORATORIO.MONICA_SOBERON.CURSO;")
+    course_result = session.sql("SELECT NOMBRE_CURSO FROM LABORATORIO.MONICA_SOBERON.NOMBRE_CURSO;")
     course_df = course_result.to_pandas()
     course_names = course_df['NOMBRE_CURSO'].tolist()
 
@@ -240,14 +241,18 @@ with tabs[2]:
     if selected_course:
         # Query for course details based on the selected course
         course_details_result = session.sql(f"""
-            SELECT NOMBRE_CURSO, FECHA_INICIO, FECHA_FIN, PROVEEDOR 
-            FROM LABORATORIO.MONICA_SOBERON.CURSO 
+            SELECT n.NOMBRE_CURSO, c.FECHA_INICIO, c.FECHA_FIN, c.PROVEEDOR 
+            FROM LABORATORIO.MONICA_SOBERON.CURSO c inner join
+            LABORATORIO.MONICA_SOBERON.NOMBRE_CURSO n 
+            ON c.id_nombre = n.id_nombre
             WHERE NOMBRE_CURSO = '{selected_course}';
         """)
         id_curso_result = session.sql(f"""
             SELECT ID_CURSO 
-            FROM LABORATORIO.MONICA_SOBERON.CURSO 
-            WHERE NOMBRE_CURSO = '{selected_course}';
+            FROM LABORATORIO.MONICA_SOBERON.CURSO c inner join 
+            LABORATORIO.MONICA_SOBERON.NOMBRE_CURSO n 
+            on c.id_nombre = n.id_nombre
+            WHERE n.NOMBRE_CURSO = '{selected_course}';
         """)
         
         course_details_df = course_details_result.to_pandas()
