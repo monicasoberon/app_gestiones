@@ -36,8 +36,7 @@ with tabs[0]:
 
     with st.form(key='new_course_form'):
 
-        nombres = session.sql("""SELECT n.NOMBRE_CURSO FROM LABORATORIO.MONICA_SOBERON.NOMBRE_CURSO as n inner join 
-                              LABORATORIO.MONICA_SOBERON.CURSO as c ON n.id_nombre = c.id_nombre;""")
+        nombres = session.sql("""SELECT n.NOMBRE_CURSO FROM LABORATORIO.MONICA_SOBERON.NOMBRE_CURSO;""")
         course_name = st.selectbox("Nombre del Curso", nombres.to_pandas()['NOMBRE_CURSO'].tolist())
         course_name_id = session.sql(f"SELECT ID_NOMBRE FROM LABORATORIO.MONICA_SOBERON.NOMBRE_CURSO WHERE NOMBRE_CURSO = '{course_name}';").to_pandas()['ID_NOMBRE'].iloc[0]
         course_start_date = st.date_input("Fecha de Inicio")
@@ -70,7 +69,10 @@ with tabs[0]:
                 session.sql(insert_course_query).collect()
 
                 # Get the ID of the newly inserted course
-                course_id_result = session.sql(f"SELECT ID_CURSO FROM LABORATORIO.MONICA_SOBERON.CURSO WHERE NOMBRE_CURSO = '{course_name}';")
+                course_id_result = session.sql(f"SELECT ID_CURSO FROM LABORATORIO.MONICA_SOBERON.CURSO as c
+                                               INNER JOIN LABORATORIO.MONICA_SOBERON.NOMBRE_CURSO as n
+                                               ON n.id_nombre = c.id_nombre
+                                               WHERE n.NOMBRE_CURSO = '{course_name}';")
                 course_id_df = course_id_result.to_pandas()
                 course_id = course_id_df['ID_CURSO'].iloc[0]
                 
