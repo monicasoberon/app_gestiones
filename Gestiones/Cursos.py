@@ -92,7 +92,8 @@ with tabs[0]:
                 st.error("Por favor, completa toda la información del curso.")
 
     with st.form(key='new_course'):
-        course_name = st.text_input("Nombre del Curso Nuevo a Añadir a la Base")
+        st.write("Si el curso no esta listado como opción en los nombres, añadelo aquí.")
+        course_name = st.text_input("Nombre del Curso Nuevo a Añadir a la Base de Datos")
 
         submit_button = st.form_submit_button(label='Crear Curso')
         
