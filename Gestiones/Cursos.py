@@ -20,20 +20,6 @@ tabs = st.tabs(["Crear Curso", "Editar Curso", "Lista de Invitados", "Lista de R
 with tabs[0]:
     st.header("Crear Nuevo Curso")
 
-    st.write("Curso Nuevo")
-    with st.form(key='new_course'):
-        course_name = st.text_input("Nombre del Curso")
-
-        submit_button = st.form_submit_button(label='Crear Curso')
-        
-        if submit_button:
-            if course_name:
-                insert_course_name_query = f"""
-                INSERT INTO LABORATORIO.MONICA_SOBERON.NOMBRE_CURSO (NOMBRE_CURSO)
-                VALUES ('{course_name}');
-                """
-                session.sql(insert_course_name_query).collect()
-
     with st.form(key='new_course_form'):
 
         nombres = session.sql("""SELECT NOMBRE_CURSO FROM LABORATORIO.MONICA_SOBERON.NOMBRE_CURSO;""")
@@ -104,6 +90,19 @@ with tabs[0]:
                 st.success(f"Curso '{course_name}' creado con éxito y asociado a las sesiones seleccionadas.")
             else:
                 st.error("Por favor, completa toda la información del curso.")
+
+    with st.form(key='new_course'):
+        course_name = st.text_input("Nombre del Curso Nuevo a Añadir a la Base")
+
+        submit_button = st.form_submit_button(label='Crear Curso')
+        
+        if submit_button:
+            if course_name:
+                insert_course_name_query = f"""
+                INSERT INTO LABORATORIO.MONICA_SOBERON.NOMBRE_CURSO (NOMBRE_CURSO)
+                VALUES ('{course_name}');
+                """
+                session.sql(insert_course_name_query).collect()
 
 # Sección para editar un curso existente
 with tabs[1]:
