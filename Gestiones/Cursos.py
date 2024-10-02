@@ -230,29 +230,31 @@ with tabs[1]:
 
 with tabs[2]:
     st.header("Registrar Invitados")
-    # Display course select box
-    selected_course = st.selectbox('Selecciona un Curso:', course_names)
-    if selected_course:
+    # Check if the DataFrame is empty before accessing it
+    if nombres_df.empty:
+        st.error("No se encontraron cursos.")
+    else:
+        # Combine course name with start and end dates for display
+        nombres_df['course_name_with_dates'] = nombres_df.apply(lambda row: f"{row['NOMBRE_CURSO']} ({row['FECHA_INICIO'].strftime('%d/%m/%Y')} - {row['FECHA_FIN'].strftime('%d/%m/%Y')})", axis=1)
+
+        # Use the selectbox to display the combined name and dates
+        selected_course_name_with_dates = st.selectbox("Selecciona el Curso:", nombres_df['course_name_with_dates'])
+
+        # Get the ID_CURSO for the selected course
+        selected_course_id = nombres_df.loc[nombres_df['course_name_with_dates'] == selected_course_name_with_dates, 'ID_CURSO'].values[0]
+
         # Query for course details based on the selected course
         course_details_result = session.sql(f"""
             SELECT n.NOMBRE_CURSO, c.FECHA_INICIO, c.FECHA_FIN, c.PROVEEDOR 
             FROM LABORATORIO.MONICA_SOBERON.CURSO c inner join
             LABORATORIO.MONICA_SOBERON.NOMBRE_CURSO n 
             ON c.id_nombre = n.id_nombre
-            WHERE NOMBRE_CURSO = '{selected_course}';
+            WHERE c.ID_CURSO = '{selected_course_id}';
         """)
-        id_curso_result = session.sql(f"""
-            SELECT ID_CURSO 
-            FROM LABORATORIO.MONICA_SOBERON.CURSO c inner join 
-            LABORATORIO.MONICA_SOBERON.NOMBRE_CURSO n 
-            on c.id_nombre = n.id_nombre
-            WHERE n.NOMBRE_CURSO = '{selected_course}';
-        """)
-        
+        id_curso = selected_course_id
+
         course_details_df = course_details_result.to_pandas()
-        id_curso_df = id_curso_result.to_pandas()
-        id_curso = id_curso_df['ID_CURSO'].iloc[0]
-        
+    
         # Display the course details
         st.write("**Detalles del Curso:**")
         for index, row in course_details_df.iterrows():
@@ -267,11 +269,7 @@ with tabs[2]:
             FROM LABORATORIO.MONICA_SOBERON.COMUNIDAD c
             JOIN LABORATORIO.MONICA_SOBERON.INVITACION_CURSO r
             ON c.ID_USUARIO = r.ID_USUARIO
-            WHERE r.ID_CURSO = (
-                SELECT ID_CURSO 
-                FROM LABORATORIO.MONICA_SOBERON.CURSO 
-                WHERE NOMBRE_CURSO = '{selected_course}'
-            );
+            WHERE r.ID_CURSO = '{id_curso}'
         """)
         
         inv_df = invitados_result.to_pandas()
@@ -299,16 +297,6 @@ with tabs[2]:
             st.write("Correos electrónicos de invitados procesados:")
             st.dataframe(df_invitados)
 
-            course_id_result = session.sql(f"""
-            SELECT ID_CURSO 
-            FROM LABORATORIO.MONICA_SOBERON.CURSO c inner join
-            LABORATORIO.MONICA_SOBERON.NOMBRE_CURSO n
-            ON c.id_nombre = n.id_nombre                             
-            WHERE NOMBRE_CURSO = '{selected_course}';
-            """)
-            course_id_df = course_id_result.to_pandas()
-            course_id = course_id_df['ID_CURSO'].iloc[0]
-
             for email in email_list:
             # Get the user ID for the email
                 user_id_result = session.sql(f"""
@@ -323,11 +311,11 @@ with tabs[2]:
 
                     insert_query = f"""
                         INSERT INTO LABORATORIO.MONICA_SOBERON.INVITACION_CURSO (ID_CURSO, ID_USUARIO)
-                        SELECT {course_id}, {user_id}
+                        SELECT {id_curso}, {user_id}
                         WHERE NOT EXISTS (
                         SELECT 1 
                         FROM LABORATORIO.MONICA_SOBERON.INVITACION_CURSO 
-                        WHERE ID_CURSO = {course_id} 
+                        WHERE ID_CURSO = {id_curso} 
                         AND ID_USUARIO = {user_id}
                     );
                     """
