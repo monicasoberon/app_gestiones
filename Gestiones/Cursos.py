@@ -106,16 +106,37 @@ with tabs[0]:
 with tabs[1]:
     st.header("Editar Curso Existente")
     
-    # Get list of existing courses for selection
-    course_result = session.sql("SELECT ID_CURSO, NOMBRE_CURSO, FECHA_INICIO, FECHA_FIN FROM LABORATORIO.MONICA_SOBERON.CURSO;")
+    # Query to get the course details along with the course name and full dates
+    course_result = session.sql("""
+        SELECT c.ID_CURSO, n.nombre_curso, c.FECHA_INICIO, c.FECHA_FIN
+        FROM LABORATORIO.MONICA_SOBERON.CURSO AS c
+        JOIN LABORATORIO.MONICA_SOBERON.NOMBRE_CURSO AS n
+        ON c.nombre_curso = n.id_nombre
+    """)
+
+    # Convert to pandas DataFrame
     course_df = course_result.to_pandas()
-    course_names = course_df[['NOMBRE_CURSO', 'FECHA_INICIO', 'FECHA_FIN']].values.tolist()
+
+    # Format the course display with course name and dates
+    course_df['display_name'] = course_df.apply(
+        lambda row: f"{row['nombre_curso']}, {row['FECHA_INICIO'].strftime('%d/%m/%Y')} - {row['FECHA_FIN'].strftime('%d/%m/%Y')}",
+        axis=1
+    )
+
+    # Create the list for the selectbox
+    course_names = course_df['display_name'].tolist()
+
+    # Use selectbox to allow the user to select a course
     selected_course_name = st.selectbox("Selecciona el Curso a Editar:", course_names)
-    
+
+    # Get the ID of the selected course
     if selected_course_name:
+        selected_course_row = course_df[course_df['display_name'] == selected_course_name].iloc[0]
+        course_id = selected_course_row['ID_CURSO']
+
         # Get the details of the selected course
-        course_id_result = session.sql(f"SELECT * FROM LABORATORIO.MONICA_SOBERON.CURSO WHERE NOMBRE_CURSO = '{selected_course_name}';")
-        course_details_df = course_id_result.to_pandas()
+        course_details_result = session.sql(f"SELECT * FROM LABORATORIO.MONICA_SOBERON.CURSO WHERE ID_CURSO = {course_id};")
+        course_details_df = course_details_result.to_pandas()
         course_details = course_details_df.iloc[0]
         
         st.write("**Actualización de Datos del Curso:**")
