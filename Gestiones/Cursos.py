@@ -330,7 +330,13 @@ with tabs[2]:
                 st.success("Usuarios invitados nuevos agregados con éxito.")
 
 with tabs[3]:
-
+    
+    nombres_result = session.sql("""
+        SELECT n.NOMBRE_CURSO, c.ID_CURSO, c.FECHA_INICIO, c.FECHA_FIN
+        FROM LABORATORIO.MONICA_SOBERON.NOMBRE_CURSO AS n 
+        INNER JOIN LABORATORIO.MONICA_SOBERON.CURSO AS c ON n.ID_NOMBRE = c.ID_NOMBRE;
+    """)
+    nombres_df = nombres_result.to_pandas()
     # Display course select box
     selected_course = st.selectbox('Selecciona un Curso: ', nombres_df['course_name_with_dates'])
     selected_course_id = nombres_df.loc[nombres_df['course_name_with_dates'] == selected_course_name_with_dates, 'ID_CURSO'].values[0]
