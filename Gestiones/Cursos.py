@@ -36,7 +36,7 @@ with tabs[0]:
 
     with st.form(key='new_course_form'):
 
-        nombres = session.sql("""SELECT n.NOMBRE_CURSO FROM LABORATORIO.MONICA_SOBERON.NOMBRE_CURSO;""")
+        nombres = session.sql("""SELECT NOMBRE_CURSO FROM LABORATORIO.MONICA_SOBERON.NOMBRE_CURSO;""")
         course_name = st.selectbox("Nombre del Curso", nombres.to_pandas()['NOMBRE_CURSO'].tolist())
         course_name_id = session.sql(f"SELECT ID_NOMBRE FROM LABORATORIO.MONICA_SOBERON.NOMBRE_CURSO WHERE NOMBRE_CURSO = '{course_name}';").to_pandas()['ID_NOMBRE'].iloc[0]
         course_start_date = st.date_input("Fecha de Inicio")
@@ -139,9 +139,9 @@ with tabs[1]:
         
         st.write("**Actualización de Datos del Curso:**")
         with st.form(key='edit_course_form'):
-            new_course_name_id = course_details['ID_NOMBRE']
-            # Fetch the current name of the course
-            course_name_result = session.sql(f"SELECT NOMBRE_CURSO FROM LABORATORIO.MONICA_SOBERON.NOMBRE_CURSO WHERE ID_NOMBRE = {new_course_name_id};")
+
+            course_name_result = session.sql(f"""SELECT NOMBRE_CURSO FROM LABORATORIO.MONICA_SOBERON.NOMBRE_CURSO n inner 
+                                             join LABORATORIO.MONICA_SOBERON.CURSO c on n.id_nombre = c.id_nombre WHERE c.id_curso = {selected_course_id};""")
             course_name_df = course_name_result.to_pandas()
             current_course_name = course_name_df['NOMBRE_CURSO'].iloc[0]
             
@@ -149,7 +149,7 @@ with tabs[1]:
             new_course_start_date = st.date_input("Fecha de Inicio", value=course_details['FECHA_INICIO'])
             new_course_end_date = st.date_input("Fecha de Fin", value=course_details['FECHA_FIN'])
             new_course_provider = st.text_input("Proveedor", value=course_details['PROVEEDOR'])
-            new_requires_case = st.checkbox("¿Requiere Caso de Uso?", value=course_details['REQUIERE_CASO_USO'])
+            new_requires_case = st.checkbox("¿Requiere Caso de Uso?", value=course_details['REQUIERE_CASO_USO'])  # Boolean remains as is
             new_course_contact_email = st.text_input("Correo de Contacto", value=course_details['CORREO_CONTACTO'])
             
             # Select multiple sessions for the course
@@ -186,7 +186,7 @@ with tabs[1]:
                         FECHA_INICIO = '{new_course_start_date}',
                         FECHA_FIN = '{new_course_end_date}',
                         PROVEEDOR = '{new_course_provider}',
-                        REQUIERE_CASO_USO = {new_requires_case},
+                        REQUIERE_CASO_USO = {new_requires_case},  -- Boolean passed directly
                         CORREO_CONTACTO = '{new_course_contact_email}'
                     WHERE ID_CURSO = {selected_course_id};
                     """
@@ -194,7 +194,9 @@ with tabs[1]:
 
                     # Update the TIENE_SESION table
                     session_id_result = session.sql(f"""
-                    SELECT ID_SESION FROM LABORATORIO.MONICA_SOBERON.SESION WHERE NOMBRE_SESION IN ({', '.join(f"'{s}'" for s in selected_sessions)});
+                    SELECT ID_SESION 
+                    FROM LABORATORIO.MONICA_SOBERON.SESION 
+                    WHERE NOMBRE_SESION IN ({', '.join([f"'{s}'" for s in selected_sessions])});
                     """)
                     session_id_df = session_id_result.to_pandas()
                     session_ids = session_id_df['ID_SESION'].tolist()
@@ -229,6 +231,7 @@ with tabs[1]:
                     st.success(f"Curso '{new_course_name}' actualizado con éxito.")
                 else:
                     st.error("Por favor, completa toda la información del curso.")
+
 
 with tabs[2]:
     st.header("Registrar Invitados")
