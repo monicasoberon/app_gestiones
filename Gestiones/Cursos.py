@@ -109,7 +109,7 @@ with tabs[1]:
     # Get list of existing courses for selection
     course_result = session.sql("SELECT ID_CURSO, NOMBRE_CURSO, YEAR(FECHA_INICIO) AS INICIO, YEAR(FECHA_FIN) AS FIN FROM LABORATORIO.MONICA_SOBERON.CURSO;")
     course_df = course_result.to_pandas()
-    course_names = course_df[['NOMBRE_CURSO', 'INICIO', 'FIN']].tolist()
+    course_names = course_df[['NOMBRE_CURSO', 'INICIO', 'FIN']].values.tolist()
     selected_course_name = st.selectbox("Selecciona el Curso a Editar:", course_names)
     
     if selected_course_name:
