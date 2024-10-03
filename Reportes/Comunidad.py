@@ -114,16 +114,20 @@ with tabs[1]:
 # Tab 3: Buscar Curso
 with tabs[2]:
     st.write('Buscar información de un curso:')
-    course_result = session.sql("SELECT NOMBRE_CURSO FROM LABORATORIO.MONICA_SOBERON.CURSO;")
+    course_result = session.sql("SELECT NOMBRE_CURSO FROM LABORATORIO.MONICA_SOBERON.NOMBRE_CURSO;")
     course_df = course_result.to_pandas()
     course_names = course_df['NOMBRE_CURSO'].tolist()
 
     selected_course = st.selectbox('Selecciona un Curso:', course_names)
     if selected_course:
+        id_curso = session.sql(f"""
+            SELECT C.ID_CURSO FROM LABORATORIO.MONICA_SOBERON.CURSO AS C INNER JOIN LABORATORIO.MONICA_SOBERON.NOMBRE_CURSO AS N
+            ON C.ID_NOMBRE = N.ID_NOMBRE WHERE N.NOMBRE_CURSO = '{selected_course}';""")
+        
         course_details_result = session.sql(f"""
-            SELECT NOMBRE_CURSO, FECHA_INICIO, FECHA_FIN, PROVEEDOR, CORREO_CONTACTO, REQUIERE_CASO_USO 
-            FROM LABORATORIO.MONICA_SOBERON.CURSO 
-            WHERE NOMBRE_CURSO = '{selected_course}';
+            SELECT n.NOMBRE_CURSO, c.FECHA_INICIO, c.FECHA_FIN, c.PROVEEDOR, c.CORREO_CONTACTO, c.REQUIERE_CASO_USO 
+            FROM LABORATORIO.MONICA_SOBERON.CURSO as c inner join LABORATORIO.MONICA_SOBERON.NOMBRE_CURSO AS n
+            WHERE c.ID_CURSO = '{id_curso}';
         """).to_pandas()
 
         st.write("**Detalles del Curso:**")
@@ -141,7 +145,7 @@ with tabs[2]:
             FROM LABORATORIO.MONICA_SOBERON.COMUNIDAD AS C
             INNER JOIN LABORATORIO.MONICA_SOBERON.INVITACION_CURSO AS I 
             ON C.ID_USUARIO = I.ID_USUARIO
-            WHERE I.ID_CURSO = (SELECT ID_CURSO FROM LABORATORIO.MONICA_SOBERON.CURSO WHERE NOMBRE_CURSO = '{selected_course}');
+            WHERE I.ID_CURSO = '{id_curso}';
         """).collect()[0][0]
         st.write(f"**Cantidad de Invitados:** {invited_count_course}")
 
@@ -150,7 +154,7 @@ with tabs[2]:
             FROM LABORATORIO.MONICA_SOBERON.COMUNIDAD AS C
             INNER JOIN LABORATORIO.MONICA_SOBERON.INVITACION_CURSO AS I 
             ON C.ID_USUARIO = I.ID_USUARIO
-            WHERE I.ID_CURSO = (SELECT ID_CURSO FROM LABORATORIO.MONICA_SOBERON.CURSO WHERE NOMBRE_CURSO = '{selected_course}');
+            WHERE I.ID_CURSO = '{id_curso}';
         """).to_pandas()
         toggle_dataframe_visibility('Mostrar/Ocultar Listado Invitados', 'show_invited_course_df', invited_df_course)
 
@@ -159,7 +163,7 @@ with tabs[2]:
             FROM LABORATORIO.MONICA_SOBERON.COMUNIDAD AS C
             INNER JOIN LABORATORIO.MONICA_SOBERON.REGISTRADOS_CURSO AS R 
             ON C.ID_USUARIO = R.ID_USUARIO
-            WHERE R.ID_CURSO = (SELECT ID_CURSO FROM LABORATORIO.MONICA_SOBERON.CURSO WHERE NOMBRE_CURSO = '{selected_course}');
+            WHERE R.ID_CURSO = '{id_curso}';
         """).collect()[0][0]
         st.write(f"**Cantidad de Usuarios Registrados:** {registered_count}")
 
@@ -168,7 +172,7 @@ with tabs[2]:
             FROM LABORATORIO.MONICA_SOBERON.COMUNIDAD AS C
             INNER JOIN LABORATORIO.MONICA_SOBERON.REGISTRADOS_CURSO AS R 
             ON C.ID_USUARIO = R.ID_USUARIO
-            WHERE R.ID_CURSO = (SELECT ID_CURSO FROM LABORATORIO.MONICA_SOBERON.CURSO WHERE NOMBRE_CURSO = '{selected_course}');
+            WHERE R.ID_CURSO = '{id_curso}';
         """).to_pandas()
         toggle_dataframe_visibility('Mostrar/Ocultar Usuarios Registrados', 'show_registered_df', registered_df)
 
