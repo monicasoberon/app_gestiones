@@ -138,6 +138,7 @@ with tabs[1]:
             course_details_df = course_details_result.to_pandas()
             course_details = course_details_df.iloc[0]
         
+        st.write(course_details['FECHA_FIN'].dtype())
         st.write("**Actualización de Datos del Curso:**")
         with st.form(key='edit_course_form'):
 
@@ -330,7 +331,7 @@ with tabs[2]:
                 """
                 session.sql(insert_query).collect()
 
-            st.success("Usuarios invitados nuevos agregados con éxito.")
+                st.success("Usuarios invitados nuevos agregados con éxito.")
 
 with tabs[3]:
     nombres_result = session.sql("""
@@ -340,7 +341,7 @@ with tabs[3]:
     """)
     nombres_df = nombres_result.to_pandas()
 
-    nombres_df['course_name_with_dates'] = nombres_df.apply(lambda row: f"{row['NOMBRE_CURSO']} ({row['FECHA_INICIO'].strftime('%d/%m/%Y')} - {row['FECHA_FIN'].strftime('%d/%m/%Y')})", axis=1)
+    nombres_df['course_name_with_dates'] = nombres_df.apply(lambda row: f"{row['NOMBRE_CURSO']} ({row['FECHA_INICIO'].strftime('%Y/%m/%d')} - {row['FECHA_FIN'].strftime('%Y/%m/%d')})", axis=1)
 
     selected_course_name_with_dates = st.selectbox("Selecciona el Curso:", nombres_df['course_name_with_dates'])
 
