@@ -144,13 +144,13 @@ with tabs[2]:
         """).to_pandas()
 
     st.write("**Detalles del Curso:**")
-    for index, row in course_details_result.iterrows():
-        st.write(f"Nombre del Curso: {row['NOMBRE_CURSO']}")
-        st.write(f"Fecha de Inicio: {row['FECHA_INICIO']}")
-        st.write(f"Fecha de Fin: {row['FECHA_FIN']}")
-        st.write(f"Proveedor: {row['PROVEEDOR']}")
-        st.write(f"Correo Contacto: {row['CORREO_CONTACTO']}")
-        st.write(f"Requiere Caso de Uso: {'Si' if row['REQUIERE_CASO_USO'] else 'No'}")
+    row = course_details_result.iloc[0]
+    st.write(f"Nombre del Curso: {row['NOMBRE_CURSO']}")
+    st.write(f"Fecha de Inicio: {row['FECHA_INICIO']}")
+    st.write(f"Fecha de Fin: {row['FECHA_FIN']}")
+    st.write(f"Proveedor: {row['PROVEEDOR']}")
+    st.write(f"Correo Contacto: {row['CORREO_CONTACTO']}")
+    st.write(f"Requiere Caso de Uso: {'Si' if row['REQUIERE_CASO_USO'] else 'No'}")
 
     # Fetch and display course invited, registered, and non-registered details
     invited_count_course = session.sql(f"""
