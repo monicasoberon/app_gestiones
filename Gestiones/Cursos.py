@@ -183,8 +183,7 @@ with tabs[1]:
             
             if update_button:
                 update_course_query = f"""
-                UPDATE LABORATORIO.MONICA_SOBERON.CURSO
-                SET ID_NOMBRE = (SELECT ID_NOMBRE FROM LABORATORIO.MONICA_SOBERON.NOMBRE_CURSO WHERE NOMBRE_CURSO = '{new_course_name}'),
+                UPDATE LABORATORIO.MONICA_SOBERON.CURSO,
                     FECHA_INICIO = '{new_course_start_date}',
                     FECHA_FIN = '{new_course_end_date}',
                     PROVEEDOR = '{new_course_provider}',
