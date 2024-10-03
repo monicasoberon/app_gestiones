@@ -244,9 +244,7 @@ with tabs[1]:
                 """
                 session.sql(update_instructor_query).collect()
 
-                st.success(f"Curso '{new_course_name}' actualizado con éxito.")
-            else:
-                st.error("Por favor, completa toda la información del curso.")
+                st.success(f"Curso actualizado con éxito.")
 
 
 with tabs[2]:
