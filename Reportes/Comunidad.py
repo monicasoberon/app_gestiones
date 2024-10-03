@@ -114,17 +114,30 @@ with tabs[1]:
 # Tab 3: Buscar Curso
 with tabs[2]:
     st.write('Buscar información de un curso:')
-    course_result = session.sql("SELECT NOMBRE_CURSO FROM LABORATORIO.MONICA_SOBERON.NOMBRE_CURSO;")
-    course_df = course_result.to_pandas()
-    course_names = course_df['NOMBRE_CURSO'].tolist()
 
-    selected_course = st.selectbox('Selecciona un Curso:', course_names)
-    if selected_course:
-        id_curso = session.sql(f"""
-            SELECT C.ID_CURSO FROM LABORATORIO.MONICA_SOBERON.CURSO AS C INNER JOIN LABORATORIO.MONICA_SOBERON.NOMBRE_CURSO AS N
-            ON C.ID_NOMBRE = N.ID_NOMBRE WHERE N.NOMBRE_CURSO = '{selected_course}';""").collect()
-    
-        course_details_result = session.sql(f"""
+    nombres_result = session.sql("""
+    SELECT n.NOMBRE_CURSO, c.ID_CURSO, c.FECHA_INICIO, c.FECHA_FIN
+    FROM LABORATORIO.MONICA_SOBERON.NOMBRE_CURSO AS n 
+    INNER JOIN LABORATORIO.MONICA_SOBERON.CURSO AS c ON n.ID_NOMBRE = c.ID_NOMBRE;
+    """)
+    nombres_df = nombres_result.to_pandas()
+
+    nombres_df['FECHA_INICIO'] = pd.to_datetime(nombres_df['FECHA_INICIO'], errors='coerce').dt.strftime('%Y/%m/%d')
+    nombres_df['FECHA_FIN'] = pd.to_datetime(nombres_df['FECHA_FIN'], errors='coerce').dt.strftime('%Y/%m/%d')
+
+    # Combine course name with start and end dates for display
+    nombres_df['course_name_with_dates'] = nombres_df.apply(
+        lambda row: f"{row['NOMBRE_CURSO']} ({row['FECHA_INICIO']} - {row['FECHA_FIN']})" 
+        if pd.notnull(row['FECHA_INICIO']) and pd.notnull(row['FECHA_FIN']) 
+        else f"{row['NOMBRE_CURSO']} (Fecha no disponible)", axis=1
+    )
+
+    # Use the selectbox to display the combined name and dates
+    selected_course_name_with_dates = st.selectbox("Selecciona el Curso:", nombres_df['course_name_with_dates'], key='selectco')
+
+    # Get the ID_CURSO for the selected course
+    id_curso = nombres_df.loc[nombres_df['course_name_with_dates'] == selected_course_name_with_dates, 'ID_CURSO'].values[0]
+    course_details_result = session.sql(f"""
             SELECT n.NOMBRE_CURSO, c.FECHA_INICIO, c.FECHA_FIN, c.PROVEEDOR, c.CORREO_CONTACTO, c.REQUIERE_CASO_USO 
             FROM LABORATORIO.MONICA_SOBERON.CURSO as c inner join LABORATORIO.MONICA_SOBERON.NOMBRE_CURSO AS n
             WHERE c.ID_CURSO = '{id_curso}';
