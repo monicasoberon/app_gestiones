@@ -15,6 +15,8 @@ st.title("Registrar Clases y Asistencias")
 tab1, tab2 = st.tabs(["Registrar Clase", "Registrar Asistencia"])
 
 with tab1:
+    st.header("Registrar Clase")
+
     nombres_result = session.sql("""
     SELECT n.NOMBRE_CURSO, c.ID_CURSO, c.FECHA_INICIO, c.FECHA_FIN
     FROM LABORATORIO.MONICA_SOBERON.NOMBRE_CURSO AS n 
@@ -36,11 +38,7 @@ with tab1:
     selected_course_name_with_dates = st.selectbox("Selecciona el Curso:", nombres_df['course_name_with_dates'], key='selectc')
 
     # Get the ID_CURSO for the selected course
-    id_curso_result = nombres_df.loc[nombres_df['course_name_with_dates'] == selected_course_name_with_dates, 'ID_CURSO'].values[0]
-    
-    id_curso_df = id_curso_result.to_pandas()
-
-    id_curso = id_curso_df['ID_CURSO'].iloc[0]
+    id_curso = nombres_df.loc[nombres_df['course_name_with_dates'] == selected_course_name_with_dates, 'ID_CURSO'].values[0]
 
     st.write("Registrar una clase")
     fecha_clase =st.date_input("Fecha de la Clase")
