@@ -143,64 +143,64 @@ with tabs[2]:
             WHERE c.ID_CURSO = '{id_curso}';
         """).to_pandas()
 
-        st.write("**Detalles del Curso:**")
-        for index, row in course_details_result.iterrows():
-            st.write(f"Nombre del Curso: {row['NOMBRE_CURSO']}")
-            st.write(f"Fecha de Inicio: {row['FECHA_INICIO']}")
-            st.write(f"Fecha de Fin: {row['FECHA_FIN']}")
-            st.write(f"Proveedor: {row['PROVEEDOR']}")
-            st.write(f"Correo Contacto: {row['CORREO_CONTACTO']}")
-            st.write(f"Requiere Caso de Uso: {'Si' if row['REQUIERE_CASO_USO'] else 'No'}")
+    st.write("**Detalles del Curso:**")
+    for index, row in course_details_result.iterrows():
+        st.write(f"Nombre del Curso: {row['NOMBRE_CURSO']}")
+        st.write(f"Fecha de Inicio: {row['FECHA_INICIO']}")
+        st.write(f"Fecha de Fin: {row['FECHA_FIN']}")
+        st.write(f"Proveedor: {row['PROVEEDOR']}")
+        st.write(f"Correo Contacto: {row['CORREO_CONTACTO']}")
+        st.write(f"Requiere Caso de Uso: {'Si' if row['REQUIERE_CASO_USO'] else 'No'}")
 
-        # Fetch and display course invited, registered, and non-registered details
-        invited_count_course = session.sql(f"""
-            SELECT COUNT(*)
-            FROM LABORATORIO.MONICA_SOBERON.COMUNIDAD AS C
-            INNER JOIN LABORATORIO.MONICA_SOBERON.INVITACION_CURSO AS I 
-            ON C.ID_USUARIO = I.ID_USUARIO
-            WHERE I.ID_CURSO = '{id_curso}';
-        """).collect()[0][0]
-        st.write(f"**Cantidad de Invitados:** {invited_count_course}")
+    # Fetch and display course invited, registered, and non-registered details
+    invited_count_course = session.sql(f"""
+        SELECT COUNT(*)
+        FROM LABORATORIO.MONICA_SOBERON.COMUNIDAD AS C
+        INNER JOIN LABORATORIO.MONICA_SOBERON.INVITACION_CURSO AS I 
+        ON C.ID_USUARIO = I.ID_USUARIO
+        WHERE I.ID_CURSO = '{id_curso}';
+    """).collect()[0][0]
+    st.write(f"**Cantidad de Invitados:** {invited_count_course}")
 
-        invited_df_course = session.sql(f"""
+    invited_df_course = session.sql(f"""
+        SELECT C.NOMBRE, C.APELLIDO, C.CORREO
+        FROM LABORATORIO.MONICA_SOBERON.COMUNIDAD AS C
+        INNER JOIN LABORATORIO.MONICA_SOBERON.INVITACION_CURSO AS I 
+        ON C.ID_USUARIO = I.ID_USUARIO
+        WHERE I.ID_CURSO = '{id_curso}';
+    """).to_pandas()
+    toggle_dataframe_visibility('Mostrar/Ocultar Listado Invitados', 'show_invited_course_df', invited_df_course)
+
+    registered_count = session.sql(f"""
+        SELECT COUNT(*)
+        FROM LABORATORIO.MONICA_SOBERON.COMUNIDAD AS C
+        INNER JOIN LABORATORIO.MONICA_SOBERON.REGISTRADOS_CURSO AS R 
+        ON C.ID_USUARIO = R.ID_USUARIO
+        WHERE R.ID_CURSO = '{id_curso}';
+    """).collect()[0][0]
+    st.write(f"**Cantidad de Usuarios Registrados:** {registered_count}")
+
+    registered_df = session.sql(f"""
+        SELECT C.NOMBRE, C.APELLIDO, C.CORREO
+        FROM LABORATORIO.MONICA_SOBERON.COMUNIDAD AS C
+        INNER JOIN LABORATORIO.MONICA_SOBERON.REGISTRADOS_CURSO AS R 
+        ON C.ID_USUARIO = R.ID_USUARIO
+        WHERE R.ID_CURSO = '{id_curso}';
+    """).to_pandas()
+    toggle_dataframe_visibility('Mostrar/Ocultar Usuarios Registrados', 'show_registered_df', registered_df)
+
+    if invited_count_course != registered_count:
+        not_registered_df = session.sql(f"""
             SELECT C.NOMBRE, C.APELLIDO, C.CORREO
             FROM LABORATORIO.MONICA_SOBERON.COMUNIDAD AS C
             INNER JOIN LABORATORIO.MONICA_SOBERON.INVITACION_CURSO AS I 
             ON C.ID_USUARIO = I.ID_USUARIO
-            WHERE I.ID_CURSO = '{id_curso}';
+            LEFT JOIN LABORATORIO.MONICA_SOBERON.REGISTRADOS_CURSO AS R 
+            ON I.ID_CURSO = R.ID_CURSO AND C.ID_USUARIO = R.ID_USUARIO
+            WHERE R.ID_USUARIO IS NULL;
         """).to_pandas()
-        toggle_dataframe_visibility('Mostrar/Ocultar Listado Invitados', 'show_invited_course_df', invited_df_course)
-
-        registered_count = session.sql(f"""
-            SELECT COUNT(*)
-            FROM LABORATORIO.MONICA_SOBERON.COMUNIDAD AS C
-            INNER JOIN LABORATORIO.MONICA_SOBERON.REGISTRADOS_CURSO AS R 
-            ON C.ID_USUARIO = R.ID_USUARIO
-            WHERE R.ID_CURSO = '{id_curso}';
-        """).collect()[0][0]
-        st.write(f"**Cantidad de Usuarios Registrados:** {registered_count}")
-
-        registered_df = session.sql(f"""
-            SELECT C.NOMBRE, C.APELLIDO, C.CORREO
-            FROM LABORATORIO.MONICA_SOBERON.COMUNIDAD AS C
-            INNER JOIN LABORATORIO.MONICA_SOBERON.REGISTRADOS_CURSO AS R 
-            ON C.ID_USUARIO = R.ID_USUARIO
-            WHERE R.ID_CURSO = '{id_curso}';
-        """).to_pandas()
-        toggle_dataframe_visibility('Mostrar/Ocultar Usuarios Registrados', 'show_registered_df', registered_df)
-
-        if invited_count_course != registered_count:
-            not_registered_df = session.sql(f"""
-                SELECT C.NOMBRE, C.APELLIDO, C.CORREO
-                FROM LABORATORIO.MONICA_SOBERON.COMUNIDAD AS C
-                INNER JOIN LABORATORIO.MONICA_SOBERON.INVITACION_CURSO AS I 
-                ON C.ID_USUARIO = I.ID_USUARIO
-                LEFT JOIN LABORATORIO.MONICA_SOBERON.REGISTRADOS_CURSO AS R 
-                ON I.ID_CURSO = R.ID_CURSO AND C.ID_USUARIO = R.ID_USUARIO
-                WHERE R.ID_USUARIO IS NULL;
-            """).to_pandas()
-            st.write(f"**Cantidad de Invitados que No se Registraron:** {invited_count_course - registered_count}")
-            toggle_dataframe_visibility('Mostrar/Ocultar Invitados que No Registraron', 'show_no_registered_df', not_registered_df)
+        st.write(f"**Cantidad de Invitados que No se Registraron:** {invited_count_course - registered_count}")
+        toggle_dataframe_visibility('Mostrar/Ocultar Invitados que No Registraron', 'show_no_registered_df', not_registered_df)
 
 ''' #Tab 4: Visualizaciones
 with tabs[3]:
