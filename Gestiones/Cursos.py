@@ -183,7 +183,8 @@ with tabs[1]:
             
             if update_button:
                 update_course_query = f"""
-                UPDATE LABORATORIO.MONICA_SOBERON.CURSO,
+                UPDATE LABORATORIO.MONICA_SOBERON.CURSO
+                SET 
                     FECHA_INICIO = '{new_course_start_date}',
                     FECHA_FIN = '{new_course_end_date}',
                     PROVEEDOR = '{new_course_provider}',
