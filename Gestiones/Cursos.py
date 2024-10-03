@@ -236,100 +236,109 @@ with tabs[1]:
 
 with tabs[2]:
     st.header("Registrar Invitados")
-    # Check if the DataFrame is empty before accessing it
-    if nombres_df.empty:
-        st.error("No se encontraron cursos.")
-    else:
-        # Combine course name with start and end dates for display
-        nombres_df['course_name_with_dates'] = nombres_df.apply(lambda row: f"{row['NOMBRE_CURSO']} ({row['FECHA_INICIO'].strftime('%d/%m/%Y')} - {row['FECHA_FIN'].strftime('%d/%m/%Y')})", axis=1)
+    # Fetch course names, IDs, and dates along with the `id_nombre` to link them
+    nombres_result = session.sql("""
+    SELECT n.NOMBRE_CURSO, c.ID_CURSO, c.FECHA_INICIO, c.FECHA_FIN
+    FROM LABORATORIO.MONICA_SOBERON.NOMBRE_CURSO AS n 
+    INNER JOIN LABORATORIO.MONICA_SOBERON.CURSO AS c ON n.ID_NOMBRE = c.ID_NOMBRE;
+    """)
+    nombres_df = nombres_result.to_pandas()
 
-        # Use the selectbox to display the combined name and dates
-        selected_course_name_with_dates = st.selectbox("Selecciona el Curso:", nombres_df['course_name_with_dates'])
+    nombres_df['course_name_with_dates'] = nombres_df.apply(lambda row: f"{row['NOMBRE_CURSO']} ({row['FECHA_INICIO'].strftime('%d/%m/%Y')} - {row['FECHA_FIN'].strftime('%d/%m/%Y')})", axis=1)
 
-        # Get the ID_CURSO for the selected course
-        selected_course_id = nombres_df.loc[nombres_df['course_name_with_dates'] == selected_course_name_with_dates, 'ID_CURSO'].values[0]
+    # Use the selectbox to display the combined name and dates
+    selected_course_name_with_dates = st.selectbox("Selecciona el Curso:", nombres_df['course_name_with_dates'])
 
-        # Query for course details based on the selected course
-        course_details_result = session.sql(f"""
-            SELECT n.NOMBRE_CURSO, c.FECHA_INICIO, c.FECHA_FIN, c.PROVEEDOR 
-            FROM LABORATORIO.MONICA_SOBERON.CURSO c inner join
-            LABORATORIO.MONICA_SOBERON.NOMBRE_CURSO n 
-            ON c.id_nombre = n.id_nombre
-            WHERE c.ID_CURSO = '{selected_course_id}';
-        """)
-        id_curso = selected_course_id
+    # Get the ID_CURSO for the selected course
+    selected_course_id = nombres_df.loc[nombres_df['course_name_with_dates'] == selected_course_name_with_dates, 'ID_CURSO'].values[0]
 
-        course_details_df = course_details_result.to_pandas()
+    # Query for course details based on the selected course
+    course_details_result = session.sql(f"""
+        SELECT n.NOMBRE_CURSO, c.FECHA_INICIO, c.FECHA_FIN, c.PROVEEDOR 
+        FROM LABORATORIO.MONICA_SOBERON.CURSO c inner join
+        LABORATORIO.MONICA_SOBERON.NOMBRE_CURSO n 
+        ON c.id_nombre = n.id_nombre
+        WHERE c.ID_CURSO = '{selected_course_id}';
+    """)
+    id_curso = selected_course_id
+
+    course_details_df = course_details_result.to_pandas()
+
+    # Display the course details
+    st.write("**Detalles del Curso:**")
+    for index, row in course_details_df.iterrows():
+        st.write(f"Nombre del Curso: {row['NOMBRE_CURSO']}")
+        st.write(f"Fecha de Inicio: {row['FECHA_INICIO']}")
+        st.write(f"Fecha de Fin: {row['FECHA_FIN']}")
+        st.write(f"Proveedor: {row['PROVEEDOR']}")
+
+    # Query for registered users for the selected course
+    invitados_result = session.sql(f"""
+        SELECT c.NOMBRE, c.APELLIDO, c.CORREO 
+        FROM LABORATORIO.MONICA_SOBERON.COMUNIDAD c
+        JOIN LABORATORIO.MONICA_SOBERON.INVITACION_CURSO r
+        ON c.ID_USUARIO = r.ID_USUARIO
+        WHERE r.ID_CURSO = '{id_curso}'
+    """)
     
-        # Display the course details
-        st.write("**Detalles del Curso:**")
-        for index, row in course_details_df.iterrows():
-            st.write(f"Nombre del Curso: {row['NOMBRE_CURSO']}")
-            st.write(f"Fecha de Inicio: {row['FECHA_INICIO']}")
-            st.write(f"Fecha de Fin: {row['FECHA_FIN']}")
-            st.write(f"Proveedor: {row['PROVEEDOR']}")
+    inv_df = invitados_result.to_pandas()
+    
+    # Display the registered users
+    st.write("**Usuarios Invitados:**")
+    st.dataframe(inv_df)
 
-        # Query for registered users for the selected course
-        invitados_result = session.sql(f"""
-            SELECT c.NOMBRE, c.APELLIDO, c.CORREO 
-            FROM LABORATORIO.MONICA_SOBERON.COMUNIDAD c
-            JOIN LABORATORIO.MONICA_SOBERON.INVITACION_CURSO r
-            ON c.ID_USUARIO = r.ID_USUARIO
-            WHERE r.ID_CURSO = '{id_curso}'
+    st.write("**Agregar Usuarios:**")
+        
+    email_input = st.text_area(
+        "Pega la lista de correos electrónicos aquí (uno por línea):",
+        height=300,
+        key="text4"
+    )
+    
+    if st.button("Procesar Correos de Invitados", key = "process4"):
+        # Process the input emails
+        email_list = [email.strip().lower() for email in email_input.split('\n') if email.strip()]
+        email_list = list(set(email_list))  # Remove duplicates
+        
+        df_invitados = pd.DataFrame(email_list, columns=['Correo'])
+        
+        # Display the processed emails
+        st.write("Correos electrónicos de invitados procesados:")
+        st.dataframe(df_invitados)
+
+        for email in email_list:
+        # Get the user ID for the email
+            user_id_result = session.sql(f"""
+            SELECT ID_USUARIO 
+            FROM LABORATORIO.MONICA_SOBERON.COMUNIDAD 
+            WHERE CORREO = '{email}';
         """)
-        
-        inv_df = invitados_result.to_pandas()
-        
-        # Display the registered users
-        st.write("**Usuarios Invitados:**")
-        st.dataframe(inv_df)
+            user_id_df = user_id_result.to_pandas()
 
-        st.write("**Agregar Usuarios:**")
-            
-        email_input = st.text_area(
-            "Pega la lista de correos electrónicos aquí (uno por línea):",
-            height=300,
-            key="text4"
-        )
-        
-        if st.button("Procesar Correos de Invitados", key = "process4"):
-            # Process the input emails
-            email_list = [email.strip().lower() for email in email_input.split('\n') if email.strip()]
-            email_list = list(set(email_list))  # Remove duplicates
-            
-            df_invitados = pd.DataFrame(email_list, columns=['Correo'])
-            
-            # Display the processed emails
-            st.write("Correos electrónicos de invitados procesados:")
-            st.dataframe(df_invitados)
+            if not user_id_df.empty:
+                user_id = user_id_df['ID_USUARIO'].iloc[0]
 
-            for email in email_list:
-            # Get the user ID for the email
-                user_id_result = session.sql(f"""
-                SELECT ID_USUARIO 
-                FROM LABORATORIO.MONICA_SOBERON.COMUNIDAD 
-                WHERE CORREO = '{email}';
-            """)
-                user_id_df = user_id_result.to_pandas()
+                insert_query = f"""
+                    INSERT INTO LABORATORIO.MONICA_SOBERON.INVITACION_CURSO (ID_CURSO, ID_USUARIO)
+                    SELECT {id_curso}, {user_id}
+                    WHERE NOT EXISTS (
+                    SELECT 1 
+                    FROM LABORATORIO.MONICA_SOBERON.INVITACION_CURSO 
+                    WHERE ID_CURSO = {id_curso} 
+                    AND ID_USUARIO = {user_id}
+                );
+                """
+                session.sql(insert_query).collect()
 
-                if not user_id_df.empty:
-                    user_id = user_id_df['ID_USUARIO'].iloc[0]
-
-                    insert_query = f"""
-                        INSERT INTO LABORATORIO.MONICA_SOBERON.INVITACION_CURSO (ID_CURSO, ID_USUARIO)
-                        SELECT {id_curso}, {user_id}
-                        WHERE NOT EXISTS (
-                        SELECT 1 
-                        FROM LABORATORIO.MONICA_SOBERON.INVITACION_CURSO 
-                        WHERE ID_CURSO = {id_curso} 
-                        AND ID_USUARIO = {user_id}
-                    );
-                    """
-                    session.sql(insert_query).collect()
-
-                st.success("Usuarios invitados nuevos agregados con éxito.")
+            st.success("Usuarios invitados nuevos agregados con éxito.")
 
 with tabs[3]:
+    nombres_result = session.sql("""
+    SELECT n.NOMBRE_CURSO, c.ID_CURSO, c.FECHA_INICIO, c.FECHA_FIN
+    FROM LABORATORIO.MONICA_SOBERON.NOMBRE_CURSO AS n 
+    INNER JOIN LABORATORIO.MONICA_SOBERON.CURSO AS c ON n.ID_NOMBRE = c.ID_NOMBRE;
+    """)
+    nombres_df = nombres_result.to_pandas()
 
     nombres_df['course_name_with_dates'] = nombres_df.apply(lambda row: f"{row['NOMBRE_CURSO']} ({row['FECHA_INICIO'].strftime('%d/%m/%Y')} - {row['FECHA_FIN'].strftime('%d/%m/%Y')})", axis=1)
 
