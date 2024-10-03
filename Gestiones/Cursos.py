@@ -181,7 +181,7 @@ with tabs[1]:
             
             update_button = st.form_submit_button(label='Actualizar Curso')
             
-               if update_button:
+            if update_button:
                 # Build dynamic update query based on changes
                 update_fields = []
 
