@@ -353,7 +353,15 @@ with tabs[3]:
     """)
     nombres_df = nombres_result.to_pandas()
 
-    nombres_df['course_name_with_dates'] = nombres_df.apply(lambda row: f"{row['NOMBRE_CURSO']} ({row['FECHA_INICIO'].strftime('%Y/%m/%d')} - {row['FECHA_FIN'].strftime('%Y/%m/%d')})", axis=1)
+    nombres_df['FECHA_INICIO'] = pd.to_datetime(nombres_df['FECHA_INICIO'], errors='coerce').dt.strftime('%Y/%m/%d')
+    nombres_df['FECHA_FIN'] = pd.to_datetime(nombres_df['FECHA_FIN'], errors='coerce').dt.strftime('%Y/%m/%d')
+
+    # Combine course name with start and end dates for display
+    nombres_df['course_name_with_dates'] = nombres_df.apply(
+        lambda row: f"{row['NOMBRE_CURSO']} ({row['FECHA_INICIO']} - {row['FECHA_FIN']})" 
+        if pd.notnull(row['FECHA_INICIO']) and pd.notnull(row['FECHA_FIN']) 
+        else f"{row['NOMBRE_CURSO']} (Fecha no disponible)", axis=1
+    )
 
     selected_course_name_with_dates = st.selectbox("Selecciona el Curso:", nombres_df['course_name_with_dates'], key='select4')
 
