@@ -64,9 +64,7 @@ with tab1:
 with tab2:
         # Display course select box
         selected_course_name_with_dates = st.selectbox("Selecciona el Curso:", nombres_df['course_name_with_dates'], key='selectc1')
-        id_curso_result = nombres_df.loc[nombres_df['course_name_with_dates'] == selected_course_name_with_dates, 'ID_CURSO'].values[0]
-        id_curso_df = id_curso_result.to_pandas()
-        id_curso = id_curso_df['ID_CURSO'].iloc[0]
+        id_curso = nombres_df.loc[nombres_df['course_name_with_dates'] == selected_course_name_with_dates, 'ID_CURSO'].values[0]
 
         # Query to get only class dates
         clases_result = session.sql(f"""
