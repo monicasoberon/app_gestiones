@@ -391,7 +391,7 @@ with tabs[3]:
         FROM LABORATORIO.MONICA_SOBERON.COMUNIDAD c
         JOIN LABORATORIO.MONICA_SOBERON.REGISTRADOS_CURSO r
         ON c.ID_USUARIO = r.ID_USUARIO
-        WHERE r.ID_CURSO = '{id_curso}');
+        WHERE r.ID_CURSO = '{id_curso}';
     """)
     
     registered_df = registered_result.to_pandas()
