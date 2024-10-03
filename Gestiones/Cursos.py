@@ -15,7 +15,7 @@ st.title("Gestión de Cursos")
 st.write("Esta aplicación te ayuda a gestionar cursos, invitados y sesiones.")
 
 # Create tabs
-tabs = st.tabs(["Crear Curso", "Editar Curso", "Lista de Invitados", "Lista de Registrados"])
+tabs = st.tabs(["Crear Curso", "Editar Curso", "Lista de Invitados", "Lista de Registrados", "Borrar Curso"])
 
 with tabs[0]:
     st.header("Crear Nuevo Curso")
@@ -454,3 +454,60 @@ height=300,  key='email_input_key'
                     session.sql(insert_query).collect()
 
             st.success("Usuarios registrados agregados con éxito.")
+
+with tabs[4]:
+    st.title("Borrar Curso")
+    st.write("Solo se permite borrar cursos de la base de datos si estos no tienen clases, usuarios invitados o usuarios registrados.")
+    st.write("Borrar un curso es algo definitivo.")
+    nombres_result = session.sql("""
+    SELECT n.NOMBRE_CURSO, c.ID_CURSO, c.FECHA_INICIO, c.FECHA_FIN
+    FROM LABORATORIO.MONICA_SOBERON.NOMBRE_CURSO AS n 
+    INNER JOIN LABORATORIO.MONICA_SOBERON.CURSO AS c ON n.ID_NOMBRE = c.ID_NOMBRE;
+    """)
+    nombres_df = nombres_result.to_pandas()
+
+    nombres_df['FECHA_INICIO'] = pd.to_datetime(nombres_df['FECHA_INICIO'], errors='coerce').dt.strftime('%Y/%m/%d')
+    nombres_df['FECHA_FIN'] = pd.to_datetime(nombres_df['FECHA_FIN'], errors='coerce').dt.strftime('%Y/%m/%d')
+
+    # Combine course name with start and end dates for display
+    nombres_df['course_name_with_dates'] = nombres_df.apply(
+        lambda row: f"{row['NOMBRE_CURSO']} ({row['FECHA_INICIO']} - {row['FECHA_FIN']})" 
+        if pd.notnull(row['FECHA_INICIO']) and pd.notnull(row['FECHA_FIN']) 
+        else f"{row['NOMBRE_CURSO']} (Fecha no disponible)", axis=1
+    )
+
+    # Use the selectbox to display the combined name and dates
+    selected_course_name_with_dates = st.selectbox("Selecciona el Curso:", nombres_df['course_name_with_dates'], key='select3')
+
+    # Get the ID_CURSO for the selected course
+    selected_course_id = nombres_df.loc[nombres_df['course_name_with_dates'] == selected_course_name_with_dates, 'ID_CURSO'].values[0]
+
+    # Query for course details based on the selected course
+    course_details_result = session.sql(f"""
+        SELECT n.NOMBRE_CURSO, c.FECHA_INICIO, c.FECHA_FIN, c.PROVEEDOR, c.CORREO_CONTACTO, c.REQUIERE_CASO_USO
+        FROM LABORATORIO.MONICA_SOBERON.CURSO c inner join
+        LABORATORIO.MONICA_SOBERON.NOMBRE_CURSO n 
+        ON c.id_nombre = n.id_nombre
+        WHERE c.ID_CURSO = '{selected_course_id}';
+    """)
+    id_curso = selected_course_id
+
+    course_details_df = course_details_result.to_pandas()
+
+    # Display the course details
+    st.write("**Detalles del Curso:**")
+    for index, row in course_details_df.iterrows():
+        st.write(f"Nombre del Curso: {row['NOMBRE_CURSO']}")
+        st.write(f"Fecha de Inicio: {row['FECHA_INICIO']}")
+        st.write(f"Fecha de Fin: {row['FECHA_FIN']}")
+        st.write(f"Proveedor: {row['PROVEEDOR']}")
+        st.write(f"Correo Contacto: {row['CORREO_CONTACTO']}")
+        st.write(f"Requiere Caso de Uso: {'Si' if row['REQUIERE_CASO_USO'] else 'No'}")
+
+    st.button("Borrar Curso")
+    seguro = st.checkbox("Estoy seguro de que quiero eliminar este curso.")
+    if seguro:
+        borrar = st.button('Eliminar Curso', key = "processC")
+        if borrar:
+            session.sql(f"DELETE FROM LABORATORIO.MONICA_SOBERON.CURSO WHERE ID_CURSO = '{id_curso}';").collect()
+            st.success(f"El curso ha sido eliminado exitosamente.")
