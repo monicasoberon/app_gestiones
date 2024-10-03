@@ -15,26 +15,6 @@ st.title("Registrar Clases y Asistencias")
 tab1, tab2 = st.tabs(["Registrar Clase", "Registrar Asistencia"])
 
 with tab1:
-     # Query to get the course details along with the course name and full dates
-    course_result = session.sql("""
-        SELECT c.ID_CURSO, n.nombre_curso, c.FECHA_INICIO, c.FECHA_FIN
-        FROM LABORATORIO.MONICA_SOBERON.CURSO AS c
-        JOIN LABORATORIO.MONICA_SOBERON.NOMBRE_CURSO AS n
-        ON c.ID_NOMBRE = n.id_nombre
-    """)
-
-    # Convert to pandas DataFramess
-    course_df = course_result.to_pandas()
-
-    # Format the course display with course name and dates
-    course_df['display_name'] = course_df.apply(
-        lambda row: f"{row['nombre_curso']}, {row['FECHA_INICIO'].strftime('%d/%m/%Y')} - {row['FECHA_FIN'].strftime('%d/%m/%Y')}",
-        axis=1
-    )
-
-    # Create the list for the selectbox
-    course_names = course_df['display_name'].tolist()
-
     nombres_result = session.sql("""
     SELECT n.NOMBRE_CURSO, c.ID_CURSO, c.FECHA_INICIO, c.FECHA_FIN
     FROM LABORATORIO.MONICA_SOBERON.NOMBRE_CURSO AS n 
