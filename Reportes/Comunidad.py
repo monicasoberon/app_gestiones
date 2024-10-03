@@ -120,12 +120,10 @@ with tabs[2]:
 
     selected_course = st.selectbox('Selecciona un Curso:', course_names)
     if selected_course:
-        id_curso_result = session.sql(f"""
+        id_curso = session.sql(f"""
             SELECT C.ID_CURSO FROM LABORATORIO.MONICA_SOBERON.CURSO AS C INNER JOIN LABORATORIO.MONICA_SOBERON.NOMBRE_CURSO AS N
-            ON C.ID_NOMBRE = N.ID_NOMBRE WHERE N.NOMBRE_CURSO = '{selected_course}';""")
-        
-        id_curso = id_curso_result['ID_CURSO'].iloc[0]
-        
+            ON C.ID_NOMBRE = N.ID_NOMBRE WHERE N.NOMBRE_CURSO = '{selected_course}';""").collect()
+    
         course_details_result = session.sql(f"""
             SELECT n.NOMBRE_CURSO, c.FECHA_INICIO, c.FECHA_FIN, c.PROVEEDOR, c.CORREO_CONTACTO, c.REQUIERE_CASO_USO 
             FROM LABORATORIO.MONICA_SOBERON.CURSO as c inner join LABORATORIO.MONICA_SOBERON.NOMBRE_CURSO AS n
