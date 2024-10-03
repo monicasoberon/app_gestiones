@@ -20,10 +20,10 @@ with tab1:
         SELECT c.ID_CURSO, n.nombre_curso, c.FECHA_INICIO, c.FECHA_FIN
         FROM LABORATORIO.MONICA_SOBERON.CURSO AS c
         JOIN LABORATORIO.MONICA_SOBERON.NOMBRE_CURSO AS n
-        ON c.nombre_curso = n.id_nombre
+        ON c.ID_NOMBRE = n.id_nombre
     """)
 
-    # Convert to pandas DataFrames
+    # Convert to pandas DataFramess
     course_df = course_result.to_pandas()
 
     # Format the course display with course name and dates
