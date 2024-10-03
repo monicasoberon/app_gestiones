@@ -202,66 +202,6 @@ with tabs[2]:
         st.write(f"**Cantidad de Invitados que No se Registraron:** {invited_count_course - registered_count}")
         toggle_dataframe_visibility('Mostrar/Ocultar Invitados que No Registraron', 'show_no_registered_df', not_registered_df)
 
-''' #Tab 4: Visualizaciones
-with tabs[3]:
-    st.write('Visualizaciones:')
-    st.write('Cantidad de Sesiones por Mes:')
-    sessions_per_month = session.sql("""
-        SELECT MONTH(FECHA_SESION) AS MES, COUNT(*) AS CANTIDAD
-        FROM LABORATORIO.MONICA_SOBERON.SESION
-        GROUP BY MES
-        ORDER BY MES;
-    """).to_pandas()
-    fig, ax = plt.subplots(figsize=(0.7, 0.7))
-    sns.barplot(data=sessions_per_month, x='MES', y='CANTIDAD', ax=ax)
-    ax.set_xlabel('Mes', fontsize=6)  # Change the font size of the x-axis label
-    ax.set_ylabel('Cantidad', fontsize=6)  # Change the font size of the y-axis label
-    ax.tick_params(axis='both', labelsize=4)
-    st.pyplot(fig)
-
-    st.write('Cantidad de Invitados vs. Asistentes por Sesión:')
-    invited_vs_attended = session.sql("""
-        SELECT S.NOMBRE_SESION, COUNT(I.ID_USUARIO) AS INVITADOS, COUNT(A.ID_USUARIO) AS ASISTENTES
-        FROM LABORATORIO.MONICA_SOBERON.SESION AS S
-        LEFT JOIN LABORATORIO.MONICA_SOBERON.INVITACION_SESION AS I
-        ON S.ID_SESION = I.ID_SESION
-        LEFT JOIN LABORATORIO.MONICA_SOBERON.ASISTENCIA_SESION AS A
-        ON S.ID_SESION = A.ID_SESION
-        GROUP BY S.NOMBRE_SESION
-        ORDER BY INVITADOS DESC;
-    """).to_pandas()
-    print(invited_vs_attended)
-    #sns.histplot(data=invited_vs_attended, x='NOMBRE_SESION', y='Cantidad', hue='Tipo', multiple='stack')
-    #st.pyplot()
-    
-    st.write('Cantidad de Usuarios Registrados por Curso:')
-    registered_per_course = session.sql("""
-        SELECT C.NOMBRE_CURSO, COUNT(R.ID_USUARIO) AS CANTIDAD
-        FROM LABORATORIO.MONICA_SOBERON.CURSO AS C
-        INNER JOIN LABORATORIO.MONICA_SOBERON.REGISTRADOS_CURSO AS R
-        ON C.ID_CURSO = R.ID_CURSO
-        GROUP BY C.NOMBRE_CURSO
-        ORDER BY CANTIDAD DESC;
-    """).to_pandas()
-    fig2, ax = plt.subplots(figsize=(2, 3))
-    sns.barplot(data=registered_per_course, x='CANTIDAD', y='NOMBRE_CURSO', ax=ax)
-    st.pyplot(fig2)
-
-    st.write('Cantidad de Invitados vs. Registrados por Curso:')
-    invited_vs_registered = session.sql("""
-        SELECT C.NOMBRE_CURSO, COUNT(I.ID_USUARIO) AS INVITADOS, COUNT(R.ID_USUARIO) AS REGISTRADOS
-        FROM LABORATORIO.MONICA_SOBERON.CURSO AS C
-        LEFT JOIN LABORATORIO.MONICA_SOBERON.INVITACION_CURSO AS I
-        ON C.ID_CURSO = I.ID_CURSO
-        LEFT JOIN LABORATORIO.MONICA_SOBERON.REGISTRADOS_CURSO AS R
-        ON C.ID_CURSO = R.ID_CURSO
-        GROUP BY C.NOMBRE_CURSO
-        ORDER BY INVITADOS DESC;
-    """).to_pandas()
-
-    sns.barplot(data=invited_vs_registered, x='INVITADOS', y='NOMBRE_CURSO', color='blue', label='Invitados')
-    sns.barplot(data=invited_vs_registered, x='REGISTRADOS', y='NOMBRE_CURSO', color='green', label='Registrados')
-'''
 
 
     
