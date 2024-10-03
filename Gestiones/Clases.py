@@ -23,7 +23,7 @@ with tab1:
         ON c.nombre_curso = n.id_nombre
     """)
 
-    # Convert to pandas DataFrame
+    # Convert to pandas DataFrames
     course_df = course_result.to_pandas()
 
     # Format the course display with course name and dates
