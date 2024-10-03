@@ -149,9 +149,7 @@ with tabs[1]:
             course_name_result = session.sql(f"""SELECT NOMBRE_CURSO FROM LABORATORIO.MONICA_SOBERON.NOMBRE_CURSO n inner 
                                              join LABORATORIO.MONICA_SOBERON.CURSO c on n.id_nombre = c.id_nombre WHERE c.id_curso = {selected_course_id};""")
             course_name_df = course_name_result.to_pandas()
-            current_course_name = course_name_df['NOMBRE_CURSO'].iloc[0]
             
-            new_course_name = st.text_input("Nombre del Curso", value=current_course_name)
             new_course_start_date = st.date_input("Fecha de Inicio", value=course_details['FECHA_INICIO'])
             new_course_end_date = st.date_input("Fecha de Fin", value=course_details['FECHA_FIN'])
             new_course_provider = st.text_input("Proveedor", value=course_details['PROVEEDOR'])
@@ -184,59 +182,57 @@ with tabs[1]:
             update_button = st.form_submit_button(label='Actualizar Curso')
             
             if update_button:
-                if new_course_name and new_course_start_date and new_course_end_date:
-                    # Update course details
-                    update_course_query = f"""
-                    UPDATE LABORATORIO.MONICA_SOBERON.CURSO
-                    SET ID_NOMBRE = (SELECT ID_NOMBRE FROM LABORATORIO.MONICA_SOBERON.NOMBRE_CURSO WHERE NOMBRE_CURSO = '{new_course_name}'),
-                        FECHA_INICIO = '{new_course_start_date}',
-                        FECHA_FIN = '{new_course_end_date}',
-                        PROVEEDOR = '{new_course_provider}',
-                        REQUIERE_CASO_USO = {new_requires_case},  -- Boolean passed directly
-                        CORREO_CONTACTO = '{new_course_contact_email}'
-                    WHERE ID_CURSO = {selected_course_id};
+                update_course_query = f"""
+                UPDATE LABORATORIO.MONICA_SOBERON.CURSO
+                SET ID_NOMBRE = (SELECT ID_NOMBRE FROM LABORATORIO.MONICA_SOBERON.NOMBRE_CURSO WHERE NOMBRE_CURSO = '{new_course_name}'),
+                    FECHA_INICIO = '{new_course_start_date}',
+                    FECHA_FIN = '{new_course_end_date}',
+                    PROVEEDOR = '{new_course_provider}',
+                    REQUIERE_CASO_USO = {new_requires_case},  -- Boolean passed directly
+                    CORREO_CONTACTO = '{new_course_contact_email}'
+                WHERE ID_CURSO = {selected_course_id};
+                """
+                session.sql(update_course_query).collect()
+
+                # Update the TIENE_SESION table
+                session_id_result = session.sql(f"""
+                SELECT ID_SESION 
+                FROM LABORATORIO.MONICA_SOBERON.SESION 
+                WHERE NOMBRE_SESION IN ({', '.join([f"'{s}'" for s in selected_sessions])});
+                """)
+                session_id_df = session_id_result.to_pandas()
+                session_ids = session_id_df['ID_SESION'].tolist()
+                
+                # Remove existing session links
+                delete_sessions_query = f"DELETE FROM LABORATORIO.MONICA_SOBERON.TIENE_SESION WHERE ID_CURSO = {selected_course_id};"
+                session.sql(delete_sessions_query).collect()
+                
+                # Insert new session links
+                for session_id in session_ids:
+                    insert_session_query = f"""
+                    INSERT INTO LABORATORIO.MONICA_SOBERON.TIENE_SESION (ID_CURSO, ID_SESION)
+                    VALUES ({selected_course_id}, {session_id});
                     """
-                    session.sql(update_course_query).collect()
+                    session.sql(insert_session_query).collect()
 
-                    # Update the TIENE_SESION table
-                    session_id_result = session.sql(f"""
-                    SELECT ID_SESION 
-                    FROM LABORATORIO.MONICA_SOBERON.SESION 
-                    WHERE NOMBRE_SESION IN ({', '.join([f"'{s}'" for s in selected_sessions])});
-                    """)
-                    session_id_df = session_id_result.to_pandas()
-                    session_ids = session_id_df['ID_SESION'].tolist()
-                    
-                    # Remove existing session links
-                    delete_sessions_query = f"DELETE FROM LABORATORIO.MONICA_SOBERON.TIENE_SESION WHERE ID_CURSO = {selected_course_id};"
-                    session.sql(delete_sessions_query).collect()
-                    
-                    # Insert new session links
-                    for session_id in session_ids:
-                        insert_session_query = f"""
-                        INSERT INTO LABORATORIO.MONICA_SOBERON.TIENE_SESION (ID_CURSO, ID_SESION)
-                        VALUES ({selected_course_id}, {session_id});
-                        """
-                        session.sql(insert_session_query).collect()
+                # Update instructor
+                instructor_id_result = session.sql(f"""
+                SELECT ID_INSTRUCTOR FROM LABORATORIO.MONICA_SOBERON.INSTRUCTOR
+                WHERE CONCAT(NOMBRE_INSTRUCTOR, ' ', APELLIDO_INSTRUCTOR) = '{selected_instructor}';
+                """)
+                instructor_id_df = instructor_id_result.to_pandas()
+                instructor_id = instructor_id_df['ID_INSTRUCTOR'].iloc[0]
+                
+                update_instructor_query = f"""
+                UPDATE LABORATORIO.MONICA_SOBERON.IMPARTE
+                SET ID_INSTRUCTOR = {instructor_id}
+                WHERE ID_CURSO = {selected_course_id};
+                """
+                session.sql(update_instructor_query).collect()
 
-                    # Update instructor
-                    instructor_id_result = session.sql(f"""
-                    SELECT ID_INSTRUCTOR FROM LABORATORIO.MONICA_SOBERON.INSTRUCTOR
-                    WHERE CONCAT(NOMBRE_INSTRUCTOR, ' ', APELLIDO_INSTRUCTOR) = '{selected_instructor}';
-                    """)
-                    instructor_id_df = instructor_id_result.to_pandas()
-                    instructor_id = instructor_id_df['ID_INSTRUCTOR'].iloc[0]
-                    
-                    update_instructor_query = f"""
-                    UPDATE LABORATORIO.MONICA_SOBERON.IMPARTE
-                    SET ID_INSTRUCTOR = {instructor_id}
-                    WHERE ID_CURSO = {selected_course_id};
-                    """
-                    session.sql(update_instructor_query).collect()
-
-                    st.success(f"Curso '{new_course_name}' actualizado con éxito.")
-                else:
-                    st.error("Por favor, completa toda la información del curso.")
+                st.success(f"Curso '{new_course_name}' actualizado con éxito.")
+            else:
+                st.error("Por favor, completa toda la información del curso.")
 
 
 with tabs[2]:
