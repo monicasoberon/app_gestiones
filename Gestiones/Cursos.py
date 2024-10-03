@@ -330,101 +330,89 @@ with tabs[2]:
                 st.success("Usuarios invitados nuevos agregados con éxito.")
 
 with tabs[3]:
-    selected_course = st.selectbox('Selecciona un Curso: ', nombres_df['course_name_with_dates'])
-    selected_course_id = nombres_df.loc[nombres_df['course_name_with_dates'] == selected_course_name_with_dates, 'ID_CURSO'].values[0]
 
-    if selected_course:
-        # Query for course details based on the selected course
-        course_details_result = session.sql(f"""
-            SELECT n.NOMBRE_CURSO, c.FECHA_INICIO, c.FECHA_FIN, c.PROVEEDOR 
-            FROM LABORATORIO.MONICA_SOBERON.CURSO as c inner join
-            LABORATORIO.MONICA_SOBERON.NOMBRE_CURSO as n
-            ON n.id_nombre = c.id_nombre
-            WHERE c.ID_CURSO = '{selected_course_id}';
-        """)
-        
-        course_details_df = course_details_result.to_pandas()
-        
-        # Display the course details
-        st.write("**Detalles del Curso:**")
-        for index, row in course_details_df.iterrows():
-            st.write(f"Nombre del Curso: {row['NOMBRE_CURSO']}")
-            st.write(f"Fecha de Inicio: {row['FECHA_INICIO']}")
-            st.write(f"Fecha de Fin: {row['FECHA_FIN']}")
-            st.write(f"Proveedor: {row['PROVEEDOR']}")
-        
-        # Query for registered users for the selected course
-        registered_result = session.sql(f"""
-            SELECT c.NOMBRE, c.APELLIDO, c.CORREO 
-            FROM LABORATORIO.MONICA_SOBERON.COMUNIDAD c
-            JOIN LABORATORIO.MONICA_SOBERON.REGISTRADOS_CURSO r
-            ON c.ID_USUARIO = r.ID_USUARIO
-            WHERE r.ID_CURSO = (
-                SELECT ID_CURSO 
-                FROM LABORATORIO.MONICA_SOBERON.CURSO 
-                WHERE ID_NOMBRE = (
-                        SELECT ID_NOMBRE 
-                        FROM LABORATORIO.MONICA_SOBERON.NOMBRE_CURSO 
-                        WHERE NOMBRE_CURSO ='{selected_course}'
-            ));
-        """)
-        
-        registered_df = registered_result.to_pandas()
-        
-        # Display the registered users
-        st.write("**Usuarios Registrados:**")
-        st.dataframe(registered_df)
+    nombres_df['course_name_with_dates'] = nombres_df.apply(lambda row: f"{row['NOMBRE_CURSO']} ({row['FECHA_INICIO'].strftime('%d/%m/%Y')} - {row['FECHA_FIN'].strftime('%d/%m/%Y')})", axis=1)
 
-        st.write("**Agregar Usuarios:**")
-        email_input2 = st.text_area(
-    "Pega la lista de correos electrónicos aquí (uno por línea):",
-    height=300,  key='email_input_key'  
+    selected_course_name_with_dates = st.selectbox("Selecciona el Curso:", nombres_df['course_name_with_dates'])
+
+    id_curso = nombres_df.loc[nombres_df['course_name_with_dates'] == selected_course_name_with_dates, 'ID_CURSO'].values[0]
+
+    course_details_result = session.sql(f"""
+        SELECT n.NOMBRE_CURSO, c.FECHA_INICIO, c.FECHA_FIN, c.PROVEEDOR 
+        FROM LABORATORIO.MONICA_SOBERON.CURSO c inner join
+        LABORATORIO.MONICA_SOBERON.NOMBRE_CURSO n 
+        ON c.id_nombre = n.id_nombre
+        WHERE c.ID_CURSO = '{id_curso}';
+    """)
+
+    course_details_df = course_details_result.to_pandas()
+    
+    # Display the course details
+    st.write("**Detalles del Curso:**")
+    for index, row in course_details_df.iterrows():
+        st.write(f"Nombre del Curso: {row['NOMBRE_CURSO']}")
+        st.write(f"Fecha de Inicio: {row['FECHA_INICIO']}")
+        st.write(f"Fecha de Fin: {row['FECHA_FIN']}")
+        st.write(f"Proveedor: {row['PROVEEDOR']}")
+    
+    # Query for registered users for the selected course
+    registered_result = session.sql(f"""
+        SELECT c.NOMBRE, c.APELLIDO, c.CORREO 
+        FROM LABORATORIO.MONICA_SOBERON.COMUNIDAD c
+        JOIN LABORATORIO.MONICA_SOBERON.REGISTRADOS_CURSO r
+        ON c.ID_USUARIO = r.ID_USUARIO
+        WHERE r.ID_CURSO = '{id_curso}');
+    """)
+    
+    registered_df = registered_result.to_pandas()
+    
+    # Display the registered users
+    st.write("**Usuarios Registrados:**")
+    st.dataframe(registered_df)
+
+    st.write("**Agregar Usuarios:**")
+    email_input2 = st.text_area(
+"Pega la lista de correos electrónicos aquí (uno por línea):",
+height=300,  key='email_input_key'  
 )
 
-        if st.button("Procesar Correos de Registrados", key = "process5"):
-    # Process the input emails
-            email_list = [email.strip().lower() for email in email_input2.split('\n') if email.strip()]
-            email_list = list(set(email_list))  # Remove duplicates
+    if st.button("Procesar Correos de Registrados", key = "process5"):
+# Process the input emails
+        email_list = [email.strip().lower() for email in email_input2.split('\n') if email.strip()]
+        email_list = list(set(email_list))  # Remove duplicates
 
-            if email_list:
-                df_registrados = pd.DataFrame(email_list, columns=['Correo'])
+        if email_list:
+            df_registrados = pd.DataFrame(email_list, columns=['Correo'])
 
-        # Display the processed emails
-                st.write("Correos electrónicos de registrados procesados:")
-                st.dataframe(df_registrados)
+    # Display the processed emails
+            st.write("Correos electrónicos de registrados procesados:")
+            st.dataframe(df_registrados)
 
-                course_id_result = session.sql(f"""
-            SELECT ID_CURSO 
-            FROM LABORATORIO.MONICA_SOBERON.CURSO 
-            WHERE NOMBRE_CURSO = '{selected_course}';
+
+    # Insert into the REGISTRADOS_CURSO table for each email
+            for email in email_list:
+        # Get the user ID for the email
+                user_id_result = session.sql(f"""
+            SELECT ID_USUARIO 
+            FROM LABORATORIO.MONICA_SOBERON.COMUNIDAD 
+            WHERE CORREO = '{email}';
         """)
-                course_id_df = course_id_result.to_pandas()
-                course_id = course_id_df['ID_CURSO'].iloc[0]
+                user_id_df = user_id_result.to_pandas()
 
-        # Insert into the REGISTRADOS_CURSO table for each email
-                for email in email_list:
-            # Get the user ID for the email
-                    user_id_result = session.sql(f"""
-                SELECT ID_USUARIO 
-                FROM LABORATORIO.MONICA_SOBERON.COMUNIDAD 
-                WHERE CORREO = '{email}';
-            """)
-                    user_id_df = user_id_result.to_pandas()
+                if not user_id_df.empty:
+                    user_id = user_id_df['ID_USUARIO'].iloc[0]
 
-                    if not user_id_df.empty:
-                        user_id = user_id_df['ID_USUARIO'].iloc[0]
+            # Insert the user and course relationship into REGISTRADOS_CURSO
+                    insert_query = f"""
+                        INSERT INTO LABORATORIO.MONICA_SOBERON.REGISTRADOS_CURSO (ID_CURSO, ID_USUARIO)
+                        SELECT {id_curso}, {user_id}
+                        WHERE NOT EXISTS (
+                            SELECT 1
+                            FROM LABORATORIO.MONICA_SOBERON.REGISTRADOS_CURSO r
+                            WHERE r.ID_CURSO = {id_curso} AND r.ID_USUARIO = {user_id}
+                        );
+                    """
 
-                # Insert the user and course relationship into REGISTRADOS_CURSO
-                        insert_query = f"""
-                            INSERT INTO LABORATORIO.MONICA_SOBERON.REGISTRADOS_CURSO (ID_CURSO, ID_USUARIO)
-                            SELECT {course_id}, {user_id}
-                            WHERE NOT EXISTS (
-                                SELECT 1
-                                FROM LABORATORIO.MONICA_SOBERON.REGISTRADOS_CURSO r
-                                WHERE r.ID_CURSO = {course_id} AND r.ID_USUARIO = {user_id}
-                            );
-                        """
+                    session.sql(insert_query).collect()
 
-                        session.sql(insert_query).collect()
-
-                st.success("Usuarios registrados agregados con éxito.")
+            st.success("Usuarios registrados agregados con éxito.")
