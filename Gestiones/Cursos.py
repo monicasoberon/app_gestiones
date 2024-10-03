@@ -121,10 +121,15 @@ with tabs[1]:
     if nombres_df.empty:
         st.error("No se encontraron cursos.")
     else:
+        nombres_df['FECHA_INICIO'] = pd.to_datetime(nombres_df['FECHA_INICIO'], errors='coerce').dt.strftime('%d/%m/%Y')
+        nombres_df['FECHA_FIN'] = pd.to_datetime(nombres_df['FECHA_FIN'], errors='coerce').dt.strftime('%d/%m/%Y')
+
         # Combine course name with start and end dates for display
         nombres_df['course_name_with_dates'] = nombres_df.apply(
-            lambda row: f"{row['NOMBRE_CURSO']} ({row['FECHA_INICIO'].strftime('%d/%m/%Y')} - {row['FECHA_FIN'].strftime('%d/%m/%Y')})", axis=1)
-
+            lambda row: f"{row['NOMBRE_CURSO']} ({row['FECHA_INICIO']} - {row['FECHA_FIN']})" 
+            if pd.notnull(row['FECHA_INICIO']) and pd.notnull(row['FECHA_FIN']) 
+            else f"{row['NOMBRE_CURSO']} (Fecha no disponible)", axis=1
+        )
         # Use the selectbox to display the combined name and dates
         selected_course_name_with_dates = st.selectbox("Selecciona el Curso:", nombres_df['course_name_with_dates'])
 
@@ -138,7 +143,6 @@ with tabs[1]:
             course_details_df = course_details_result.to_pandas()
             course_details = course_details_df.iloc[0]
         
-        st.write(course_details['FECHA_FIN'].dtype())
         st.write("**Actualización de Datos del Curso:**")
         with st.form(key='edit_course_form'):
 
