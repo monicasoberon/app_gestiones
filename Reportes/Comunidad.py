@@ -133,24 +133,32 @@ with tabs[2]:
     )
 
     # Use the selectbox to display the combined name and dates
-    selected_course_name_with_dates = st.selectbox("Selecciona el Curso:", nombres_df['course_name_with_dates'], key='selectco')
+    selected_course_name_with_dates = st.selectbox("Selecciona el Curso:", nombres_df['course_name_with_dates'], key='select3')
 
     # Get the ID_CURSO for the selected course
-    id_curso = nombres_df.loc[nombres_df['course_name_with_dates'] == selected_course_name_with_dates, 'ID_CURSO'].values[0]
-    course_details_result = session.sql(f"""
-            SELECT n.NOMBRE_CURSO, c.FECHA_INICIO, c.FECHA_FIN, c.PROVEEDOR, c.CORREO_CONTACTO, c.REQUIERE_CASO_USO 
-            FROM LABORATORIO.MONICA_SOBERON.CURSO as c inner join LABORATORIO.MONICA_SOBERON.NOMBRE_CURSO AS n
-            WHERE c.ID_CURSO = '{id_curso}';
-        """).to_pandas()
+    selected_course_id = nombres_df.loc[nombres_df['course_name_with_dates'] == selected_course_name_with_dates, 'ID_CURSO'].values[0]
 
+    # Query for course details based on the selected course
+    course_details_result = session.sql(f"""
+        SELECT n.NOMBRE_CURSO, c.FECHA_INICIO, c.FECHA_FIN, c.PROVEEDOR, c.CORREO_CONTACTO, c.REQUIERE_CASO_USO
+        FROM LABORATORIO.MONICA_SOBERON.CURSO c inner join
+        LABORATORIO.MONICA_SOBERON.NOMBRE_CURSO n 
+        ON c.id_nombre = n.id_nombre
+        WHERE c.ID_CURSO = '{selected_course_id}';
+    """)
+    id_curso = selected_course_id
+
+    course_details_df = course_details_result.to_pandas()
+
+    # Display the course details
     st.write("**Detalles del Curso:**")
-    row = course_details_result.iloc[0]
-    st.write(f"Nombre del Curso: {row['NOMBRE_CURSO']}")
-    st.write(f"Fecha de Inicio: {row['FECHA_INICIO']}")
-    st.write(f"Fecha de Fin: {row['FECHA_FIN']}")
-    st.write(f"Proveedor: {row['PROVEEDOR']}")
-    st.write(f"Correo Contacto: {row['CORREO_CONTACTO']}")
-    st.write(f"Requiere Caso de Uso: {'Si' if row['REQUIERE_CASO_USO'] else 'No'}")
+    for index, row in course_details_df.iterrows():
+        st.write(f"Nombre del Curso: {row['NOMBRE_CURSO']}")
+        st.write(f"Fecha de Inicio: {row['FECHA_INICIO']}")
+        st.write(f"Fecha de Fin: {row['FECHA_FIN']}")
+        st.write(f"Proveedor: {row['PROVEEDOR']}")
+        st.write(f"Correo Contacto: {row['CORREO_CONTACTO']}")
+        st.write(f"Requiere Caso de Uso: {'Si' if row['REQUIERE_CASO_USO'] else 'No'}")
 
     # Fetch and display course invited, registered, and non-registered details
     invited_count_course = session.sql(f"""
