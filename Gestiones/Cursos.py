@@ -181,18 +181,32 @@ with tabs[1]:
             
             update_button = st.form_submit_button(label='Actualizar Curso')
             
-            if update_button:
-                update_course_query = f"""
-                UPDATE LABORATORIO.MONICA_SOBERON.CURSO
-                SET 
-                    FECHA_INICIO = '{new_course_start_date}',
-                    FECHA_FIN = '{new_course_end_date}',
-                    PROVEEDOR = '{new_course_provider}',
-                    REQUIERE_CASO_USO = {new_requires_case},  -- Boolean passed directly
-                    CORREO_CONTACTO = '{new_course_contact_email}'
-                WHERE ID_CURSO = {selected_course_id};
-                """
-                session.sql(update_course_query).collect()
+               if update_button:
+                # Build dynamic update query based on changes
+                update_fields = []
+
+                if new_course_start_date != course_details['FECHA_INICIO']:
+                    update_fields.append(f"FECHA_INICIO = '{new_course_start_date}'")
+                
+                if new_course_end_date != course_details['FECHA_FIN']:
+                    update_fields.append(f"FECHA_FIN = '{new_course_end_date}'")
+                
+                if new_course_provider != course_details['PROVEEDOR']:
+                    update_fields.append(f"PROVEEDOR = '{new_course_provider}'")
+                
+                if new_requires_case != course_details['REQUIERE_CASO_USO']:
+                    update_fields.append(f"REQUIERE_CASO_USO = {new_requires_case}")
+                
+                if new_course_contact_email != course_details['CORREO_CONTACTO']:
+                    update_fields.append(f"CORREO_CONTACTO = '{new_course_contact_email}'")
+
+                if update_fields:
+                    update_course_query = f"""
+                    UPDATE LABORATORIO.MONICA_SOBERON.CURSO
+                    SET {', '.join(update_fields)}
+                    WHERE ID_CURSO = {selected_course_id};
+                    """
+                    session.sql(update_course_query).collect()
 
                 # Update the TIENE_SESION table
                 session_id_result = session.sql(f"""
