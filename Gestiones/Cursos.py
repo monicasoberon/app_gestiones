@@ -456,9 +456,11 @@ height=300,  key='email_input_key'
             st.success("Usuarios registrados agregados con éxito.")
 
 with tabs[4]:
+    st.title("AQUI FALTA CHECAR SI TIENEN CLAES INVITADOS O REGSITRADOS")
     st.title("Borrar Curso")
     st.write("Solo se permite borrar cursos de la base de datos si estos no tienen clases, usuarios invitados o usuarios registrados.")
     st.write("Borrar un curso es algo definitivo.")
+
     nombres_result = session.sql("""
     SELECT n.NOMBRE_CURSO, c.ID_CURSO, c.FECHA_INICIO, c.FECHA_FIN
     FROM LABORATORIO.MONICA_SOBERON.NOMBRE_CURSO AS n 
