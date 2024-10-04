@@ -33,7 +33,7 @@ with tabs[0]:
 
         nombres = session.sql("""SELECT NOMBRE_CURSO FROM LABORATORIO.MONICA_SOBERON.CATALOGO_CURSOS;""")
         course_name = st.selectbox("Nombre del Curso", nombres.to_pandas()['NOMBRE_CURSO'].tolist())
-        course_name_id = session.sql(f"SELECT ID_NOMBRE FROM LABORATORIO.MONICA_SOBERON.CATALOGO_CURSOS WHERE NOMBRE_CURSO = '{course_name}';").to_pandas()['ID_NOMBRE'].iloc[0]
+        course_name_id = session.sql(f"SELECT ID_CATALOGO FROM LABORATORIO.MONICA_SOBERON.CATALOGO_CURSOS WHERE NOMBRE_CURSO = '{course_name}';").to_pandas()['ID_CATALOGO'].iloc[0]
         course_start_date = st.date_input("Fecha de Inicio")
         course_end_date = st.date_input("Fecha de Fin")
         course_provider = st.text_input("Proveedor")
@@ -58,7 +58,7 @@ with tabs[0]:
             if course_name and course_start_date and course_end_date:
                 # Insert new course into the CURSO table
                 insert_course_query = f"""
-                INSERT INTO LABORATORIO.MONICA_SOBERON.CURSO (ID_NOMBRE, FECHA_INICIO, FECHA_FIN, PROVEEDOR, REQUIERE_CASO_USO, CORREO_CONTACTO)
+                INSERT INTO LABORATORIO.MONICA_SOBERON.CURSO (ID_CATALOGO, FECHA_INICIO, FECHA_FIN, PROVEEDOR, REQUIERE_CASO_USO, CORREO_CONTACTO)
                 VALUES ('{course_name_id}', '{course_start_date}', '{course_end_date}', '{course_provider}', {requires_case}, '{course_contact_email}');
                 """
                 session.sql(insert_course_query).collect()
