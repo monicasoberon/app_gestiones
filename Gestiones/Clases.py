@@ -57,7 +57,7 @@ with tab1:
         # Ejecutar la query
             session.sql(insert_class_query).collect()
         # Mensaje de éxito
-            st.success(f"Clase creada exitosamente para el curso {selected_course} en la fecha {fecha_clase_str}.")
+            st.success(f"Clase creada exitosamente para el curso en la fecha {fecha_clase_str}.")
         else:
             st.error("Por favor, completa todos los campos.")
 

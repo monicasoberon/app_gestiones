@@ -17,7 +17,7 @@ st.write(
 )
 
 # Create tabs
-tabs = st.tabs(["Crear Sesión", "Editar Sesión", "Registrar Invitados", "Registrar Asistentes"])
+tabs = st.tabs(["Crear Sesión", "Editar Sesión", "Registrar Invitados", "Registrar Asistentes", "Borrar Sesión"])
 
 with tabs[0]:
     st.header("Crear Sesión")
@@ -280,4 +280,49 @@ with tabs[3]:
             # Execute the query
             session.sql(insert_query).collect()
             st.success("Asistencias registradas con éxito.")    
+
+with tabs[4]:
+    st.title("Borrar Sesión")
+    st.write("Solo se permite borrar sesiones de la base de datos si estos no tienen invitaciones o asistencias.")
+    st.write("Borrar una sesion es algo definitivo.")
+
+    session_result = session.sql("SELECT NOMBRE_SESION FROM LABORATORIO.MONICA_SOBERON.SESION;")
+    session_df = session_result.to_pandas()
+    session_names = session_df['NOMBRE_SESION'].tolist()
+
+    # Display session select box
+    selected_session = st.selectbox('Selecciona una Sesión: ', session_names)
+    if selected_session:
+        # Query for session details based on the selected session
+        session_details_result = session.sql(f"SELECT NOMBRE_SESION, FECHA_SESION, LINK_SESION_INFORMATIVA FROM LABORATORIO.MONICA_SOBERON.SESION WHERE NOMBRE_SESION = '{selected_session}';")
+        session_id_result = session.sql(f"SELECT ID_SESION FROM LABORATORIO.MONICA_SOBERON.SESION WHERE NOMBRE_SESION = '{selected_session}';")
+        
+        session_details_df = session_details_result.to_pandas()
+        session_id_df = session_id_result.to_pandas()
+        id_sesion = session_id_df['ID_SESION'].iloc[0]
+            
+        # Display the session details as a list
+        st.write("**Detalles de la Sesión:**")
+        for index, row in session_details_df.iterrows():
+            st.write(f" Nombre de la Sesión: {row['NOMBRE_SESION']}")
+            st.write(f" Fecha de la Sesión: {row['FECHA_SESION']}")
+
+    seguro = st.checkbox("Estoy seguro de que quiero eliminar esta sesion.")
+
+    checkdata = session.sql(f"""
+    SELECT 
+        (SELECT COUNT(*) FROM LABORATORIO.MONICA_SOBERON.INVITACION_SESION WHERE ID_SESION = '{id_sesion}') AS INVITADOS_COUNT,
+        (SELECT COUNT(*) FROM LABORATORIO.MONICA_SOBERON.ASISTENCIA_SESION WHERE ID_sESION = '{id_sesion}') AS ASISTENTES_COUNT
+    """)
+
+    checkdata_df = checkdata.to_pandas()
+
+    if checkdata_df.iloc[0]['INVITADOS_COUNT'] == 0 and checkdata_df.iloc[0]['ASISTENTES_COUNT'] == 0:
+        if seguro:
+            borrar = st.button('Eliminar Sesión', key="processS")
+            if borrar:
+                session.sql(f"DELETE FROM LABORATORIO.MONICA_SOBERON.SESION WHERE ID_SESION = '{id_sesion}';").collect()
+                st.success(f"La sesion ha sido eliminado exitosamente.")
+    else:
+        st.write("Esta sesion no se puede eliminar porque tiene clases, invitados, o usuarios registrados asociados.")
 
