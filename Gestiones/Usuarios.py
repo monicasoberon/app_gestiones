@@ -48,10 +48,11 @@ with tab1:
             st.success("Usuario creado exitosamente.")
 
 with tab5:
+    with tab5:
     st.header("Añadir Usuarios Faltantes")
     st.write("""Esta sección sirve para pegar los correos copiados al seleccionar reply all en outlook. 
                 Aquí se formatean los correos y se añaden a la comunidad los que aún no se encuentran en ella.""")
-    
+
     # Input for emails
     correos_input = st.text_area("Pega aquí los correos:")
 
@@ -88,31 +89,24 @@ with tab5:
                 st.write(f"Los siguientes correos no están registrados en la comunidad:")
                 st.write(", ".join(nuevos_correos))
                 st.write("Complete los datos de los siguientes usuarios:")
-                columns = ["Correo", "Nombre", "Apellido", "Negocio", "Área", "País", "Estatus"]
 
                 # Create a form to submit all data at once
                 with st.form("user_info_form"):
-                    st.write("Rendering Form")  # Debug point
+                    st.write("**Registrar Información de Usuarios Faltantes**")  # Header for the form
 
-                    # Create the table header
-                    cols = st.columns(len(columns))  # Create a column for each attribute
-
-                    for col, column_name in zip(cols, columns):
-                        col.write(f"**{column_name}**")  # Header for each column
-
-                    # Loop through each email and create input fields for each attribute
                     user_data = []
                     for correo in nuevos_correos:
-                        cols = st.columns(len(columns))  # Create a column for each attribute
-                        # Fill in email (non-editable) and editable fields for other attributes
-                        with cols[0]:
-                            st.write(correo)  # Display email
-                        nombre = cols[1].text_input("", placeholder="Nombre", key=f"nombre_{correo}", label_visibility="collapsed")
-                        apellido = cols[2].text_input("", placeholder="Apellido", key=f"apellido_{correo}", label_visibility="collapsed")
-                        negocio = cols[3].text_input("", placeholder="Negocio", key=f"negocio_{correo}", label_visibility="collapsed")
-                        area = cols[4].text_input("", placeholder="Área", key=f"area_{correo}", label_visibility="collapsed")
-                        pais = cols[5].text_input("", placeholder="País", key=f"pais_{correo}", label_visibility="collapsed")
-                        status = cols[6].checkbox("Activo", value=True, key=f"status_{correo}")
+                        # Display each email and create input fields for the remaining attributes
+                        st.markdown(f"##### Correo: {correo}")  # Display email prominently
+                        cols = st.columns(6)  # Create columns for attributes except email
+
+                        # Editable fields for each attribute
+                        nombre = cols[0].text_input(f"Nombre para {correo}", placeholder="Nombre", key=f"nombre_{correo}")
+                        apellido = cols[1].text_input(f"Apellido para {correo}", placeholder="Apellido", key=f"apellido_{correo}")
+                        negocio = cols[2].text_input(f"Negocio para {correo}", placeholder="Negocio", key=f"negocio_{correo}")
+                        area = cols[3].text_input(f"Área para {correo}", placeholder="Área", key=f"area_{correo}")
+                        pais = cols[4].text_input(f"País para {correo}", placeholder="País", key=f"pais_{correo}")
+                        status = cols[5].checkbox(f"Activo para {correo}", value=True, key=f"status_{correo}")
 
                         # Collect data for this user
                         user_data.append({
@@ -126,7 +120,6 @@ with tab5:
                         })
 
                     # Submit button for the form
-                    st.write("Collected user data:", user_data)  # Check the data collected
                     submit_button = st.form_submit_button("Registrar Usuarios")
 
                     if submit_button:
@@ -155,13 +148,14 @@ with tab5:
                             try:
                                 # Execute the SQL query to insert new user
                                 st.write("Executing SQL query...")  # Debug point before execution
-                                result = session.sql(insert_query).collect()
+                                session.sql(insert_query).collect()
                                 st.success(f"Usuario {user['Nombre'] or user['Correo']} registrado con éxito.")
                             except Exception as e:
                                 st.error(f"Error al registrar {user['Correo']}: {e}")
 
             else:
                 st.success("Todos los correos ya están registrados en la comunidad.")
+
     
 with tab2:
 
