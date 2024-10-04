@@ -124,8 +124,9 @@ with tab5:
                     # Submit button for the form
                     st.write("1")
                     submit_button = st.form_submit_button("Registrar Usuarios")
+                    st.write("2")
                     if submit_button:
-                        st.write("2")
+                        st.write("3")
                         st.write("Formulario enviado. Procesando usuarios...")  # write point
 
                         # Once the form is submitted, process the user_data list
