@@ -69,7 +69,7 @@ if selected_member:
             INNER JOIN LABORATORIO.MONICA_SOBERON.REGISTRADOS_CURSO AS R 
             ON C.ID_CURSO = R.ID_CURSO 
             INNER JOIN LABORATORIO.MONICA_SOBERON.NOMBRE_CURSO AS N
-            ON C.ID_NOMBRE_CURSO = N.ID_NOMBRE_CURSO
+            ON C.ID_NOMBRE = N.ID_NOMBRE
             WHERE R.ID_USUARIO = (SELECT ID_USUARIO FROM LABORATORIO.MONICA_SOBERON.COMUNIDAD WHERE CORREO = '{selected_member}');
         """)
         member_courses_df = member_courses_result.to_pandas()
