@@ -64,10 +64,12 @@ if selected_member:
     # Tab 3: Cursos Inscritos
     with tab3:
         member_courses_result = session.sql(f"""
-            SELECT C.NOMBRE_CURSO, C.FECHA_INICIO, C.FECHA_FIN, R.SOLICITUD_APROBADA, R.CURSO_APROBADO 
+            SELECT N.NOMBRE_CURSO, C.FECHA_INICIO, C.FECHA_FIN, R.SOLICITUD_APROBADA, R.CURSO_APROBADO 
             FROM LABORATORIO.MONICA_SOBERON.CURSO AS C 
             INNER JOIN LABORATORIO.MONICA_SOBERON.REGISTRADOS_CURSO AS R 
             ON C.ID_CURSO = R.ID_CURSO 
+            INNER JOIN LABORATORIO.MONICA_SOBERON.NOMBRE_CURSO AS N
+            ON C.ID_NOMBRE_CURSO = N.ID_NOMBRE_CURSO
             WHERE R.ID_USUARIO = (SELECT ID_USUARIO FROM LABORATORIO.MONICA_SOBERON.COMUNIDAD WHERE CORREO = '{selected_member}');
         """)
         member_courses_df = member_courses_result.to_pandas()
