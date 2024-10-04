@@ -56,19 +56,18 @@ with tab5:
     correos_input = st.text_area("Pega aquí los correos:")
 
     if st.button("Añadir Usuarios", key="usuario"):
-        st.write("Botón de añadir usuarios fue presionado.")  # Debug point
+        st.write("Botón de añadir usuarios fue presionado.")
         if correos_input:
             # Process the input emails
-            correos = correos_input.split(";")  # Split by semicolon
+            correos = correos_input.split(";")
             correos_formateados = []
 
             for correo in correos:
-                # Clean and extract email from the format
                 correo_limpio = correo.split("<")[-1].strip().rstrip(">")
                 correo_final = correo_limpio.replace(chr(10), '').replace(chr(13), '').strip().lower()
                 correos_formateados.append(correo_final)
 
-            st.write(f"Correos procesados: {correos_formateados}")  # Debug point
+            st.write(f"Correos procesados: {correos_formateados}")
 
             # Get the existing community emails from the database
             try:
@@ -81,81 +80,63 @@ with tab5:
 
             # Filter new emails that are not in the community
             nuevos_correos = set(correos_formateados) - comunidad_correos
-            st.write(f"Nuevos correos que no están en la comunidad: {nuevos_correos}")  # Debug point
+            st.write(f"Nuevos correos que no están en la comunidad: {nuevos_correos}")
 
-            # Display the filtered new emails
             if nuevos_correos:
-                st.write(f"Los siguientes correos no están registrados en la comunidad:")
-                st.write(", ".join(nuevos_correos))
                 st.write("Complete los datos de los siguientes usuarios:")
                 columns = ["Correo", "Nombre", "Apellido", "Negocio", "Área", "País", "Estatus"]
+                
+                user_data = []
+                for correo in nuevos_correos:
+                    cols = st.columns(len(columns))  # Create a column for each attribute
 
-                # Create a form to submit all data at once
-                with st.container(border=True):
-                    st.write("**Registrar Información de Usuarios Faltantes**")
-                    col_headers = st.columns(len(columns))
-                    for col, column_name in zip(col_headers, columns):
-                        col.write(f"**{column_name}**") 
+                    with cols[0]:
+                        st.write(correo)  # Display email
+                    nombre = cols[1].text_input("Nombre", placeholder="Nombre", key=f"nombre_{correo}", label_visibility="collapsed")
+                    apellido = cols[2].text_input("Apellido", placeholder="Apellido", key=f"apellido_{correo}", label_visibility="collapsed")
+                    negocio = cols[3].text_input("Negocio", placeholder="Negocio", key=f"negocio_{correo}", label_visibility="collapsed")
+                    area = cols[4].text_input("Área", placeholder="Área", key=f"area_{correo}", label_visibility="collapsed")
+                    pais = cols[5].text_input("País", placeholder="País", key=f"pais_{correo}", label_visibility="collapsed")
+                    status = cols[6].checkbox("Activo", value=True, key=f"status_{correo}")
 
-                    # Create input rows for each email
-                    user_data = []
-                    for correo in nuevos_correos:
-                        cols = st.columns(len(columns))  # Create a column for each attribute
-                        # Fill in email (non-editable) and editable fields for other attributes
-                        with cols[0]:
-                            st.write(correo)  # Display email
-                        nombre = cols[1].text_input("Nombre", placeholder="Nombre", key=f"nombre_{correo}", label_visibility="collapsed")
-                        apellido = cols[2].text_input("Apellido", placeholder="Apellido", key=f"apellido_{correo}", label_visibility="collapsed")
-                        negocio = cols[3].text_input("Negocio", placeholder="Negocio", key=f"negocio_{correo}", label_visibility="collapsed")
-                        area = cols[4].text_input("Área", placeholder="Área", key=f"area_{correo}", label_visibility="collapsed")
-                        pais = cols[5].text_input("País", placeholder="País", key=f"pais_{correo}", label_visibility="collapsed")
-                        status = cols[6].checkbox("Activo", value=True, key=f"status_{correo}")
+                    # Collect data for this user
+                    user_data.append({
+                        "Correo": correo,
+                        "Nombre": nombre if nombre else None,
+                        "Apellido": apellido if apellido else None,
+                        "Negocio": negocio if negocio else None,
+                        "Área": area if area else None,
+                        "País": pais if pais else None,
+                        "Estatus": status
+                    })
 
-                        # Collect data for this user
-                        user_data.append({
-                            "Correo": correo,
-                            "Nombre": nombre if nombre else None,
-                            "Apellido": apellido if apellido else None,
-                            "Negocio": negocio if negocio else None,
-                            "Área": area if area else None,
-                            "País": pais if pais else None,
-                            "Estatus": status
-                        })
+                if st.button("Registrar Usuarios"):
+                    st.write("Formulario enviado. Procesando usuarios...")
 
-                    # Submit button for the form
-                    submit_button = st.button("Registrar Usuarios")
+                    # Process the user_data list
+                    for user in user_data:
+                        st.write(f"Registrando usuario: {user['Correo']}")
 
-                    if submit_button:
-                        st.write("Formulario enviado. Procesando usuarios...")  # Debug point
+                        insert_query = f"""
+                        INSERT INTO LABORATORIO.MONICA_SOBERON.COMUNIDAD 
+                        (NOMBRE, APELLIDO, CORREO, STATUS, NEGOCIO, AREA, PAIS)
+                        VALUES (
+                            {f"'{user['Nombre']}'" if user['Nombre'] is not None else 'NULL'}, 
+                            {f"'{user['Apellido']}'" if user['Apellido'] is not None else 'NULL'}, 
+                            '{user['Correo']}', 
+                            {user['Estatus']}, 
+                            {f"'{user['Negocio']}'" if user['Negocio'] is not None else 'NULL'}, 
+                            {f"'{user['Área']}'" if user['Área'] is not None else 'NULL'}, 
+                            {f"'{user['País']}'" if user['País'] is not None else 'NULL'}
+                        );
+                        """
+                        st.write(f"SQL Query: {insert_query}")
 
-                        # Once the form is submitted, process the user_data list
-                        for user in user_data:
-                            st.write(f"Registrando usuario: {user['Correo']}")  # Debug point for each user
-
-                            # Insert query with direct handling of NULL values
-                            insert_query = f"""
-                            INSERT INTO LABORATORIO.MONICA_SOBERON.COMUNIDAD 
-                            (NOMBRE, APELLIDO, CORREO, STATUS, NEGOCIO, AREA, PAIS)
-                            VALUES (
-                                {f"'{user['Nombre']}'" if user['Nombre'] is not None else 'NULL'}, 
-                                {f"'{user['Apellido']}'" if user['Apellido'] is not None else 'NULL'}, 
-                                '{user['Correo']}', 
-                                {user['Estatus']}, 
-                                {f"'{user['Negocio']}'" if user['Negocio'] is not None else 'NULL'}, 
-                                {f"'{user['Área']}'" if user['Área'] is not None else 'NULL'}, 
-                                {f"'{user['País']}'" if user['País'] is not None else 'NULL'}
-                            );
-                            """
-                            st.write(f"SQL Query: {insert_query}")  # Debugging the SQL query
-
-                            try:
-                                # Execute the SQL query to insert new user
-                                st.write("Executing SQL query...")  # Debug point before execution
-                                session.sql(insert_query).collect()
-                                st.success(f"Usuario {user['Nombre'] or user['Correo']} registrado con éxito.")
-                            except Exception as e:
-                                st.error(f"Error al registrar {user['Correo']}: {e}")
-
+                        try:
+                            session.sql(insert_query).collect()
+                            st.success(f"Usuario {user['Nombre'] or user['Correo']} registrado con éxito.")
+                        except Exception as e:
+                            st.error(f"Error al registrar {user['Correo']}: {e}")
             else:
                 st.success("Todos los correos ya están registrados en la comunidad.")
 
