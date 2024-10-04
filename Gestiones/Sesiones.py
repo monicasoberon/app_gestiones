@@ -307,22 +307,22 @@ with tabs[4]:
             st.write(f" Nombre de la Sesión: {row['NOMBRE_SESION']}")
             st.write(f" Fecha de la Sesión: {row['FECHA_SESION']}")
 
-    seguro = st.checkbox("Estoy seguro de que quiero eliminar esta sesion.")
+        seguro = st.checkbox("Estoy seguro de que quiero eliminar esta sesion.")
 
-    checkdata = session.sql(f"""
-    SELECT 
-        (SELECT COUNT(*) FROM LABORATORIO.MONICA_SOBERON.INVITACION_SESION WHERE ID_SESION = '{id_sesion}') AS INVITADOS_COUNT,
-        (SELECT COUNT(*) FROM LABORATORIO.MONICA_SOBERON.ASISTENCIA_SESION WHERE ID_sESION = '{id_sesion}') AS ASISTENTES_COUNT
-    """)
+        checkdata = session.sql(f"""
+        SELECT 
+            (SELECT COUNT(*) FROM LABORATORIO.MONICA_SOBERON.INVITACION_SESION WHERE ID_SESION = '{id_sesion}') AS INVITADOS_COUNT,
+            (SELECT COUNT(*) FROM LABORATORIO.MONICA_SOBERON.ASISTENCIA_SESION WHERE ID_sESION = '{id_sesion}') AS ASISTENTES_COUNT
+        """)
 
-    checkdata_df = checkdata.to_pandas()
+        checkdata_df = checkdata.to_pandas()
 
-    if checkdata_df.iloc[0]['INVITADOS_COUNT'] == 0 and checkdata_df.iloc[0]['ASISTENTES_COUNT'] == 0:
-        if seguro:
-            borrar = st.button('Eliminar Sesión', key="processS")
-            if borrar:
-                session.sql(f"DELETE FROM LABORATORIO.MONICA_SOBERON.SESION WHERE ID_SESION = '{id_sesion}';").collect()
-                st.success(f"La sesion ha sido eliminado exitosamente.")
-    else:
-        st.write("Esta sesion no se puede eliminar porque tiene clases, invitados, o usuarios registrados asociados.")
+        if checkdata_df.iloc[0]['INVITADOS_COUNT'] == 0 and checkdata_df.iloc[0]['ASISTENTES_COUNT'] == 0:
+            if seguro:
+                borrar = st.button('Eliminar Sesión', key="processS")
+                if borrar:
+                    session.sql(f"DELETE FROM LABORATORIO.MONICA_SOBERON.SESION WHERE ID_SESION = '{id_sesion}';").collect()
+                    st.success(f"La sesion ha sido eliminado exitosamente.")
+        else:
+            st.write("Esta sesion no se puede eliminar porque tiene clases, invitados, o usuarios registrados asociados.")
 
