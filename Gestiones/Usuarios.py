@@ -131,10 +131,12 @@ with tab2:
 
         # Fetch registered courses for the member
         registrados = session.sql(f""" 
-            SELECT C.NOMBRE_CURSO, C.FECHA_INICIO, C.FECHA_FIN, R.SOLICITUD_APROBADA, R.CURSO_APROBADO
+            SELECT N.NOMBRE_CURSO, C.FECHA_INICIO, C.FECHA_FIN, R.SOLICITUD_APROBADA, R.CURSO_APROBADO
             FROM LABORATORIO.MONICA_SOBERON.REGISTRADOS_CURSO AS R 
             INNER JOIN LABORATORIO.MONICA_SOBERON.CURSO AS C 
             ON R.ID_CURSO = C.ID_CURSO 
+            INNER JOIN LABORATORIO.MONICA_SOBERON.NOMBRE_CURSO AS N
+            ON C.ID_NOMBRE = N.ID_NOMBRE
             WHERE R.ID_USUARIO = (SELECT ID_USUARIO FROM LABORATORIO.MONICA_SOBERON.COMUNIDAD WHERE CORREO = '{miembro}');
         """)
 
@@ -176,8 +178,10 @@ with tab2:
                     CURSO_APROBADO = {1 if updated_row['CURSO_APROBADO'] else 0}
                 WHERE ID_USUARIO = (SELECT ID_USUARIO FROM LABORATORIO.MONICA_SOBERON.COMUNIDAD WHERE CORREO = '{miembro}')
                 AND ID_CURSO = (SELECT ID_CURSO 
-                    FROM LABORATORIO.MONICA_SOBERON.CURSO 
-                    WHERE NOMBRE_CURSO = '{updated_row['NOMBRE_CURSO']}');
+                    FROM LABORATORIO.MONICA_SOBERON.CURSO AS C
+                    INNER JOIN LABORATORIO.MONICA_SOBERON.NOMBRE_CURSO AS N
+                    ON C.ID_NOMBRE = N.ID_NOMBRE 
+                    WHERE N.NOMBRE_CURSO = '{updated_row['NOMBRE_CURSO']}');
                 """
                 session.sql(query)
 
