@@ -56,6 +56,7 @@ with tab5:
     correos_input = st.text_area("Pega aquí los correos:")
 
     if st.button("Añadir Usuarios", key="usuario"):
+        st.write("Botón de añadir usuarios fue presionado.")  # Debug point
         if correos_input:
             # Process the input emails
             correos = correos_input.split(";")  # Split by semicolon
@@ -67,13 +68,20 @@ with tab5:
                 correo_final = correo_limpio.replace(chr(10), '').replace(chr(13), '').strip().lower()
                 correos_formateados.append(correo_final)
 
+            st.write(f"Correos procesados: {correos_formateados}")  # Debug point
+
             # Get the existing community emails from the database
-            comunidad_result = session.sql("SELECT CORREO FROM LABORATORIO.MONICA_SOBERON.COMUNIDAD;")
-            comunidad_df = comunidad_result.to_pandas()
-            comunidad_correos = set(comunidad_df['CORREO'].tolist())
+            try:
+                comunidad_result = session.sql("SELECT CORREO FROM LABORATORIO.MONICA_SOBERON.COMUNIDAD;")
+                comunidad_df = comunidad_result.to_pandas()
+                comunidad_correos = set(comunidad_df['CORREO'].tolist())
+            except Exception as e:
+                st.error(f"Error al consultar la base de datos: {e}")
+                st.stop()
 
             # Filter new emails that are not in the community
             nuevos_correos = set(correos_formateados) - comunidad_correos
+            st.write(f"Nuevos correos que no están en la comunidad: {nuevos_correos}")  # Debug point
 
             # Display the filtered new emails
             if nuevos_correos:
@@ -97,12 +105,12 @@ with tab5:
                         # Fill in email (non-editable) and editable fields for other attributes
                         with cols[0]:
                             st.write(correo)  # Display email
-                        nombre = cols[1].text_input("n", key=f"nombre_{correo}", label_visibility="collapsed")  # Placeholder label
-                        apellido = cols[2].text_input("a", key=f"apellido_{correo}", label_visibility="collapsed")
-                        negocio = cols[3].text_input("n", key=f"negocio_{correo}", label_visibility="collapsed")
-                        area = cols[4].text_input("a", key=f"area_{correo}", label_visibility="collapsed")
-                        pais = cols[5].text_input("p", key=f"pais_{correo}", label_visibility="collapsed")
-                        status = cols[6].checkbox("s", value=True, key=f"status_{correo}", label_visibility="collapsed")
+                        nombre = cols[1].text_input("Nombre", key=f"nombre_{correo}", label_visibility="collapsed")
+                        apellido = cols[2].text_input("Apellido", key=f"apellido_{correo}", label_visibility="collapsed")
+                        negocio = cols[3].text_input("Negocio", key=f"negocio_{correo}", label_visibility="collapsed")
+                        area = cols[4].text_input("Área", key=f"area_{correo}", label_visibility="collapsed")
+                        pais = cols[5].text_input("País", key=f"pais_{correo}", label_visibility="collapsed")
+                        status = cols[6].checkbox("Activo", value=True, key=f"status_{correo}", label_visibility="collapsed")
 
                         # Collect data for this user
                         user_data.append({
@@ -119,9 +127,12 @@ with tab5:
                     submit_button = st.form_submit_button("Registrar Usuarios")
 
                     if submit_button:
-                        # Once the form is submitted, you can process the user_data list
+                        st.write("Formulario enviado. Procesando usuarios...")  # Debug point
+
+                        # Once the form is submitted, process the user_data list
                         for user in user_data:
-                            st.write(f"Registrando usuario: {user['Correo']}")
+                            st.write(f"Registrando usuario: {user['Correo']}")  # Debug point for each user
+
                             insert_query = f"""
                             INSERT INTO LABORATORIO.MONICA_SOBERON.COMUNIDAD 
                             (NOMBRE, APELLIDO, CORREO, STATUS, NEGOCIO, AREA, PAIS)
@@ -147,6 +158,7 @@ with tab5:
 
             else:
                 st.success("Todos los correos ya están registrados en la comunidad.")
+
         
 with tab2:
 
