@@ -324,5 +324,5 @@ with tabs[4]:
                     session.sql(f"DELETE FROM LABORATORIO.MONICA_SOBERON.SESION WHERE ID_SESION = '{id_sesion}';").collect()
                     st.success(f"La sesion ha sido eliminado exitosamente.")
             else:
-                st.write("Esta sesion no se puede eliminar porque tiene clases, invitados, o usuarios registrados asociados.")
+                st.error("Esta sesion no se puede eliminar porque tiene clases, invitados, o usuarios registrados asociados.")
 
