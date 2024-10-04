@@ -107,12 +107,12 @@ with tab5:
                         # Fill in email (non-editable) and editable fields for other attributes
                         with cols[0]:
                             st.write(correo)  # Display email
-                        nombre = cols[1].text_input("Nombre", key=f"nombre_{correo}", label_visibility="collapsed")
-                        apellido = cols[2].text_input("Apellido", key=f"apellido_{correo}", label_visibility="collapsed")
-                        negocio = cols[3].text_input("Negocio", key=f"negocio_{correo}", label_visibility="collapsed")
-                        area = cols[4].text_input("Área", key=f"area_{correo}", label_visibility="collapsed")
-                        pais = cols[5].text_input("País", key=f"pais_{correo}", label_visibility="collapsed")
-                        status = cols[6].checkbox("Activo", value=True, key=f"status_{correo}", label_visibility="collapsed")
+                        nombre = cols[1].text_input("", placeholder="Nombre", key=f"nombre_{correo}", label_visibility="collapsed")
+                        apellido = cols[2].text_input("", placeholder="Apellido", key=f"apellido_{correo}", label_visibility="collapsed")
+                        negocio = cols[3].text_input("", placeholder="Negocio", key=f"negocio_{correo}", label_visibility="collapsed")
+                        area = cols[4].text_input("", placeholder="Área", key=f"area_{correo}", label_visibility="collapsed")
+                        pais = cols[5].text_input("", placeholder="País", key=f"pais_{correo}", label_visibility="collapsed")
+                        status = cols[6].checkbox("Activo", value=True, key=f"status_{correo}")
 
                         # Collect data for this user
                         user_data.append({
@@ -127,11 +127,9 @@ with tab5:
 
                     # Submit button for the form
                     st.write("Collected user data:", user_data)  # Check the data collected
-                    st.write("1")
                     submit_button = st.form_submit_button("Registrar Usuarios")
-                    st.write("2")
+
                     if submit_button:
-                        st.write("3")
                         st.write("Formulario enviado. Procesando usuarios...")  # Debug point
 
                         # Once the form is submitted, process the user_data list
@@ -156,14 +154,15 @@ with tab5:
 
                             try:
                                 # Execute the SQL query to insert new user
-                                session.sql(insert_query).collect()
+                                st.write("Executing SQL query...")  # Debug point before execution
+                                result = session.sql(insert_query).collect()
                                 st.success(f"Usuario {user['Nombre'] or user['Correo']} registrado con éxito.")
                             except Exception as e:
                                 st.error(f"Error al registrar {user['Correo']}: {e}")
 
             else:
                 st.success("Todos los correos ya están registrados en la comunidad.")
-        
+    
 with tab2:
 
     st.header("Editar Usuarios")
