@@ -56,7 +56,7 @@ with tab5:
     correos_input = st.text_area("Pega aquí los correos:")
 
     if st.button("Añadir Usuarios", key="usuario"):
-        st.write("Botón de añadir usuarios fue presionado.")  # Debug point
+        st.write("Botón de añadir usuarios fue presionado.")  # write point
         if correos_input:
             # Process the input emails
             correos = correos_input.split(";")  # Split by semicolon
@@ -68,7 +68,7 @@ with tab5:
                 correo_final = correo_limpio.replace(chr(10), '').replace(chr(13), '').strip().lower()
                 correos_formateados.append(correo_final)
 
-            st.write(f"Correos procesados: {correos_formateados}")  # Debug point
+            st.write(f"Correos procesados: {correos_formateados}")  # write point
 
             # Get the existing community emails from the database
             try:
@@ -81,7 +81,7 @@ with tab5:
 
             # Filter new emails that are not in the community
             nuevos_correos = set(correos_formateados) - comunidad_correos
-            st.write(f"Nuevos correos que no están en la comunidad: {nuevos_correos}")  # Debug point
+            st.write(f"Nuevos correos que no están en la comunidad: {nuevos_correos}")  # write point
             # Display the filtered new emails
             if nuevos_correos:
                 st.write(f"Los siguientes correos no están registrados en la comunidad:")
@@ -98,7 +98,7 @@ with tab5:
 
                     # Loop through each email and create input fields for each attribute
                     user_data = []
-                    st.debug("0")
+                    st.write("0")
                     for correo in nuevos_correos:
                         cols = st.columns(len(columns))  # Create a column for each attribute
                         # Fill in email (non-editable) and editable fields for other attributes
@@ -122,15 +122,15 @@ with tab5:
                             "Estatus": status
                         })
                     # Submit button for the form
-                    st.debug("1")
+                    st.write("1")
                     submit_button = st.form_submit_button("Registrar Usuarios")
                     if submit_button:
-                        st.debug("2")
-                        st.write("Formulario enviado. Procesando usuarios...")  # Debug point
+                        st.write("2")
+                        st.write("Formulario enviado. Procesando usuarios...")  # write point
 
                         # Once the form is submitted, process the user_data list
                         for user in user_data:
-                            st.write(f"Registrando usuario: {user['Correo']}")  # Debug point for each user
+                            st.write(f"Registrando usuario: {user['Correo']}")  # write point for each user
 
                             # Insert query with direct handling of NULL values
                             insert_query = f"""
@@ -146,7 +146,7 @@ with tab5:
                                 {f"'{user['País']}'" if user['País'] is not None else 'NULL'}
                             );
                             """
-                            # Debugging: Display the SQL query being executed
+                            # writeging: Display the SQL query being executed
                             st.write(f"SQL Query: {insert_query}")
                             try:
                                 # Execute the SQL query to insert new user
