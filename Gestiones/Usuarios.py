@@ -57,7 +57,6 @@ with tab5:
 
     if st.button("Añadir Usuarios", key="usuario"):
         st.write("Botón de añadir usuarios fue presionado.")  # Debug point
-
         if correos_input:
             # Process the input emails
             correos = correos_input.split(";")  # Split by semicolon
@@ -89,33 +88,33 @@ with tab5:
                 st.write(f"Los siguientes correos no están registrados en la comunidad:")
                 st.write(", ".join(nuevos_correos))
                 st.write("Complete los datos de los siguientes usuarios:")
-
-                # Define table headers
                 columns = ["Correo", "Nombre", "Apellido", "Negocio", "Área", "País", "Estatus"]
 
-                # Create a form for submitting the entire table
+                # Create a form to submit all data at once
                 with st.form("user_info_form"):
-                    # Create an empty list to hold user data
+                    st.write("Rendering Form")  # Debug point
+
+                    # Create the table header
+                    cols = st.columns(len(columns))  # Create a column for each attribute
+
+                    for col, column_name in zip(cols, columns):
+                        col.write(f"**{column_name}**")  # Header for each column
+
+                    # Loop through each email and create input fields for each attribute
                     user_data = []
-
-                    # Generate table-like input fields
                     for correo in nuevos_correos:
-                        # Create a new row for each user
-                        cols = st.columns(len(columns))
-
-                        # Display the email (non-editable)
+                        cols = st.columns(len(columns))  # Create a column for each attribute
+                        # Fill in email (non-editable) and editable fields for other attributes
                         with cols[0]:
-                            st.write(correo)
+                            st.write(correo)  # Display email
+                        nombre = cols[1].text_input("Nombre", key=f"nombre_{correo}", label_visibility="collapsed")
+                        apellido = cols[2].text_input("Apellido", key=f"apellido_{correo}", label_visibility="collapsed")
+                        negocio = cols[3].text_input("Negocio", key=f"negocio_{correo}", label_visibility="collapsed")
+                        area = cols[4].text_input("Área", key=f"area_{correo}", label_visibility="collapsed")
+                        pais = cols[5].text_input("País", key=f"pais_{correo}", label_visibility="collapsed")
+                        status = cols[6].checkbox("Activo", value=True, key=f"status_{correo}", label_visibility="collapsed")
 
-                        # Editable fields for other attributes
-                        nombre = cols[1].text_input("n", key=f"nombre_{correo}", label_visibility="collapsed")
-                        apellido = cols[2].text_input("a", key=f"apellido_{correo}", label_visibility="collapsed")
-                        negocio = cols[3].text_input("c", key=f"negocio_{correo}", label_visibility="collapsed")
-                        area = cols[4].text_input("a", key=f"area_{correo}", label_visibility="collapsed")
-                        pais = cols[5].text_input("p", key=f"pais_{correo}", label_visibility="collapsed")
-                        status = cols[6].checkbox("s", value=True, key=f"status_{correo}", label_visibility="collapsed")
-
-                        # Append the collected data for this user
+                        # Collect data for this user
                         user_data.append({
                             "Correo": correo,
                             "Nombre": nombre if nombre else None,
@@ -127,9 +126,12 @@ with tab5:
                         })
 
                     # Submit button for the form
+                    st.write("Collected user data:", user_data)  # Check the data collected
+                    st.write("1")
                     submit_button = st.form_submit_button("Registrar Usuarios")
-
+                    st.write("2")
                     if submit_button:
+                        st.write("3")
                         st.write("Formulario enviado. Procesando usuarios...")  # Debug point
 
                         # Once the form is submitted, process the user_data list
@@ -150,8 +152,7 @@ with tab5:
                                 {f"'{user['País']}'" if user['País'] is not None else 'NULL'}
                             );
                             """
-                            # Debugging: Display the SQL query being executed
-                            st.write(f"SQL Query: {insert_query}")
+                            st.write(f"SQL Query: {insert_query}")  # Debugging the SQL query
 
                             try:
                                 # Execute the SQL query to insert new user
@@ -162,7 +163,7 @@ with tab5:
 
             else:
                 st.success("Todos los correos ya están registrados en la comunidad.")
-
+        
 with tab2:
 
     st.header("Editar Usuarios")
