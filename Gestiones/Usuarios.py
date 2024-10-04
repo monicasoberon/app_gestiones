@@ -123,22 +123,6 @@ with tab5:
                         # Once the form is submitted, you can process the user_data list
                         for user in user_data:
                             st.write(f"Registrando usuario: {user['Correo']}")
-                        # Example: Construct the SQL insert query for each user (use NULL for empty fields)
-                        insert_query = f"""
-                        INSERT INTO LABORATORIO.MONICA_SOBERON.COMUNIDAD 
-                        (NOMBRE, APELLIDO, CORREO, STATUS, NEGOCIO, AREA, PAIS)
-                        VALUES (
-                            {f"'{user['Nombre']}'" if user['Nombre'] else 'NULL'}, 
-                            {f"'{user['Apellido']}'" if user['Apellido'] else 'NULL'}, 
-                            '{user['Correo']}', 
-                            {user['Estatus']}, 
-                            {f"'{user['Negocio']}'" if user['Negocio'] else 'NULL'}, 
-                            {f"'{user['Área']}'" if user['Área'] else 'NULL'}, 
-                            {f"'{user['País']}'" if user['País'] else 'NULL'}
-                        );
-                        """
-                        if submit_button:
-                            # Construct the SQL insert query, using `NULL` for empty fields
                             insert_query = f"""
                             INSERT INTO LABORATORIO.MONICA_SOBERON.COMUNIDAD 
                             (NOMBRE, APELLIDO, CORREO, STATUS, NEGOCIO, AREA, PAIS)
