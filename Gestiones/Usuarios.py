@@ -125,7 +125,7 @@ with tab5:
                     st.debug("1")
                     submit_button = st.form_submit_button("Registrar Usuarios")
                     if submit_button:
-                    st.debug("2")
+                        st.debug("2")
                         st.write("Formulario enviado. Procesando usuarios...")  # Debug point
 
                         # Once the form is submitted, process the user_data list
