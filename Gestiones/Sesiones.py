@@ -205,7 +205,7 @@ with tabs[2]:
                             # Reiniciar estado del popup después de procesar
                             st.session_state.show_popup = False
 
-with tabs[2]:
+with tabs[3]:
     st.header("Lista de Usuarios que Asistieron")
     
     # Query for session information
