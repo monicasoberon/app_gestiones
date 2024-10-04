@@ -79,49 +79,49 @@ with tab5:
             if nuevos_correos:
                 st.write(f"Los siguientes correos no están registrados en la comunidad:")
                 st.write(", ".join(nuevos_correos))
-            st.write("Complete los datos de los siguientes usuarios:")
-            columns = ["Correo", "Nombre", "Apellido", "Negocio", "Área", "País", "Estatus"]
+                st.write("Complete los datos de los siguientes usuarios:")
+                columns = ["Correo", "Nombre", "Apellido", "Negocio", "Área", "País", "Estatus"]
 
-            # Create a form to submit all data at once
-            with st.form("user_info_form"):
-                # Create the table header
-                cols = st.columns(len(columns))  # Create a column for each attribute
-
-                for col, column_name in zip(cols, columns):
-                    col.write(f"**{column_name}**")  # Header for each column
-
-                # Loop through each email and create input fields for each attribute
-                user_data = []
-                for correo in nuevos_correos:
+                # Create a form to submit all data at once
+                with st.form("user_info_form"):
+                    # Create the table header
                     cols = st.columns(len(columns))  # Create a column for each attribute
-                    # Fill in email (non-editable) and editable fields for other attributes
-                    with cols[0]:
-                        st.write(correo)  # Display email
-                    nombre = cols[1].text_input(f"Nombre (opcional) - {correo}", key=f"nombre_{correo}")
-                    apellido = cols[2].text_input(f"Apellido (opcional) - {correo}", key=f"apellido_{correo}")
-                    negocio = cols[3].text_input(f"Negocio (opcional) - {correo}", key=f"negocio_{correo}")
-                    area = cols[4].text_input(f"Área (opcional) - {correo}", key=f"area_{correo}")
-                    pais = cols[5].text_input(f"País (opcional) - {correo}", key=f"pais_{correo}")
-                    status = cols[6].checkbox("Activo", value=True, key=f"status_{correo}")
 
-                    # Collect data for this user
-                    user_data.append({
-                        "Correo": correo,
-                        "Nombre": nombre,
-                        "Apellido": apellido,
-                        "Negocio": negocio,
-                        "Área": area,
-                        "País": pais,
-                        "Estatus": status
-                    })
+                    for col, column_name in zip(cols, columns):
+                        col.write(f"**{column_name}**")  # Header for each column
 
-                # Submit button for the form
-                submit_button = st.form_submit_button("Registrar Usuarios")
+                    # Loop through each email and create input fields for each attribute
+                    user_data = []
+                    for correo in nuevos_correos:
+                        cols = st.columns(len(columns))  # Create a column for each attribute
+                        # Fill in email (non-editable) and editable fields for other attributes
+                        with cols[0]:
+                            st.write(correo)  # Display email
+                        nombre = cols[1].text_input(f"Nombre (opcional) - {correo}", key=f"nombre_{correo}")
+                        apellido = cols[2].text_input(f"Apellido (opcional) - {correo}", key=f"apellido_{correo}")
+                        negocio = cols[3].text_input(f"Negocio (opcional) - {correo}", key=f"negocio_{correo}")
+                        area = cols[4].text_input(f"Área (opcional) - {correo}", key=f"area_{correo}")
+                        pais = cols[5].text_input(f"País (opcional) - {correo}", key=f"pais_{correo}")
+                        status = cols[6].checkbox("Activo", value=True, key=f"status_{correo}")
 
-                if submit_button:
-                    # Once the form is submitted, you can process the user_data list
-                    for user in user_data:
-                        st.write(f"Registrando usuario: {user['Correo']}")
+                        # Collect data for this user
+                        user_data.append({
+                            "Correo": correo,
+                            "Nombre": nombre,
+                            "Apellido": apellido,
+                            "Negocio": negocio,
+                            "Área": area,
+                            "País": pais,
+                            "Estatus": status
+                        })
+
+                    # Submit button for the form
+                    submit_button = st.form_submit_button("Registrar Usuarios")
+
+                    if submit_button:
+                        # Once the form is submitted, you can process the user_data list
+                        for user in user_data:
+                            st.write(f"Registrando usuario: {user['Correo']}")
                         # Example: Construct the SQL insert query for each user (use NULL for empty fields)
                         insert_query = f"""
                         INSERT INTO LABORATORIO.MONICA_SOBERON.COMUNIDAD 
