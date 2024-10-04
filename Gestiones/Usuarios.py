@@ -104,7 +104,6 @@ with tab5:
                         pais = cols[5].text_input("p", key=f"pais_{correo}", label_visibility="collapsed")
                         status = cols[6].checkbox("s", value=True, key=f"status_{correo}", label_visibility="collapsed")
 
-
                         # Collect data for this user
                         user_data.append({
                             "Correo": correo,
@@ -127,21 +126,21 @@ with tab5:
                             INSERT INTO LABORATORIO.MONICA_SOBERON.COMUNIDAD 
                             (NOMBRE, APELLIDO, CORREO, STATUS, NEGOCIO, AREA, PAIS)
                             VALUES (
-                                {f"'{nombre}'" if nombre else 'NULL'}, 
-                                {f"'{apellido}'" if apellido else 'NULL'}, 
-                                '{correo}', 
-                                {status}, 
-                                {f"'{negocio}'" if negocio else 'NULL'}, 
-                                {f"'{area}'" if area else 'NULL'}, 
-                                {f"'{pais}'" if pais else 'NULL'}
+                                {f"'{user['Nombre']}'" if user['Nombre'] else 'NULL'}, 
+                                {f"'{user['Apellido']}'" if user['Apellido'] else 'NULL'}, 
+                                '{user['Correo']}', 
+                                {user['Estatus']}, 
+                                {f"'{user['Negocio']}'" if user['Negocio'] else 'NULL'}, 
+                                {f"'{user['Área']}'" if user['Área'] else 'NULL'}, 
+                                {f"'{user['País']}'" if user['País'] else 'NULL'}
                             );
                             """
                             try:
                                 # Execute the SQL query to insert new user
                                 session.sql(insert_query).collect()
-                                st.success(f"Usuario {nombre or correo} registrado con éxito.")
+                                st.success(f"Usuario {user['Nombre'] or user['Correo']} registrado con éxito.")
                             except Exception as e:
-                                st.error(f"Error al registrar {correo}: {e}")
+                                st.error(f"Error al registrar {user['Correo']}: {e}")
 
             else:
                 st.success("Todos los correos ya están registrados en la comunidad.")
