@@ -49,7 +49,7 @@ with tab1:
 
 with tab5:
     st.header("Añadir Usuarios Faltantes")
-    st.write("""Esta sección sirve para pegar los correos copiados al seleccionar reply all en outlook. 
+    st.write("""Esta sección sirve para pegar los correos copiados al seleccionar reply all en Outlook. 
                 Aquí se formatean los correos y se añaden a la comunidad los que aún no se encuentran en ella.""")
 
     # Input for emails
@@ -88,24 +88,28 @@ with tab5:
                 st.write(f"Los siguientes correos no están registrados en la comunidad:")
                 st.write(", ".join(nuevos_correos))
                 st.write("Complete los datos de los siguientes usuarios:")
+                columns = ["Correo", "Nombre", "Apellido", "Negocio", "Área", "País", "Estatus"]
 
                 # Create a form to submit all data at once
                 with st.form("user_info_form"):
-                    st.write("**Registrar Información de Usuarios Faltantes**")  # Header for the form
+                    st.write("**Registrar Información de Usuarios Faltantes**")
+                    col_headers = st.columns(len(columns))
+                    for col, column_name in zip(col_headers, columns):
+                        col.write(f"**{column_name}**") 
 
+                    # Create input rows for each email
                     user_data = []
                     for correo in nuevos_correos:
-                        # Display each email and create input fields for the remaining attributes
-                        st.markdown(f"##### Correo: {correo}")  # Display email prominently
-                        cols = st.columns(6)  # Create columns for attributes except email
-
-                        # Editable fields for each attribute
-                        nombre = cols[0].text_input("n", placeholder="Nombre", key=f"nombre_{correo}", label_visibility="hidden")
-                        apellido = cols[1].text_input("a", placeholder="Apellido", key=f"apellido_{correo}", label_visibility="hidden")
-                        negocio = cols[2].text_input("n", placeholder="Negocio", key=f"negocio_{correo}", label_visibility="hidden")
-                        area = cols[3].text_input("a", placeholder="Área", key=f"area_{correo}", label_visibility="hidden")
-                        pais = cols[4].text_input("p", placeholder="País", key=f"pais_{correo}", label_visibility="hidden")
-                        status = cols[5].checkbox("Activo", value=True, key=f"status_{correo}", label_visibility="hidden")
+                        cols = st.columns(len(columns))  # Create a column for each attribute
+                        # Fill in email (non-editable) and editable fields for other attributes
+                        with cols[0]:
+                            st.write(correo)  # Display email
+                        nombre = cols[1].text_input("Nombre", placeholder="Nombre", key=f"nombre_{correo}", label_visibility="collapsed")
+                        apellido = cols[2].text_input("Apellido", placeholder="Apellido", key=f"apellido_{correo}", label_visibility="collapsed")
+                        negocio = cols[3].text_input("Negocio", placeholder="Negocio", key=f"negocio_{correo}", label_visibility="collapsed")
+                        area = cols[4].text_input("Área", placeholder="Área", key=f"area_{correo}", label_visibility="collapsed")
+                        pais = cols[5].text_input("País", placeholder="País", key=f"pais_{correo}", label_visibility="collapsed")
+                        status = cols[6].checkbox("Activo", value=True, key=f"status_{correo}")
 
                         # Collect data for this user
                         user_data.append({
