@@ -91,7 +91,7 @@ with tab5:
                 columns = ["Correo", "Nombre", "Apellido", "Negocio", "Área", "País", "Estatus"]
 
                 # Create a form to submit all data at once
-                with st.form("user_info_form", key="user_info_form"):
+                with st.form("user_info_form"):
                     # Create the table header
                     cols = st.columns(len(columns))  # Create a column for each attribute
 
