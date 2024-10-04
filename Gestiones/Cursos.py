@@ -113,6 +113,7 @@ with tabs[0]:
                 VALUES ('{course_name}');
                 """
                 session.sql(insert_course_name_query).collect()
+                st.success("Curso creado y añadido al catálogo de cursos!")
 
 # Sección para editar un curso existente
 with tabs[1]:
