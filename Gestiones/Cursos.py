@@ -506,11 +506,11 @@ with tabs[4]:
 
     checkdata_df = checkdata.to_pandas()
 
-    if checkdata_df.iloc[0]['CLASES_COUNT'] == 0 and checkdata_df.iloc[0]['INVITADOS_COUNT'] == 0 and checkdata_df.iloc[0]['REGISTRADOS_COUNT'] == 0:
-        if seguro:
+    if seguro:
+        if checkdata_df.iloc[0]['CLASES_COUNT'] == 0 and checkdata_df.iloc[0]['INVITADOS_COUNT'] == 0 and checkdata_df.iloc[0]['REGISTRADOS_COUNT'] == 0:
             borrar = st.button('Eliminar Curso', key="processC")
             if borrar:
                 session.sql(f"DELETE FROM LABORATORIO.MONICA_SOBERON.CURSO WHERE ID_CURSO = '{id_curso}';").collect()
                 st.success(f"El curso ha sido eliminado exitosamente.")
-    else:
-        st.write("Este curso no se puede eliminar porque tiene clases, invitados, o usuarios registrados asociados.")
+        else:
+            st.write("Este curso no se puede eliminar porque tiene clases, invitados, o usuarios registrados asociados.")
