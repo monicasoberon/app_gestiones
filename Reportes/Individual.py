@@ -97,8 +97,10 @@ if selected_member:
     # Tab 5: Cursos a los que fue Invitado y No Registró
     with tab5:
         invitado_no_registro = session.sql(f"""
-            SELECT S.NOMBRE_CURSO, S.FECHA_INICIO 
+            SELECT N.NOMBRE_CURSO, S.FECHA_INICIO 
             FROM LABORATORIO.MONICA_SOBERON.CURSO AS S 
+            INNER JOIN LABORATORIO.MONICA_SOBERON.NOMBRE_CURSO AS N
+            ON N.ID_NOMBRE = S.ID_NOMBRE
             INNER JOIN LABORATORIO.MONICA_SOBERON.INVITACION_CURSO AS I 
             ON S.ID_CURSO = I.ID_CURSO 
             LEFT JOIN LABORATORIO.MONICA_SOBERON.REGISTRADOS_CURSO AS A 
