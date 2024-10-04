@@ -479,7 +479,7 @@ with tabs[4]:
     )
 
     # Use the selectbox to display the combined name and dates
-    selected_course_name_with_dates = st.selectbox("Selecciona el Curso:", nombres_df['course_name_with_dates'], key='select3')
+    selected_course_name_with_dates = st.selectbox("Selecciona el Curso:", nombres_df['course_name_with_dates'], key='select31')
 
     # Get the ID_CURSO for the selected course
     selected_course_id = nombres_df.loc[nombres_df['course_name_with_dates'] == selected_course_name_with_dates, 'ID_CURSO'].values[0]
