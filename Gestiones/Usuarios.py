@@ -55,7 +55,7 @@ with tab5:
     # Input for emails
     correos_input = st.text_area("Pega aquí los correos:")
 
-    if st.button("Añadir Usuarioadas", key="usuario"):
+    if st.button("Añadir Usuarios", key="usuario"):
         st.write("Botón de añadir usuarios fue presionado.")  # Debug point
         if correos_input:
             # Process the input emails
@@ -91,7 +91,7 @@ with tab5:
                 columns = ["Correo", "Nombre", "Apellido", "Negocio", "Área", "País", "Estatus"]
 
                 # Create a form to submit all data at once
-                with st.form("user_info_form"):
+                with st.form("user_info_form", key="user_info_form"):
                     # Create the table header
                     cols = st.columns(len(columns))  # Create a column for each attribute
 
@@ -124,7 +124,7 @@ with tab5:
                         })
 
                     # Submit button for the form
-                    submit_button = st.form_submit_button("Registrar Usuarios")
+                    submit_button = st.form_submit_button("Registrar Usuarios", key="submit_users")
 
                     if submit_button:
                         st.write("Formulario enviado. Procesando usuarios...")  # Debug point
