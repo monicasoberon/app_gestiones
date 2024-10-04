@@ -124,7 +124,7 @@ with tab5:
                         })
 
                     # Submit button for the form
-                    submit_button = st.form_submit_button("Registrar Usuarios", key="submit_users")
+                    submit_button = st.form_submit_button("Registrar Usuarios")
 
                     if submit_button:
                         st.write("Formulario enviado. Procesando usuarios...")  # Debug point
