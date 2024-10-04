@@ -18,8 +18,8 @@ st.write("Esta aplicación te ayuda a gestionar cursos, invitados y sesiones.")
 def get_course_names():
     nombres_result = session.sql("""
         SELECT n.NOMBRE_CURSO, c.ID_CURSO, c.FECHA_INICIO, c.FECHA_FIN
-        FROM LABORATORIO.MONICA_SOBERON.NOMBRE_CURSO AS n 
-        INNER JOIN LABORATORIO.MONICA_SOBERON.CURSO AS c ON n.ID_NOMBRE = c.ID_NOMBRE;
+        FROM LABORATORIO.MONICA_SOBERON.CATALOGO_CURSOS AS n 
+        INNER JOIN LABORATORIO.MONICA_SOBERON.CURSO AS c ON n.ID_CATALOGO = c.ID_CATALOGO;
     """)
     return nombres_result.to_pandas()
 
@@ -31,9 +31,9 @@ with tabs[0]:
 
     with st.form(key='new_course_form'):
 
-        nombres = session.sql("""SELECT NOMBRE_CURSO FROM LABORATORIO.MONICA_SOBERON.NOMBRE_CURSO;""")
+        nombres = session.sql("""SELECT NOMBRE_CURSO FROM LABORATORIO.MONICA_SOBERON.CATALOGO_CURSOS;""")
         course_name = st.selectbox("Nombre del Curso", nombres.to_pandas()['NOMBRE_CURSO'].tolist())
-        course_name_id = session.sql(f"SELECT ID_NOMBRE FROM LABORATORIO.MONICA_SOBERON.NOMBRE_CURSO WHERE NOMBRE_CURSO = '{course_name}';").to_pandas()['ID_NOMBRE'].iloc[0]
+        course_name_id = session.sql(f"SELECT ID_NOMBRE FROM LABORATORIO.MONICA_SOBERON.CATALOGO_CURSOS WHERE NOMBRE_CURSO = '{course_name}';").to_pandas()['ID_NOMBRE'].iloc[0]
         course_start_date = st.date_input("Fecha de Inicio")
         course_end_date = st.date_input("Fecha de Fin")
         course_provider = st.text_input("Proveedor")
@@ -65,8 +65,8 @@ with tabs[0]:
 
                 # Get the ID of the newly inserted course
                 course_id_result = session.sql(f"""SELECT ID_CURSO FROM LABORATORIO.MONICA_SOBERON.CURSO as c
-                                               INNER JOIN LABORATORIO.MONICA_SOBERON.NOMBRE_CURSO as n
-                                               ON n.id_nombre = c.id_nombre
+                                               INNER JOIN LABORATORIO.MONICA_SOBERON.CATALOGO_CURSOS as n
+                                               ON n.ID_CATALOGO = c.ID_CATALOGO
                                                WHERE n.NOMBRE_CURSO = '{course_name}';""")
                 course_id_df = course_id_result.to_pandas()
                 course_id = course_id_df['ID_CURSO'].iloc[0]
@@ -109,7 +109,7 @@ with tabs[0]:
         if submit_button:
             if course_name:
                 insert_course_name_query = f"""
-                INSERT INTO LABORATORIO.MONICA_SOBERON.NOMBRE_CURSO (NOMBRE_CURSO)
+                INSERT INTO LABORATORIO.MONICA_SOBERON.CATALOGO_CURSOS (NOMBRE_CURSO)
                 VALUES ('{course_name}');
                 """
                 session.sql(insert_course_name_query).collect()
@@ -148,8 +148,8 @@ with tabs[1]:
         st.write("**Actualización de Datos del Curso:**")
         with st.form(key='edit_course_form'):
 
-            course_name_result = session.sql(f"""SELECT NOMBRE_CURSO FROM LABORATORIO.MONICA_SOBERON.NOMBRE_CURSO n inner 
-                                             join LABORATORIO.MONICA_SOBERON.CURSO c on n.id_nombre = c.id_nombre WHERE c.id_curso = {selected_course_id};""")
+            course_name_result = session.sql(f"""SELECT NOMBRE_CURSO FROM LABORATORIO.MONICA_SOBERON.CATALOGO_CURSOS n inner 
+                                             join LABORATORIO.MONICA_SOBERON.CURSO c on n.ID_CATALOGO = c.ID_CATALOGO WHERE c.id_curso = {selected_course_id};""")
             course_name_df = course_name_result.to_pandas()
             
             new_course_start_date = st.date_input("Fecha de Inicio", value=course_details['FECHA_INICIO'])
@@ -274,8 +274,8 @@ with tabs[2]:
     course_details_result = session.sql(f"""
         SELECT n.NOMBRE_CURSO, c.FECHA_INICIO, c.FECHA_FIN, c.PROVEEDOR 
         FROM LABORATORIO.MONICA_SOBERON.CURSO c inner join
-        LABORATORIO.MONICA_SOBERON.NOMBRE_CURSO n 
-        ON c.id_nombre = n.id_nombre
+        LABORATORIO.MONICA_SOBERON.CATALOGO_CURSOS n 
+        ON c.ID_CATALOGO = n.ID_CATALOGO
         WHERE c.ID_CURSO = '{selected_course_id}';
     """)
     id_curso = selected_course_id
@@ -372,8 +372,8 @@ with tabs[3]:
     course_details_result = session.sql(f"""
         SELECT n.NOMBRE_CURSO, c.FECHA_INICIO, c.FECHA_FIN, c.PROVEEDOR 
         FROM LABORATORIO.MONICA_SOBERON.CURSO c inner join
-        LABORATORIO.MONICA_SOBERON.NOMBRE_CURSO n 
-        ON c.id_nombre = n.id_nombre
+        LABORATORIO.MONICA_SOBERON.CATALOGO_CURSOS n 
+        ON c.ID_CATALOGO = n.ID_CATALOGO
         WHERE c.ID_CURSO = '{id_curso}';
     """)
 
@@ -476,8 +476,8 @@ with tabs[4]:
     course_details_result = session.sql(f"""
         SELECT n.NOMBRE_CURSO, c.FECHA_INICIO, c.FECHA_FIN, c.PROVEEDOR, c.CORREO_CONTACTO, c.REQUIERE_CASO_USO
         FROM LABORATORIO.MONICA_SOBERON.CURSO c inner join
-        LABORATORIO.MONICA_SOBERON.NOMBRE_CURSO n 
-        ON c.id_nombre = n.id_nombre
+        LABORATORIO.MONICA_SOBERON.CATALOGO_CURSOS n 
+        ON c.ID_CATALOGO = n.ID_CATALOGO
         WHERE c.ID_CURSO = '{id_curso}';
     """)
 

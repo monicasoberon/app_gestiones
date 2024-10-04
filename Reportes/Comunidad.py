@@ -117,8 +117,8 @@ with tabs[2]:
 
     nombres_result = session.sql("""
     SELECT n.NOMBRE_CURSO, c.ID_CURSO, c.FECHA_INICIO, c.FECHA_FIN
-    FROM LABORATORIO.MONICA_SOBERON.NOMBRE_CURSO AS n 
-    INNER JOIN LABORATORIO.MONICA_SOBERON.CURSO AS c ON n.ID_NOMBRE = c.ID_NOMBRE;
+    FROM LABORATORIO.MONICA_SOBERON.CATALOGO_CURSOS AS n 
+    INNER JOIN LABORATORIO.MONICA_SOBERON.CURSO AS c ON n.ID_CATALOGO = c.ID_CATALOGO;
     """)
     nombres_df = nombres_result.to_pandas()
 
@@ -142,8 +142,8 @@ with tabs[2]:
     course_details_result = session.sql(f"""
         SELECT n.NOMBRE_CURSO, c.FECHA_INICIO, c.FECHA_FIN, c.PROVEEDOR, c.CORREO_CONTACTO, c.REQUIERE_CASO_USO
         FROM LABORATORIO.MONICA_SOBERON.CURSO c inner join
-        LABORATORIO.MONICA_SOBERON.NOMBRE_CURSO n 
-        ON c.id_nombre = n.id_nombre
+        LABORATORIO.MONICA_SOBERON.CATALOGO_CURSOS n 
+        ON c.ID_CATALOGO = n.ID_CATALOGO
         WHERE c.ID_CURSO = '{selected_course_id}';
     """)
     id_curso = selected_course_id
