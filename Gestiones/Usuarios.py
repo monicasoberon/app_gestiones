@@ -89,7 +89,7 @@ with tab5:
                 st.write(", ".join(nuevos_correos))
                 st.write("Complete los datos de los siguientes usuarios:")
                 columns = ["Correo", "Nombre", "Apellido", "Negocio", "Área", "País", "Estatus"]
-
+                print("hola2")
                 # Create a form to submit all data at once
                 with st.form("user_info_form"):
                     # Create the table header
