@@ -115,17 +115,16 @@ with tab5:
                         # Collect data for this user
                         user_data.append({
                             "Correo": correo,
-                            "Nombre": nombre,
-                            "Apellido": apellido,
-                            "Negocio": negocio,
-                            "Área": area,
-                            "País": pais,
+                            "Nombre": nombre if nombre else None,
+                            "Apellido": apellido if apellido else None,
+                            "Negocio": negocio if negocio else None,
+                            "Área": area if area else None,
+                            "País": pais if pais else None,
                             "Estatus": status
                         })
 
                     # Submit button for the form
                     submit_button = st.form_submit_button("Registrar Usuarios")
-
                     if submit_button:
                         st.write("Formulario enviado. Procesando usuarios...")  # Debug point
 
@@ -133,22 +132,22 @@ with tab5:
                         for user in user_data:
                             st.write(f"Registrando usuario: {user['Correo']}")  # Debug point for each user
 
+                            # Insert query with direct handling of NULL values
                             insert_query = f"""
                             INSERT INTO LABORATORIO.MONICA_SOBERON.COMUNIDAD 
                             (NOMBRE, APELLIDO, CORREO, STATUS, NEGOCIO, AREA, PAIS)
                             VALUES (
-                                {f"'{user['Nombre']}'" if user['Nombre'] else 'NULL'}, 
-                                {f"'{user['Apellido']}'" if user['Apellido'] else 'NULL'}, 
+                                {f"'{user['Nombre']}'" if user['Nombre'] is not None else 'NULL'}, 
+                                {f"'{user['Apellido']}'" if user['Apellido'] is not None else 'NULL'}, 
                                 '{user['Correo']}', 
                                 {user['Estatus']}, 
-                                {f"'{user['Negocio']}'" if user['Negocio'] else 'NULL'}, 
-                                {f"'{user['Área']}'" if user['Área'] else 'NULL'}, 
-                                {f"'{user['País']}'" if user['País'] else 'NULL'}
+                                {f"'{user['Negocio']}'" if user['Negocio'] is not None else 'NULL'}, 
+                                {f"'{user['Área']}'" if user['Área'] is not None else 'NULL'}, 
+                                {f"'{user['País']}'" if user['País'] is not None else 'NULL'}
                             );
                             """
                             # Debugging: Display the SQL query being executed
                             st.write(f"SQL Query: {insert_query}")
-                            
                             try:
                                 # Execute the SQL query to insert new user
                                 session.sql(insert_query).collect()
