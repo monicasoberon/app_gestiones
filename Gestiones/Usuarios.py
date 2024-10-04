@@ -47,10 +47,11 @@ with tab1:
                 
             st.success("Usuario creado exitosamente.")
 
-with tab5:
+with tabs[5]:
     st.header("Añadir Usuarios Faltantes")
     st.write("""Esta sección sirve para pegar los correos copiados al seleccionar reply all en outlook. 
                 Aquí se formatean los correos y se añaden a la comunidad los que aún no se encuentran en ella.""")
+    
     # Input for emails
     correos_input = st.text_area("Pega aquí los correos:")
 
@@ -73,6 +74,49 @@ with tab5:
 
             # Filter new emails that are not in the community
             nuevos_correos = set(correos_formateados) - comunidad_correos
+
+            # Display the filtered new emails
+            if nuevos_correos:
+                st.write(f"Los siguientes correos no están registrados en la comunidad:")
+                st.write(", ".join(nuevos_correos))
+
+                # For each unregistered email, prompt for user input to register them
+                for correo in nuevos_correos:
+                    st.write(f"Registrar información para {correo}:")
+                    with st.form(key=f"form_{correo}"):
+                        nombre = st.text_input(f"Nombre para {correo} (opcional)", key=f"nombre_{correo}")
+                        apellido = st.text_input(f"Apellido para {correo} (opcional)", key=f"apellido_{correo}")
+                        negocio = st.text_input(f"Negocio para {correo} (opcional)", key=f"negocio_{correo}")
+                        area = st.text_input(f"Área para {correo} (opcional)", key=f"area_{correo}")
+                        pais = st.text_input(f"País para {correo} (opcional)", key=f"pais_{correo}")
+                        status = st.checkbox(f"Estatus Activo", value=True, key=f"status_{correo}")
+                        
+                        submit_button = st.form_submit_button(label=f"Registrar {correo}")
+
+                        if submit_button:
+                            # Construct the SQL insert query, using `NULL` for empty fields
+                            insert_query = f"""
+                            INSERT INTO LABORATORIO.MONICA_SOBERON.COMUNIDAD 
+                            (NOMBRE, APELLIDO, CORREO, STATUS, NEGOCIO, AREA, PAIS)
+                            VALUES (
+                                {f"'{nombre}'" if nombre else 'NULL'}, 
+                                {f"'{apellido}'" if apellido else 'NULL'}, 
+                                '{correo}', 
+                                {status}, 
+                                {f"'{negocio}'" if negocio else 'NULL'}, 
+                                {f"'{area}'" if area else 'NULL'}, 
+                                {f"'{pais}'" if pais else 'NULL'}
+                            );
+                            """
+                            try:
+                                # Execute the SQL query to insert new user
+                                session.sql(insert_query).collect()
+                                st.success(f"Usuario {nombre or correo} registrado con éxito.")
+                            except Exception as e:
+                                st.error(f"Error al registrar {correo}: {e}")
+
+            else:
+                st.success("Todos los correos ya están registrados en la comunidad.")
         
 with tab2:
 
