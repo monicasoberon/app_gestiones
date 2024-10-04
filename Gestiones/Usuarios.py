@@ -100,12 +100,12 @@ with tab5:
                         cols = st.columns(6)  # Create columns for attributes except email
 
                         # Editable fields for each attribute
-                        nombre = cols[0].text_input(f"Nombre para {correo}", placeholder="Nombre", key=f"nombre_{correo}")
-                        apellido = cols[1].text_input(f"Apellido para {correo}", placeholder="Apellido", key=f"apellido_{correo}")
-                        negocio = cols[2].text_input(f"Negocio para {correo}", placeholder="Negocio", key=f"negocio_{correo}")
-                        area = cols[3].text_input(f"Área para {correo}", placeholder="Área", key=f"area_{correo}")
-                        pais = cols[4].text_input(f"País para {correo}", placeholder="País", key=f"pais_{correo}")
-                        status = cols[5].checkbox(f"Activo para {correo}", value=True, key=f"status_{correo}")
+                        nombre = cols[0].text_input("n", placeholder="Nombre", key=f"nombre_{correo}", label_visibility="hidden")
+                        apellido = cols[1].text_input("a", placeholder="Apellido", key=f"apellido_{correo}", label_visibility="hidden")
+                        negocio = cols[2].text_input("n", placeholder="Negocio", key=f"negocio_{correo}", label_visibility="hidden")
+                        area = cols[3].text_input("a", placeholder="Área", key=f"area_{correo}", label_visibility="hidden")
+                        pais = cols[4].text_input("p", placeholder="País", key=f"pais_{correo}", label_visibility="hidden")
+                        status = cols[5].checkbox("Activo", value=True, key=f"status_{correo}", label_visibility="hidden")
 
                         # Collect data for this user
                         user_data.append({
