@@ -97,12 +97,13 @@ with tab5:
                         # Fill in email (non-editable) and editable fields for other attributes
                         with cols[0]:
                             st.write(correo)  # Display email
-                        nombre = cols[1].text_input(key=f"nombre_{correo}", label_visibility="collapsed")
-                        apellido = cols[2].text_input(key=f"apellido_{correo}", label_visibility="collapsed")
-                        negocio = cols[3].text_input(key=f"negocio_{correo}", label_visibility="collapsed")
-                        area = cols[4].text_input(key=f"area_{correo}", label_visibility="collapsed")
-                        pais = cols[5].text_input(key=f"pais_{correo}", label_visibility="collapsed")
+                        nombre = cols[1].text_input(" ", key=f"nombre_{correo}", label_visibility="collapsed")  # Placeholder label
+                        apellido = cols[2].text_input(" ", key=f"apellido_{correo}", label_visibility="collapsed")
+                        negocio = cols[3].text_input(" ", key=f"negocio_{correo}", label_visibility="collapsed")
+                        area = cols[4].text_input(" ", key=f"area_{correo}", label_visibility="collapsed")
+                        pais = cols[5].text_input(" ", key=f"pais_{correo}", label_visibility="collapsed")
                         status = cols[6].checkbox("", value=True, key=f"status_{correo}", label_visibility="collapsed")
+
 
                         # Collect data for this user
                         user_data.append({
