@@ -91,7 +91,7 @@ with tab5:
                 columns = ["Correo", "Nombre", "Apellido", "Negocio", "Área", "País", "Estatus"]
 
                 # Create a form to submit all data at once
-                with st.form("user_info_form"):
+                with st.container(border=True):
                     st.write("**Registrar Información de Usuarios Faltantes**")
                     col_headers = st.columns(len(columns))
                     for col, column_name in zip(col_headers, columns):
@@ -123,7 +123,7 @@ with tab5:
                         })
 
                     # Submit button for the form
-                    submit_button = st.form_submit_button("Registrar Usuarios")
+                    submit_button = st.button("Registrar Usuarios")
 
                     if submit_button:
                         st.write("Formulario enviado. Procesando usuarios...")  # Debug point
