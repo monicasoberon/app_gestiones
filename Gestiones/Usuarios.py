@@ -82,14 +82,12 @@ with tab5:
             # Filter new emails that are not in the community
             nuevos_correos = set(correos_formateados) - comunidad_correos
             st.write(f"Nuevos correos que no están en la comunidad: {nuevos_correos}")  # Debug point
-
             # Display the filtered new emails
             if nuevos_correos:
                 st.write(f"Los siguientes correos no están registrados en la comunidad:")
                 st.write(", ".join(nuevos_correos))
                 st.write("Complete los datos de los siguientes usuarios:")
                 columns = ["Correo", "Nombre", "Apellido", "Negocio", "Área", "País", "Estatus"]
-                print("hola2")
                 # Create a form to submit all data at once
                 with st.form("user_info_form"):
                     # Create the table header
@@ -100,6 +98,7 @@ with tab5:
 
                     # Loop through each email and create input fields for each attribute
                     user_data = []
+                    st.debug("0")
                     for correo in nuevos_correos:
                         cols = st.columns(len(columns))  # Create a column for each attribute
                         # Fill in email (non-editable) and editable fields for other attributes
@@ -122,11 +121,11 @@ with tab5:
                             "País": pais if pais else None,
                             "Estatus": status
                         })
-                    print("hola1")
                     # Submit button for the form
+                    st.debug("1")
                     submit_button = st.form_submit_button("Registrar Usuarios")
-                    print("hola")
                     if submit_button:
+                    st.debug("2")
                         st.write("Formulario enviado. Procesando usuarios...")  # Debug point
 
                         # Once the form is submitted, process the user_data list
