@@ -14,6 +14,15 @@ if "auth_data" not in st.session_state:
 st.title("Gestión de Cursos")
 st.write("Esta aplicación te ayuda a gestionar cursos, invitados y sesiones.")
 
+@st.cache_data
+def get_course_names():
+    nombres_result = session.sql("""
+        SELECT n.NOMBRE_CURSO, c.ID_CURSO, c.FECHA_INICIO, c.FECHA_FIN
+        FROM LABORATORIO.MONICA_SOBERON.NOMBRE_CURSO AS n 
+        INNER JOIN LABORATORIO.MONICA_SOBERON.CURSO AS c ON n.ID_NOMBRE = c.ID_NOMBRE;
+    """)
+    return nombres_result.to_pandas()
+
 # Create tabs
 tabs = st.tabs(["Crear Curso", "Editar Curso", "Lista de Invitados", "Lista de Registrados", "Borrar Curso"])
 
@@ -109,14 +118,7 @@ with tabs[0]:
 with tabs[1]:
     st.header("Editar Curso Existente")
     
-    # Fetch course names, IDs, and dates along with the `id_nombre` to link them
-    nombres_result = session.sql("""
-        SELECT n.NOMBRE_CURSO, c.ID_CURSO, c.FECHA_INICIO, c.FECHA_FIN
-        FROM LABORATORIO.MONICA_SOBERON.NOMBRE_CURSO AS n 
-        INNER JOIN LABORATORIO.MONICA_SOBERON.CURSO AS c ON n.ID_NOMBRE = c.ID_NOMBRE;
-    """)
-    nombres_df = nombres_result.to_pandas()
-
+    nombres_df = get_course_names()
     # Check if the DataFrame is empty before accessing it
     if nombres_df.empty:
         st.error("No se encontraron cursos.")
@@ -249,13 +251,8 @@ with tabs[1]:
 
 with tabs[2]:
     st.header("Registrar Invitados")
-    # Fetch course names, IDs, and dates along with the `id_nombre` to link them
-    nombres_result = session.sql("""
-    SELECT n.NOMBRE_CURSO, c.ID_CURSO, c.FECHA_INICIO, c.FECHA_FIN
-    FROM LABORATORIO.MONICA_SOBERON.NOMBRE_CURSO AS n 
-    INNER JOIN LABORATORIO.MONICA_SOBERON.CURSO AS c ON n.ID_NOMBRE = c.ID_NOMBRE;
-    """)
-    nombres_df = nombres_result.to_pandas()
+    
+    nombres_df = get_course_names()
 
     nombres_df['FECHA_INICIO'] = pd.to_datetime(nombres_df['FECHA_INICIO'], errors='coerce').dt.strftime('%Y/%m/%d')
     nombres_df['FECHA_FIN'] = pd.to_datetime(nombres_df['FECHA_FIN'], errors='coerce').dt.strftime('%Y/%m/%d')
@@ -354,12 +351,9 @@ with tabs[2]:
                 st.success("Usuarios invitados nuevos agregados con éxito.")
 
 with tabs[3]:
-    nombres_result = session.sql("""
-    SELECT n.NOMBRE_CURSO, c.ID_CURSO, c.FECHA_INICIO, c.FECHA_FIN
-    FROM LABORATORIO.MONICA_SOBERON.NOMBRE_CURSO AS n 
-    INNER JOIN LABORATORIO.MONICA_SOBERON.CURSO AS c ON n.ID_NOMBRE = c.ID_NOMBRE;
-    """)
-    nombres_df = nombres_result.to_pandas()
+    st.header("Lista de Usuarios Registrados")
+    
+    nombres_df = get_course_names()
 
     nombres_df['FECHA_INICIO'] = pd.to_datetime(nombres_df['FECHA_INICIO'], errors='coerce').dt.strftime('%Y/%m/%d')
     nombres_df['FECHA_FIN'] = pd.to_datetime(nombres_df['FECHA_FIN'], errors='coerce').dt.strftime('%Y/%m/%d')
@@ -456,16 +450,11 @@ height=300,  key='email_input_key'
             st.success("Usuarios registrados agregados con éxito.")
 
 with tabs[4]:
-    st.title("Borrar Curso")
+    st.header("Borrar Curso")
     st.write("Solo se permite borrar cursos de la base de datos si estos no tienen clases, usuarios invitados o usuarios registrados.")
     st.write("Borrar un curso es algo definitivo.")
 
-    nombres_result = session.sql("""
-    SELECT n.NOMBRE_CURSO, c.ID_CURSO, c.FECHA_INICIO, c.FECHA_FIN
-    FROM LABORATORIO.MONICA_SOBERON.NOMBRE_CURSO AS n 
-    INNER JOIN LABORATORIO.MONICA_SOBERON.CURSO AS c ON n.ID_NOMBRE = c.ID_NOMBRE;
-    """)
-    nombres_df = nombres_result.to_pandas()
+    nombres_df = get_course_names()
 
     nombres_df['FECHA_INICIO'] = pd.to_datetime(nombres_df['FECHA_INICIO'], errors='coerce').dt.strftime('%Y/%m/%d')
     nombres_df['FECHA_FIN'] = pd.to_datetime(nombres_df['FECHA_FIN'], errors='coerce').dt.strftime('%Y/%m/%d')

@@ -62,101 +62,101 @@ with tab1:
             st.error("Por favor, completa todos los campos.")
 
 with tab2:
-        # Display course select box
-        selected_course_name_with_dates = st.selectbox("Selecciona el Curso:", nombres_df['course_name_with_dates'], key='selectc1')
-        id_curso = nombres_df.loc[nombres_df['course_name_with_dates'] == selected_course_name_with_dates, 'ID_CURSO'].values[0]
+    st.header("Registrar Asistencia") 
+    selected_course_name_with_dates = st.selectbox("Selecciona el Curso:", nombres_df['course_name_with_dates'], key='selectc12')
+    id_curso = nombres_df.loc[nombres_df['course_name_with_dates'] == selected_course_name_with_dates, 'ID_CURSO'].values[0]
 
-        # Query to get only class dates
-        clases_result = session.sql(f"""
-            SELECT clase.id_clase, clase.fecha 
-            FROM LABORATORIO.MONICA_SOBERON.CLASE clase
-            INNER JOIN LABORATORIO.MONICA_SOBERON.CURSO curso 
-            ON clase.id_curso = curso.id_curso
-            WHERE curso.id_curso = {id_curso};
-        """).to_pandas()
+    # Query to get only class dates
+    clases_result = session.sql(f"""
+        SELECT clase.id_clase, clase.fecha 
+        FROM LABORATORIO.MONICA_SOBERON.CLASE clase
+        INNER JOIN LABORATORIO.MONICA_SOBERON.CURSO curso 
+        ON clase.id_curso = curso.id_curso
+        WHERE curso.id_curso = {id_curso};
+    """).to_pandas()
 
+    st.write(clases_result)
+
+    if not clases_result.empty:
+        # Muestra el contenido de clases_result para depuración
         st.write(clases_result)
 
-        if not clases_result.empty:
-            # Muestra el contenido de clases_result para depuración
-            st.write(clases_result)
+        # Crea un diccionario que mapea las fechas a los ID de clase
+        clases_dict = {row['FECHA']: row['ID_CLASE'] for index, row in clases_result.iterrows()}
 
-            # Crea un diccionario que mapea las fechas a los ID de clase
-            clases_dict = {row['FECHA']: row['ID_CLASE'] for index, row in clases_result.iterrows()}
+        # Selecciona la fecha de la clase usando el diccionario
+        selected_class_date = st.selectbox("Selecciona una Fecha de Clase:", list(clases_dict.keys()), key='class_select_asistencia3')
+        
+        if selected_class_date:
+            id_clase = clases_dict[selected_class_date]
 
-            # Selecciona la fecha de la clase usando el diccionario
-            selected_class_date = st.selectbox("Selecciona una Fecha de Clase:", list(clases_dict.keys()), key='class_select_asistencia3')
+            # Now you can proceed with further processing using `id_clase`
+            # Query for students who attended the class
+            students_result = session.sql(f"""
+                SELECT id_usuario 
+                FROM LABORATORIO.MONICA_SOBERON.ASISTENCIA_CLASE 
+                WHERE id_clase = {id_clase};
+            """).to_pandas()
             
-            if selected_class_date:
-                id_clase = clases_dict[selected_class_date]
+            if not students_result.empty:
+                st.write("Estudiantes que asistieron a la clase:")
+                st.dataframe(students_result)
+            else:
+                st.write(f"No hay estudiantes registrados para la clase {id_clase}.")
+            
+            email_input = st.text_area(
+                "Pega la lista de correos electrónicos aquí (uno por línea):",
+                height=300, key = "asistencia_text"
+            )       
 
-                # Now you can proceed with further processing using `id_clase`
-                # Query for students who attended the class
-                students_result = session.sql(f"""
-                    SELECT id_usuario 
-                    FROM LABORATORIO.MONICA_SOBERON.ASISTENCIA_CLASE 
-                    WHERE id_clase = {id_clase};
-                """).to_pandas()
-                
-                if not students_result.empty:
-                    st.write("Estudiantes que asistieron a la clase:")
-                    st.dataframe(students_result)
-                else:
-                    st.write(f"No hay estudiantes registrados para la clase {id_clase}.")
-                
-                email_input = st.text_area(
-                    "Pega la lista de correos electrónicos aquí (uno por línea):",
-                    height=300, key = "asistencia_text"
-                )       
+            if st.button("Procesar Correos", key="correos_asistencias"):
+                assistant_email_list = [email.replace(chr(10), '').replace(chr(13), '').strip().lower() for email in email_input.split('\n') if email.strip()]
+                assistant_email_list = list(set(assistant_email_list))
+                if assistant_email_list:
+                    # Convertir lista de correos en string para la consulta
+                    email_list_str = ', '.join(f"'{email}'" for email in assistant_email_list)
 
-                if st.button("Procesar Correos", key="correos_asistencias"):
-                    assistant_email_list = [email.replace(chr(10), '').replace(chr(13), '').strip().lower() for email in email_input.split('\n') if email.strip()]
-                    assistant_email_list = list(set(assistant_email_list))
-                    if assistant_email_list:
-                        # Convertir lista de correos en string para la consulta
-                        email_list_str = ', '.join(f"'{email}'" for email in assistant_email_list)
+                    # Consulta para verificar qué correos ya están en la comunidad
+                    existing_emails_query = f"""
+                        SELECT correo 
+                        FROM LABORATORIO.MONICA_SOBERON.comunidad 
+                        WHERE correo IN ({email_list_str})
+                    """
+                    existing_emails = session.sql(existing_emails_query).collect()
+                    existing_email_set = set(email['CORREO'] for email in existing_emails)
 
-                        # Consulta para verificar qué correos ya están en la comunidad
-                        existing_emails_query = f"""
-                            SELECT correo 
-                            FROM LABORATORIO.MONICA_SOBERON.comunidad 
-                            WHERE correo IN ({email_list_str})
-                        """
-                        existing_emails = session.sql(existing_emails_query).collect()
-                        existing_email_set = set(email['CORREO'] for email in existing_emails)
+                    # Mostrar los correos procesados
+                    st.write("Correos electrónicos procesados:")
+                    st.write(assistant_email_list)
 
-                        # Mostrar los correos procesados
-                        st.write("Correos electrónicos procesados:")
-                        st.write(assistant_email_list)
+                    # Mostrar los correos que ya están en la comunidad
+                    if existing_email_set:
+                        st.write("Correos encontrados en la comunidad de analítica:")
+                        st.write(existing_email_set)
 
-                        # Mostrar los correos que ya están en la comunidad
-                        if existing_email_set:
-                            st.write("Correos encontrados en la comunidad de analítica:")
-                            st.write(existing_email_set)
+                        # Marcar como asistentes a los correos encontrados
+                        for email in existing_email_set:
+                            # Obtener el ID del usuario según el correo
+                            user_id_query = f"""
+                                SELECT id_usuario 
+                                FROM LABORATORIO.MONICA_SOBERON.comunidad 
+                                WHERE correo = '{email}'
+                            """
+                            user_id_result = session.sql(user_id_query).collect()
+                            user_id = user_id_result[0]['ID_USUARIO'] if user_id_result else None
 
-                            # Marcar como asistentes a los correos encontrados
-                            for email in existing_email_set:
-                                # Obtener el ID del usuario según el correo
-                                user_id_query = f"""
-                                    SELECT id_usuario 
-                                    FROM LABORATORIO.MONICA_SOBERON.comunidad 
-                                    WHERE correo = '{email}'
+                            # Registrar asistencia si se encuentra el ID
+                            if user_id:
+                                insert_attendance_query = f"""
+                                    INSERT INTO LABORATORIO.MONICA_SOBERON.asistencia_clase (id_clase, id_usuario) 
+                                    VALUES ({id_clase}, {user_id});
                                 """
-                                user_id_result = session.sql(user_id_query).collect()
-                                user_id = user_id_result[0]['ID_USUARIO'] if user_id_result else None
+                                session.sql(insert_attendance_query).collect()
 
-                                # Registrar asistencia si se encuentra el ID
-                                if user_id:
-                                    insert_attendance_query = f"""
-                                        INSERT INTO LABORATORIO.MONICA_SOBERON.asistencia_clase (id_clase, id_usuario) 
-                                        VALUES ({id_clase}, {user_id});
-                                    """
-                                    session.sql(insert_attendance_query).collect()
-
-                            st.success("Asistencias registradas con éxito para los correos encontrados.")
-                        else:
-                            st.warning("Ninguno de los correos está registrado en la comunidad de analítica.")
+                        st.success("Asistencias registradas con éxito para los correos encontrados.")
                     else:
-                        st.error("No se proporcionaron correos electrónicos válidos.")
-        else:
-            st.write("No hay clases registradas para este curso.")
+                        st.warning("Ninguno de los correos está registrado en la comunidad de analítica.")
+                else:
+                    st.error("No se proporcionaron correos electrónicos válidos.")
+    else:
+        st.write("No hay clases registradas para este curso.")

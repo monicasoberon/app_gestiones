@@ -282,7 +282,7 @@ with tabs[3]:
             st.success("Asistencias registradas con éxito.")    
 
 with tabs[4]:
-    st.title("Borrar Sesión")
+    st.header("Borrar Sesión")
     st.write("Solo se permite borrar sesiones de la base de datos si estos no tienen invitaciones o asistencias.")
     st.write("Borrar una sesion es algo definitivo.")
 
