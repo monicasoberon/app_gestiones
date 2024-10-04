@@ -456,7 +456,6 @@ height=300,  key='email_input_key'
             st.success("Usuarios registrados agregados con éxito.")
 
 with tabs[4]:
-    st.title("AQUI FALTA CHECAR SI TIENEN CLAES INVITADOS O REGSITRADOS")
     st.title("Borrar Curso")
     st.write("Solo se permite borrar cursos de la base de datos si estos no tienen clases, usuarios invitados o usuarios registrados.")
     st.write("Borrar un curso es algo definitivo.")
@@ -482,7 +481,7 @@ with tabs[4]:
     selected_course_name_with_dates = st.selectbox("Selecciona el Curso:", nombres_df['course_name_with_dates'], key='select31')
 
     # Get the ID_CURSO for the selected course
-    selected_course_id = nombres_df.loc[nombres_df['course_name_with_dates'] == selected_course_name_with_dates, 'ID_CURSO'].values[0]
+    id_curso = nombres_df.loc[nombres_df['course_name_with_dates'] == selected_course_name_with_dates, 'ID_CURSO'].values[0]
 
     # Query for course details based on the selected course
     course_details_result = session.sql(f"""
@@ -490,9 +489,8 @@ with tabs[4]:
         FROM LABORATORIO.MONICA_SOBERON.CURSO c inner join
         LABORATORIO.MONICA_SOBERON.NOMBRE_CURSO n 
         ON c.id_nombre = n.id_nombre
-        WHERE c.ID_CURSO = '{selected_course_id}';
+        WHERE c.ID_CURSO = '{id_curso}';
     """)
-    id_curso = selected_course_id
 
     course_details_df = course_details_result.to_pandas()
 
@@ -506,10 +504,23 @@ with tabs[4]:
         st.write(f"Correo Contacto: {row['CORREO_CONTACTO']}")
         st.write(f"Requiere Caso de Uso: {'Si' if row['REQUIERE_CASO_USO'] else 'No'}")
 
-    st.button("Borrar Curso")
     seguro = st.checkbox("Estoy seguro de que quiero eliminar este curso.")
-    if seguro:
-        borrar = st.button('Eliminar Curso', key = "processC")
-        if borrar:
-            session.sql(f"DELETE FROM LABORATORIO.MONICA_SOBERON.CURSO WHERE ID_CURSO = '{id_curso}';").collect()
-            st.success(f"El curso ha sido eliminado exitosamente.")
+
+    # Check if the course is associated with any classes, invited users, or registered users
+    checkdata = session.sql(f"""
+    SELECT 
+        (SELECT COUNT(*) FROM LABORATORIO.MONICA_SOBERON.CLASE WHERE ID_CURSO = '{id_curso}') AS CLASES_COUNT,
+        (SELECT COUNT(*) FROM LABORATORIO.MONICA_SOBERON.INVITACION_CURSO WHERE ID_CURSO = '{id_curso}') AS INVITADOS_COUNT,
+        (SELECT COUNT(*) FROM LABORATORIO.MONICA_SOBERON.REGISTRADOS_CURSO WHERE ID_CURSO = '{id_curso}') AS REGISTRADOS_COUNT
+    """)
+
+    checkdata_df = checkdata.to_pandas()
+
+    if checkdata_df.iloc[0]['CLASES_COUNT'] == 0 and checkdata_df.iloc[0]['INVITADOS_COUNT'] == 0 and checkdata_df.iloc[0]['REGISTRADOS_COUNT'] == 0:
+        if seguro:
+            borrar = st.button('Eliminar Curso', key="processC")
+            if borrar:
+                session.sql(f"DELETE FROM LABORATORIO.MONICA_SOBERON.CURSO WHERE ID_CURSO = '{id_curso}';").collect()
+                st.success(f"El curso ha sido eliminado exitosamente.")
+    else:
+        st.write("Este curso no se puede eliminar porque tiene clases, invitados, o usuarios registrados asociados.")
