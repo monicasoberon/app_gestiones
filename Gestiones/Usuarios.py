@@ -135,6 +135,9 @@ with tab5:
                                 {f"'{user['País']}'" if user['País'] else 'NULL'}
                             );
                             """
+                            # Debugging: Display the SQL query being executed
+                            st.write(f"SQL Query: {insert_query}")
+                            
                             try:
                                 # Execute the SQL query to insert new user
                                 session.sql(insert_query).collect()
