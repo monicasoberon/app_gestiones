@@ -128,41 +128,41 @@ with tab5:
                     # Submit button for the form
                     st.write("Collected user data:", user_data)  # Check the data collected
                     st.write("1")
-                    submit_button = st.form_submit_button("Registrar Usuarios")
-                    st.write("2")
-                    if submit_button:
-                        st.write("3")
-                        st.write("Formulario enviado. Procesando usuarios...")  # Debug point
+                submit_button = st.form_submit_button("Registrar Usuarios")
+                st.write("2")
+                if submit_button:
+                    st.write("3")
+                    st.write("Formulario enviado. Procesando usuarios...")  # Debug point
 
-                        # Once the form is submitted, process the user_data list
-                        for user in user_data:
-                            st.write(f"Registrando usuario: {user['Correo']}")  # Debug point for each user
+                    # Once the form is submitted, process the user_data list
+                    for user in user_data:
+                        st.write(f"Registrando usuario: {user['Correo']}")  # Debug point for each user
 
-                            # Insert query with direct handling of NULL values
-                            insert_query = f"""
-                            INSERT INTO LABORATORIO.MONICA_SOBERON.COMUNIDAD 
-                            (NOMBRE, APELLIDO, CORREO, STATUS, NEGOCIO, AREA, PAIS)
-                            VALUES (
-                                {f"'{user['Nombre']}'" if user['Nombre'] is not None else 'NULL'}, 
-                                {f"'{user['Apellido']}'" if user['Apellido'] is not None else 'NULL'}, 
-                                '{user['Correo']}', 
-                                {user['Estatus']}, 
-                                {f"'{user['Negocio']}'" if user['Negocio'] is not None else 'NULL'}, 
-                                {f"'{user['Área']}'" if user['Área'] is not None else 'NULL'}, 
-                                {f"'{user['País']}'" if user['País'] is not None else 'NULL'}
-                            );
-                            """
-                            st.write(f"SQL Query: {insert_query}")  # Debugging the SQL query
+                        # Insert query with direct handling of NULL values
+                        insert_query = f"""
+                        INSERT INTO LABORATORIO.MONICA_SOBERON.COMUNIDAD 
+                        (NOMBRE, APELLIDO, CORREO, STATUS, NEGOCIO, AREA, PAIS)
+                        VALUES (
+                            {f"'{user['Nombre']}'" if user['Nombre'] is not None else 'NULL'}, 
+                            {f"'{user['Apellido']}'" if user['Apellido'] is not None else 'NULL'}, 
+                            '{user['Correo']}', 
+                            {user['Estatus']}, 
+                            {f"'{user['Negocio']}'" if user['Negocio'] is not None else 'NULL'}, 
+                            {f"'{user['Área']}'" if user['Área'] is not None else 'NULL'}, 
+                            {f"'{user['País']}'" if user['País'] is not None else 'NULL'}
+                        );
+                        """
+                        st.write(f"SQL Query: {insert_query}")  # Debugging the SQL query
 
-                            try:
-                                # Execute the SQL query to insert new user
-                                session.sql(insert_query).collect()
-                                st.success(f"Usuario {user['Nombre'] or user['Correo']} registrado con éxito.")
-                            except Exception as e:
-                                st.error(f"Error al registrar {user['Correo']}: {e}")
+                        try:
+                            # Execute the SQL query to insert new user
+                            session.sql(insert_query).collect()
+                            st.success(f"Usuario {user['Nombre'] or user['Correo']} registrado con éxito.")
+                        except Exception as e:
+                            st.error(f"Error al registrar {user['Correo']}: {e}")
 
-            else:
-                st.success("Todos los correos ya están registrados en la comunidad.")
+        else:
+            st.success("Todos los correos ya están registrados en la comunidad.")
         
 with tab2:
 
