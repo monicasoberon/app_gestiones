@@ -20,12 +20,14 @@ st.write(
 @st.cache_data
 def get_user_names():
     users_result = session.sql("""
-        SELECT correo, nombre, apellido from LABORATORIO.MONICA_SOBERON.COMUNIDAD;
+        SELECT correo, nombre, apellido FROM LABORATORIO.MONICA_SOBERON.COMUNIDAD;
     """)
-    users_result.to_pandas()
-    users_result['USUARIOS'] = users_result.apply(
-        lambda row: f"{row['CORREO']} : {row['NOMBRE']} {row['APELLIDO']}")
-    return users_result
+    users_df = users_result.to_pandas()
+
+    # Create a formatted column 'USUARIOS' combining 'correo', 'nombre', and 'apellido'
+    users_df['USUARIOS'] = users_df.apply(
+        lambda row: f"{row['correo']} : {row['nombre']} {row['apellido']}", axis=1)
+    return users_df
 
 tab1, tab2, tab5, tab3, tab4 = st.tabs(["Crear Usuario", "Editar Usuario", "Pegar correos Outlook", "Registrar Instructor", "Eliminar Usuario"])
 
@@ -144,10 +146,11 @@ with tab2:
 
     st.header("Editar Usuarios") 
     # Display selectbox for individual member selection
-    users_result = get_user_names()
-    miembro = st.selectbox('Selecciona un miembro:', users_result['USUARIOS'])
+    users_df = get_user_names()
+    miembro = st.selectbox('Selecciona un miembro:', users_df['USUARIOS'])
     if miembro:
         # Query to get individual member details
+        miembro = miembro.split(' : ')[0]
         miembro_sql = session.sql(f"""
             SELECT NOMBRE, APELLIDO, CORREO, STATUS, NEGOCIO, AREA, PAIS 
             FROM LABORATORIO.MONICA_SOBERON.COMUNIDAD 
