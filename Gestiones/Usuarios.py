@@ -47,19 +47,26 @@ with tab1:
                 
             st.success("Usuario creado exitosamente.")
 
-
 with tab5:
-
     st.header("Añadir Usuarios Faltantes")
     st.write("""Esta sección sirve para pegar los correos copiados al seleccionar reply all en Outlook. 
                 Aquí se formatean los correos y se añaden a la comunidad los que aún no se encuentran en ella.""")
-
+    
     # Input for emails
     correos_input = st.text_area("Pega aquí los correos:")
 
-    if st.button("Añadir Usuarios", key="usuario"):
-        st.write("Botón de añadir usuarios fue presionado.")  # Debug point
+    # Add a button for submitting the emails
+    runbtn = st.button("Añadir Usuarios", key="usuario")
 
+    # Initialize session state for handling the button state
+    if "runbtn_state" not in st.session_state:
+        st.session_state.runbtn_state = False
+
+    # If the button is pressed or state is true
+    if runbtn or st.session_state.runbtn_state:
+        st.session_state.runbtn_state = True
+
+        # Ensure the text area has input
         if correos_input:
             # Process the input emails
             correos = correos_input.split(";")  # Split by semicolon
@@ -67,7 +74,7 @@ with tab5:
 
             st.write(f"Correos procesados: {correos_formateados}")  # Debug point
 
-            # Get the existing community emails from the database
+            # Get the existing community emails from the database (simulated here)
             try:
                 comunidad_result = session.sql("SELECT CORREO FROM LABORATORIO.MONICA_SOBERON.COMUNIDAD;")
                 comunidad_df = comunidad_result.to_pandas()
@@ -81,7 +88,7 @@ with tab5:
             st.write(f"Nuevos correos que no están en la comunidad: {nuevos_correos}")  # Debug point
 
             if nuevos_correos:
-                st.write(f"Complete los datos de los siguientes usuarios:")
+                st.write("Complete los datos de los siguientes usuarios:")
 
                 # Create a dataframe with columns for user data input
                 user_data = pd.DataFrame(
@@ -100,7 +107,7 @@ with tab5:
                 st.write("Datos editados por el usuario:", edited_user_data)
 
                 # Submit button for saving the changes
-                if st.button("Registrar Usuarios"):
+                if st.button("Registrar Usuarios", key="submit_users"):
                     st.write("Formulario enviado. Procesando usuarios...")  # Debug point
 
                     # Process the user_data list and insert into the database
@@ -132,7 +139,6 @@ with tab5:
                             st.error(f"Error al registrar {row['Correo']}: {e}")
             else:
                 st.success("Todos los correos ya están registrados en la comunidad.")
-
     
 with tab2:
 
