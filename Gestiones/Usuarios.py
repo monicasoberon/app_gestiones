@@ -66,6 +66,21 @@ with tab5:
 
             st.write(f"Correos procesados: {correos_formateados}")  # Debug point
 
+            user_data = pd.DataFrame(
+                    [{"Correo": correo, "Nombre": "", "Apellido": "", "Negocio": "", "Área": "", "País": "", "Estatus": True}])
+            
+            # Define the column configurations
+            column_config = {
+                'Correo': st.column_config.TextColumn('Correo (No Editable)', width='large', disabled=True),
+                'Nombre': st.column_config.TextColumn('Nombre', max_chars=50),
+                'Apellido': st.column_config.TextColumn('Apellido', max_chars=50),
+                'Negocio': st.column_config.TextColumn('Negocio', max_chars=50),
+                'Área': st.column_config.TextColumn('Área', max_chars=50),
+                'País': st.column_config.TextColumn('País', max_chars=50),
+                'Estatus': st.column_config.CheckboxColumn('Activo', help='Selecciona si el usuario está activo')
+            }
+
+
             # Get the existing community emails from the database
             try:
                 comunidad_result = session.sql("SELECT CORREO FROM LABORATORIO.MONICA_SOBERON.COMUNIDAD;")
@@ -83,23 +98,6 @@ with tab5:
             if nuevos_correos:
                 st.write(f"Complete los datos de los siguientes usuarios:")
 
-                # Create a dataframe with columns for user data input
-                user_data = pd.DataFrame(
-                    [{"Correo": correo, "Nombre": "", "Apellido": "", "Negocio": "", "Área": "", "País": "", "Estatus": True}
-                    for correo in nuevos_correos]
-                )
-
-                # Define the column configurations
-                column_config = {
-                    'Correo': st.column_config.TextColumn('Correo (No Editable)', width='large', disabled=True),
-                    'Nombre': st.column_config.TextColumn('Nombre', max_chars=50),
-                    'Apellido': st.column_config.TextColumn('Apellido', max_chars=50),
-                    'Negocio': st.column_config.TextColumn('Negocio', max_chars=50),
-                    'Área': st.column_config.TextColumn('Área', max_chars=50),
-                    'País': st.column_config.TextColumn('País', max_chars=50),
-                    'Estatus': st.column_config.CheckboxColumn('Activo', help='Selecciona si el usuario está activo')
-                }
-
                 # Editable dataframe using st.data_editor
                 edited_user_data = st.data_editor(
                     user_data,
@@ -107,6 +105,9 @@ with tab5:
                     num_rows="dynamic",  # Allow dynamic rows
                     use_container_width=True,  # Allow better UI scaling
                 )
+
+                for correo in nuevos_correos:
+                    edited_user_data[0][correo]=nuevos_correos[correo]
 
                 # Submit button for saving the changes
                 if st.button("Registrar Usuarios"):
