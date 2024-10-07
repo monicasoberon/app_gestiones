@@ -302,14 +302,13 @@ with tab4:
         if seguro:
             check_data = session.sql(f"""
             SELECT 
-                (SELECT COUNT(*) FROM LABORATORIO.MONICA_SOBERON.CLASE WHERE ID_USUARIO = {miembro_id}) AS CLASES_COUNT,
                 (SELECT COUNT(*) FROM LABORATORIO.MONICA_SOBERON.INVITACION_CURSO WHERE ID_USUARIO = {miembro_id}) AS INVITADOS_COUNT,
                 (SELECT COUNT(*) FROM LABORATORIO.MONICA_SOBERON.REGISTRADOS_CURSO WHERE ID_USUARIO = {miembro_id}) AS REGISTRADOS_COUNT,
                 (SELECT COUNT(*) FROM LABORATORIO.MONICA_SOBERON.INVITACION_SESION WHERE ID_USUARIO = {miembro_id}) AS INVITADO_COUNT,
                 (SELECT COUNT(*) FROM LABORATORIO.MONICA_SOBERON.ASISTENCIA_SESION WHERE ID_USUARIO = {miembro_id}) AS ASISTENTES_COUNT
             """).to_pandas()
 
-            if check_data.iloc[0]['CLASES_COUNT'] == 0 and check_data.iloc[0]['INVITADOS_COUNT'] == 0 and check_data.iloc[0]['REGISTRADOS_COUNT'] == 0 and check_data.iloc[0]['INVITADO_COUNT'] == 0 and check_data.iloc[0]['ASISTENTES_COUNT'] == 0:
+            if check_data.iloc[0]['INVITADOS_COUNT'] == 0 and check_data.iloc[0]['REGISTRADOS_COUNT'] == 0 and check_data.iloc[0]['INVITADO_COUNT'] == 0 and check_data.iloc[0]['ASISTENTES_COUNT'] == 0:
                 borrar = st.button('Eliminar Usuario', key="processU")
                 if borrar:
                     session.sql(f"DELETE FROM LABORATORIO.MONICA_SOBERON.COMUNIDAD WHERE ID_USUARIO = {miembro_id};").collect()
