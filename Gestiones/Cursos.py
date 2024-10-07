@@ -473,7 +473,7 @@ with tabs[4]:
 
     # Execute the SQL query to fetch registered users for the course
     people = session.sql(f"""
-        SELECT r.id_usuario, c.nombre as Nombre, c.apellido as Apellido
+        SELECT r.id_usuario, c.nombre as Nombre, c.apellido as Apellido, r.status, r.curso_aprobado
         FROM registrados_curso as r
         INNER JOIN comunidad as c ON r.id_usuario = c.id_usuario
         WHERE r.id_curso = {id_curso};
@@ -484,7 +484,7 @@ with tabs[4]:
 
     # Create a DataFrame with editable columns for user data
     user_data = pd.DataFrame(
-        [{"Nombre": row['NOMBRE'], "Apellido": row['APELLIDO'], "Status": False, "Finalizado": False}
+        [{"Nombre": row['NOMBRE'], "Apellido": row['APELLIDO'], "Status": row['STATUS'], "Finalizado": row['CURSO_APROBADO']}
         for index, row in people_df.iterrows()]
     )
 
