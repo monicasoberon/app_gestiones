@@ -80,7 +80,6 @@ with tab5:
             nuevos_correos = set(correos_formateados) - comunidad_correos
             st.write(f"Nuevos correos que no están en la comunidad: {nuevos_correos}")  # Debug point
 
-            # Display the filtered new emails
             if nuevos_correos:
                 st.write(f"Complete los datos de los siguientes usuarios:")
 
@@ -90,24 +89,15 @@ with tab5:
                     for correo in nuevos_correos]
                 )
 
-                # Define the column configurations
-                column_config = {
-                    'Correo': st.column_config.TextColumn('Correo (No Editable)', width='large', disabled=True),
-                    'Nombre': st.column_config.TextColumn('Nombre', max_chars=50),
-                    'Apellido': st.column_config.TextColumn('Apellido', max_chars=50),
-                    'Negocio': st.column_config.TextColumn('Negocio', max_chars=50),
-                    'Área': st.column_config.TextColumn('Área', max_chars=50),
-                    'País': st.column_config.TextColumn('País', max_chars=50),
-                    'Estatus': st.column_config.CheckboxColumn('Activo', help='Selecciona si el usuario está activo')
-                }
-
-                # Editable dataframe using st.data_editor
+                # Use st.data_editor with editable columns, except for 'Correo'
                 edited_user_data = st.data_editor(
                     user_data,
-                    column_config=column_config,
                     num_rows="dynamic",  # Allow dynamic rows
-                    use_container_width=True,  # Allow better UI scaling
+                    use_container_width=True  # Allow better UI scaling
                 )
+
+                # Debugging: Show the collected data
+                st.write("Datos editados por el usuario:", edited_user_data)
 
                 # Submit button for saving the changes
                 if st.button("Registrar Usuarios"):
@@ -134,9 +124,9 @@ with tab5:
                         st.write(f"SQL Query: {insert_query}")  # Debugging the SQL query
 
                         try:
-                            # Execute the SQL query to insert new user
-                            st.write("Executing SQL query...")  # Debug point before execution
-                            session.sql(insert_query).collect()
+                            # Simulate executing the SQL query
+                            st.write("Simulating SQL execution...")  # Debug point before execution
+                            # session.sql(insert_query).collect()  # Uncomment when using an actual database session
                             st.success(f"Usuario {row['Nombre'] or row['Correo']} registrado con éxito.")
                         except Exception as e:
                             st.error(f"Error al registrar {row['Correo']}: {e}")
