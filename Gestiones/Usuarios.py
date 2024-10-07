@@ -99,12 +99,8 @@ with tab5:
                 # Use st.data_editor with editable columns, except for 'Correo'
                 edited_user_data = st.data_editor(
                     user_data,
-                    num_rows="dynamic",  # Allow dynamic rows
                     use_container_width=True  # Allow better UI scaling
                 )
-
-                # Debugging: Show the collected data
-                st.write("Datos editados por el usuario:", edited_user_data)
 
                 # Submit button for saving the changes
                 if st.button("Registrar Usuarios", key="submit_users"):
@@ -128,12 +124,9 @@ with tab5:
                             {f"'{row['País']}'" if row['País'] else 'NULL'}
                         );
                         """
-                        st.write(f"SQL Query: {insert_query}")  # Debugging the SQL query
 
                         try:
-                            # Simulate executing the SQL query
-                            st.write("Simulating SQL execution...")  # Debug point before execution
-                            # session.sql(insert_query).collect()  # Uncomment when using an actual database session
+                            session.sql(insert_query).collect()  
                             st.success(f"Usuario {row['Nombre'] or row['Correo']} registrado con éxito.")
                         except Exception as e:
                             st.error(f"Error al registrar {row['Correo']}: {e}")
