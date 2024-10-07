@@ -281,7 +281,8 @@ with tab4:
     if miembro_del:
         # Query to get individual member details
         miembro_sql_del = session.sql(f"SELECT NOMBRE, APELLIDO, CORREO, STATUS FROM LABORATORIO.MONICA_SOBERON.COMUNIDAD WHERE CORREO = '{miembro_del}';")
-        miembro_id = session.sql(f"Select id_usuario FROM LABORATORIO.MONICA_SOBERON.COMUNIDAD WHERE CORREO = '{miembro_del}';")
+        miembro_id_result = session.sql(f"Select id_usuario FROM LABORATORIO.MONICA_SOBERON.COMUNIDAD WHERE CORREO = '{miembro_del}';")
+        miembro_id = miembro_id_result.to_pandas().iloc[0, 0]
         miembro_df_del = miembro_sql_del.to_pandas()
 
         # Display member details
@@ -305,7 +306,6 @@ with tab4:
                 (SELECT COUNT(*) FROM LABORATORIO.MONICA_SOBERON.INVITACION_SESION WHERE ID_USUARIO = '{miembro_id}') AS INVITADO_COUNT,
                 (SELECT COUNT(*) FROM LABORATORIO.MONICA_SOBERON.ASISTENCIA_SESION WHERE ID_USUARIO = '{miembro_id}') AS ASISTENTES_COUNT
             """)
-
             checkdata_df = check_data.to_pandas()
 
             if seguro:
