@@ -180,7 +180,7 @@ with tab2:
             negocio_nuevo = st.text_input('Negocio Nuevo (opcional):', value=row['NEGOCIO'])  # New optional field
             area_nueva = st.text_input('Área Nueva (opcional):', value=row['AREA'])  # New optional field
             pais_nuevo = st.text_input('País Nuevo (opcional):', value=row['PAIS'])  # New optional field
-            baja_nuevo = st.checkbox('Baja Empresa (Activo = True, Inactivo = False)', value=bool(row['BAJA_EMPRESA']))
+            baja_nuevo = st.checkbox('Baja Empresa (Baja de la Empresa = True, En la Empresa = False)', value=bool(row['BAJA_EMPRESA']))
 
             submit_button = st.form_submit_button(label='Actualizar Detalles')
 
