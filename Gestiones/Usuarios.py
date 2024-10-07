@@ -267,7 +267,7 @@ with tab3:
 with tab4:
     st.header("Eliminar Usuario")
     st.write(
-        """Eliminar un usuario es algo definitivo. Se borrarán todos sus datos."""
+        """Eliminar un usuario es algo definitivo. Se borrarán todos sus datos. Solo se pueden borrar usuarios que no se han invitado, asistido, o registrado a un curso o sesion."""
     )
 
     # Query to get a list of community members
@@ -281,6 +281,7 @@ with tab4:
     if miembro_del:
         # Query to get individual member details
         miembro_sql_del = session.sql(f"SELECT NOMBRE, APELLIDO, CORREO, STATUS FROM LABORATORIO.MONICA_SOBERON.COMUNIDAD WHERE CORREO = '{miembro_del}';")
+        miembro_id = session.sql(f"Select id_usuario FROM LABORATORIO.MONICA_SOBERON.COMUNIDAD WHERE CORREO = '{miembro_del}';")
         miembro_df_del = miembro_sql_del.to_pandas()
 
         # Display member details
@@ -296,8 +297,22 @@ with tab4:
 
         # Deletion button, only enabled if checkbox is checked
         if seguro:
-            borrar = st.button('Eliminar Usuario', key = "process8")
-            if borrar:
-                session.sql(f"DELETE FROM LABORATORIO.MONICA_SOBERON.COMUNIDAD WHERE CORREO = '{miembro_del}';").collect()
-                st.success(f"El usuario con correo {miembro_del} ha sido eliminado exitosamente.")
+            check_data = session.sql(f"""
+            SELECT 
+                (SELECT COUNT(*) FROM LABORATORIO.MONICA_SOBERON.CLASE WHERE ID_USUARIO = '{miembro_id}') AS CLASES_COUNT,
+                (SELECT COUNT(*) FROM LABORATORIO.MONICA_SOBERON.INVITACION_CURSO WHERE ID_USUARIO = '{miembro_id}') AS INVITADOS_COUNT,
+                (SELECT COUNT(*) FROM LABORATORIO.MONICA_SOBERON.REGISTRADOS_CURSO WHERE ID_USUARIO = '{miembro_id}') AS REGISTRADOS_COUNT,
+                (SELECT COUNT(*) FROM LABORATORIO.MONICA_SOBERON.INVITACION_SESION WHERE ID_USUARIO = '{miembro_id}') AS INVITADO_COUNT,
+                (SELECT COUNT(*) FROM LABORATORIO.MONICA_SOBERON.ASISTENCIA_SESION WHERE ID_USUARIO = '{miembro_id}') AS ASISTENTES_COUNT
+            """)
 
+            checkdata_df = check_data.to_pandas()
+
+            if seguro:
+                if checkdata_df.iloc[0]['CLASES_COUNT'] == 0 and checkdata_df.iloc[0]['INVITADOS_COUNT'] == 0 and checkdata_df.iloc[0]['REGISTRADOS_COUNT'] == 0 and checkdata_df.iloc[0]['INVITADO_COUNT'] == 0 and checkdata_df.iloc[0]['ASISTENTES_COUNT'] == 0:
+                    borrar = st.button('Eliminar Usuario', key="processU")
+                    if borrar:
+                        session.sql(f"DELETE FROM LABORATORIO.MONICA_SOBERON.COMUNIDAD WHERE ID_USUARIO = '{miembro_id}';").collect()
+                        st.success(f"El usuario ha sido eliminado exitosamente.")
+            else:
+                st.error("Este usuario no se puede eliminar porque ha sido invitado, asistido, o registrado a un curso o sesion.")
