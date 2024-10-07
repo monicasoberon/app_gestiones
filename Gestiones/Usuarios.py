@@ -16,6 +16,17 @@ st.write(
         al igual que su estatus y detalles sobre sus cursos.
         """
     )
+
+@st.cache_data
+def get_user_names():
+    users_result = session.sql("""
+        SELECT correo, nombre, apellido from LABORATORIO.MONICA_SOBERON.COMUNIDAD;
+    """)
+    users_result.to_pandas()
+    users_result['USUARIOS'] = users_result.apply(
+        lambda row: f"{row['CORREO']} : {row['NOMBRE']} {row['APELLIDO']}")
+    return users_result
+
 tab1, tab2, tab5, tab3, tab4 = st.tabs(["Crear Usuario", "Editar Usuario", "Pegar correos Outlook", "Registrar Instructor", "Eliminar Usuario"])
 
 with tab1:
@@ -131,14 +142,10 @@ with tab5:
     
 with tab2:
 
-    st.header("Editar Usuarios")
-    # Query to get a list of community members
-    comunidad_result = session.sql("SELECT CORREO FROM LABORATORIO.MONICA_SOBERON.COMUNIDAD;")
-    comunidad_df = comunidad_result.to_pandas()
-    comunidad_correos = comunidad_df['CORREO'].tolist()
-
+    st.header("Editar Usuarios") 
     # Display selectbox for individual member selection
-    miembro = st.selectbox('Selecciona un miembro:', comunidad_correos)
+    users_result = get_user_names()
+    miembro = st.selectbox('Selecciona un miembro:', users_result['USUARIOS'])
     if miembro:
         # Query to get individual member details
         miembro_sql = session.sql(f"""
