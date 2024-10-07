@@ -152,7 +152,7 @@ with tab2:
         # Query to get individual member details
         miembro = miembro.split(' : ')[0]
         miembro_sql = session.sql(f"""
-            SELECT NOMBRE, APELLIDO, CORREO, STATUS, NEGOCIO, AREA, PAIS 
+            SELECT NOMBRE, APELLIDO, CORREO, STATUS, NEGOCIO, AREA, PAIS, BAJA_EMPRESA
             FROM LABORATORIO.MONICA_SOBERON.COMUNIDAD 
             WHERE CORREO = '{miembro}';
         """)
@@ -168,6 +168,7 @@ with tab2:
             st.write(f" Negocio: {row['NEGOCIO']}")
             st.write(f" Área: {row['AREA']}")
             st.write(f" País: {row['PAIS']}")
+            st.write(f" Baja Empresa: {row['BAJA_EMPRESA']}")
 
         st.write("**Actualización de Datos Personales:**")
         # Form to update user details
@@ -175,10 +176,11 @@ with tab2:
             nombre_nuevo = st.text_input('Nombre Nuevo:', value=row['NOMBRE'])
             apellido_nuevo = st.text_input('Apellido Nuevo:', value=row['APELLIDO'])
             correo_nuevo = st.text_input('Correo Nuevo:', value=row['CORREO'])
-            estatus_nuevo = st.checkbox('Estatus (Activo = True, Inactivo = False)', value=row['STATUS'])
+            estatus_nuevo = st.checkbox('Estatus (Activo = True, Inactivo = False)', value=bool(row['STATUS']))
             negocio_nuevo = st.text_input('Negocio Nuevo (opcional):', value=row['NEGOCIO'])  # New optional field
             area_nueva = st.text_input('Área Nueva (opcional):', value=row['AREA'])  # New optional field
             pais_nuevo = st.text_input('País Nuevo (opcional):', value=row['PAIS'])  # New optional field
+            baja_nuevo = st.checkbox('Baja Empresa (Activo = True, Inactivo = False)', value=bool(row['BAJA_EMPRESA']))
 
             submit_button = st.form_submit_button(label='Actualizar Detalles')
 
@@ -188,7 +190,8 @@ with tab2:
                     UPDATE LABORATORIO.MONICA_SOBERON.COMUNIDAD
                     SET NOMBRE = '{nombre_nuevo}', APELLIDO = '{apellido_nuevo}', 
                         STATUS = {1 if estatus_nuevo else 0}, CORREO = '{correo_nuevo}',
-                        NEGOCIO = '{negocio_nuevo}', AREA = '{area_nueva}', PAIS = '{pais_nuevo}'
+                        NEGOCIO = '{negocio_nuevo}', AREA = '{area_nueva}', PAIS = '{pais_nuevo}',
+                        BAJA_EMPRESA = {1 if baja_nuevo else 0}
                     WHERE CORREO = '{miembro}';
                 """).collect()
                 
