@@ -482,14 +482,6 @@ with tabs[4]:
     # Convert the result to a pandas DataFrame
     people_df = people.to_pandas()
 
-    # Debugging: Check the actual column names and sample data in the DataFrame
-    st.write("people_df columns:", people_df.columns)
-    st.write("Sample data from people_df:", people_df.head())
-    for index, row in people_df.iterrows():
-        st.write(f"Row {index}: {row}")
-
-
-
     # Create a DataFrame with editable columns for user data
     user_data = pd.DataFrame(
         [{"Nombre": row['NOMBRE'], "Apellido": row['NOMBRE'], "Status": False, "Finalizado": False}
