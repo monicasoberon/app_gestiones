@@ -280,13 +280,11 @@ with tab4:
         """Eliminar un usuario es algo definitivo. Se borrarán todos sus datos. Solo se pueden borrar usuarios que no se han invitado, asistido, o registrado a un curso o sesión."""
     )
 
-    # Query to get a list of community members
-    comunidad_result_del = session.sql("SELECT CORREO FROM LABORATORIO.MONICA_SOBERON.COMUNIDAD;")
-    comunidad_df_del = comunidad_result_del.to_pandas()
-    comunidad_correos_del = comunidad_df_del['CORREO'].tolist()
-
-    # Display selectbox for individual member selection
-    miembro_del = st.selectbox('Selecciona un miembro:', comunidad_correos_del, key='del')
+    users_df = get_user_names()
+    miembro = st.selectbox('Selecciona un miembro:', users_df['USUARIOS'], key='del')
+    if miembro:
+        # Query to get individual member details
+        miembro_del = miembro.split(' : ')[0]
     
     if miembro_del:
         # Query to get individual member details
