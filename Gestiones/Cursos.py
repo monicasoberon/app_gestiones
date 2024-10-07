@@ -492,7 +492,7 @@ with tabs[4]:
 
     # Create a DataFrame with editable columns for user data
     user_data = pd.DataFrame(
-        [{"Nombre": row['Nombre'], "Apellido": row['Apellido'], "Status": False, "Finalizado": False}
+        [{"Nombre": row['NOMBRE'], "Apellido": row['NOMBRE'], "Status": False, "Finalizado": False}
         for index, row in people_df.iterrows()]
     )
 
