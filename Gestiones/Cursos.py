@@ -24,7 +24,7 @@ def get_course_names():
     return nombres_result.to_pandas()
 
 # Create tabs
-tabs = st.tabs(["Crear Curso", "Editar Curso", "Lista de Invitados", "Lista de Registrados", "Borrar Curso"])
+tabs = st.tabs(["Crear Curso", "Editar Curso", "Lista de Invitados", "Lista de Registrados", "Bajas y Finalizaciones" "Borrar Curso"])
 
 with tabs[0]:
     st.header("Crear Nuevo Curso")
@@ -451,6 +451,67 @@ height=300,  key='email_input_key'
             st.success("Usuarios registrados agregados con éxito.")
 
 with tabs[4]:
+    st.header("Dar de Baja o Finalizar Curso")
+    st.write("En esta sección puede índicar que usuarios se han dado de baja y que usuarios han finalizado un curso.")
+
+    nombres_df = get_course_names()
+
+    nombres_df['FECHA_INICIO'] = pd.to_datetime(nombres_df['FECHA_INICIO'], errors='coerce').dt.strftime('%Y/%m/%d')
+    nombres_df['FECHA_FIN'] = pd.to_datetime(nombres_df['FECHA_FIN'], errors='coerce').dt.strftime('%Y/%m/%d')
+
+    # Combine course name with start and end dates for display
+    nombres_df['course_name_with_dates'] = nombres_df.apply(
+        lambda row: f"{row['NOMBRE_CURSO']} ({row['FECHA_INICIO']} - {row['FECHA_FIN']})" 
+        if pd.notnull(row['FECHA_INICIO']) and pd.notnull(row['FECHA_FIN']) 
+        else f"{row['NOMBRE_CURSO']} (Fecha no disponible)", axis=1
+    )
+
+    # Use the selectbox to display the combined name and dates
+    selected_course_name_with_dates = st.selectbox("Selecciona el Curso:", nombres_df['course_name_with_dates'], key='select31')
+
+    id_curso = nombres_df.loc[nombres_df['course_name_with_dates'] == selected_course_name_with_dates, 'ID_CURSO'].values[0]
+
+    # Execute the SQL query to fetch registered users for the course
+    people = session.sql(f"""
+        SELECT r.id_usuario, c.nombre as Nombre, c.apellido as Apellido
+        FROM registrados_curso as r
+        INNER JOIN comunidad as c ON r.id_usuario = c.id_usuario
+        WHERE r.id_curso = {id_curso};
+    """)
+
+    # Convert the result to a pandas DataFrame
+    people_df = people.to_pandas()
+
+    # Create a DataFrame with editable columns for user data
+    user_data = pd.DataFrame(
+        [{"Nombre": row['Nombre'], "Apellido": row['Apellido'], "Status": False, "Finalizado": False}
+        for index, row in people_df.iterrows()]
+    )
+
+    # Use st.data_editor to allow editing the data
+    edited_user_data = st.data_editor(
+        user_data,
+        use_container_width=True  # Allow better UI scaling
+    )
+
+    # Button to submit the updated data
+    if st.button("Registrar Usuarios", key="submit_users_bf"):
+        for index, row in edited_user_data.iterrows():
+            # Assuming you want to update the `STATUS` and `CURSO_APROBADO` in the database
+            update_query = f"""
+            UPDATE LABORATORIO.MONICA_SOBERON.REGISTRADOS_CURSO
+            SET CURSO_APROBADO = {1 if row['Finalizado'] else 0},  
+                STATUS = {1 if row['Status'] else 0}
+            WHERE ID_USUARIO = {people_df.iloc[index]['id_usuario']} AND ID_CURSO = {id_curso};
+            """
+            try:
+                # Execute the SQL update query
+                session.sql(update_query).collect()  
+                st.success(f"Usuario {row['Nombre']} registrado con éxito.")
+            except Exception as e:
+                st.error(f"Error al registrar {row['Nombre']}: {e}")
+
+with tabs[5]:
     st.header("Borrar Curso")
     st.write("Solo se permite borrar cursos de la base de datos si estos no tienen clases, usuarios invitados o usuarios registrados.")
     st.write("Borrar un curso es algo definitivo.")
