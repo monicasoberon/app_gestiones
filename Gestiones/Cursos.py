@@ -24,7 +24,7 @@ def get_course_names():
     return nombres_result.to_pandas()
 
 # Create tabs
-tabs = st.tabs(["Crear Curso", "Editar Curso", "Lista de Invitados", "Lista de Registrados", "Bajas y Finalizaciones" "Borrar Curso"])
+tabs = st.tabs(["Crear Curso", "Editar Curso", "Lista de Invitados", "Lista de Registrados", "Bajas y Finalizaciones", "Borrar Curso"])
 
 with tabs[0]:
     st.header("Crear Nuevo Curso")
