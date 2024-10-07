@@ -71,10 +71,6 @@ with tab5:
             # Process the input emails
             correos = correos_input.split(";")  # Split by semicolon
             correos_formateados = [correo.split("<")[-1].strip().rstrip(">").replace(chr(10), '').replace(chr(13), '').strip().lower() for correo in correos]
-
-            st.write(f"Correos procesados: {correos_formateados}")  # Debug point
-
-            # Get the existing community emails from the database (simulated here)
             try:
                 comunidad_result = session.sql("SELECT CORREO FROM LABORATORIO.MONICA_SOBERON.COMUNIDAD;")
                 comunidad_df = comunidad_result.to_pandas()
