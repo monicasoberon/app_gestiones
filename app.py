@@ -54,10 +54,12 @@ if auth_data:
 
     comunidad = st.Page("Reportes/Comunidad.py", title="Comunidad")
 
+    estadisticas = st.Page("Reportes/Estadisticas.py", title="Estadísticas")
+
     pg = st.navigation(
     {
         "Gestiones": [sesiones, cursos, clases, usuarios],
-        "Reportes": [individual, comunidad],
+        "Reportes": [individual, comunidad, estadisticas],
     }
     )
     pg.run()
