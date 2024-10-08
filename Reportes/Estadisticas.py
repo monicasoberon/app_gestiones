@@ -5,28 +5,32 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from snowflake.snowpark.functions import col
 
+# Connect to Snowflake
 cnx = st.connection("snowflake")
 session = cnx.session()
 
+# Authentication check
 if "auth_data" not in st.session_state:
     st.write("Please authenticate to access this page.")
-    st.stop()  # Stop the execution of this page
+    st.stop()
+
+# Set a general Seaborn style for all visualizations
+sns.set_style("whitegrid")
+color_palette = sns.color_palette("muted")
 
 st.title("Estadísticas del Centro de Transformación Digital")
 
-# Top 10 most involved users (most sessions + courses attended)
+### Section 1: Top 10 Most Involved Users ###
 st.write("### Usuarios Más Involucrados")
 st.write(
     """
     Esta gráfica muestra los 10 usuarios que han estado más involucrados 
     en el Centro de Transformación Digital, con base en las sesiones a las 
-    que han asistido y los cursos en los que se han inscrito. La participación 
-    total se calcula combinando asistencia a sesiones y registro en cursos, 
-    sin contar varias asistencias a la misma sesión o curso más de una vez.
+    que han asistido y los cursos en los que se han inscrito.
     """
 )
 
-# Corrected SQL query for top users (distinct participation)
+# SQL query for top involved users
 top_users_result = session.sql("""
     SELECT 
         C.CORREO,
@@ -44,15 +48,21 @@ top_users_result = session.sql("""
 """)
 top_users_df = top_users_result.to_pandas()
 
-# Create figure for top users
+# Create a figure for top users
 fig, ax = plt.subplots(figsize=(10, 6))
-sns.barplot(data=top_users_df, x='PARTICIPACION_TOTAL', y='CORREO', ax=ax)
-ax.set_title('Top 10 Usuarios Más Involucrados')
+sns.barplot(data=top_users_df, x='PARTICIPACION_TOTAL', y='CORREO', ax=ax, palette=color_palette)
+ax.set_title('Top 10 Usuarios Más Involucrados', fontsize=16, weight='bold')
+ax.set_xlabel('Total de Participaciones (Sesiones + Cursos)', fontsize=12)
+ax.set_ylabel('Correo del Usuario', fontsize=12)
+ax.set_xticks(ax.get_xticks())
+plt.xticks(fontsize=10)
+plt.yticks(fontsize=10)
+sns.despine()
 
 # Display the figure in Streamlit
 st.pyplot(fig)
 
-# Most popular courses (highest enrollments)
+### Section 2: Most Popular Courses ###
 st.write("### Cursos Más Populares")
 st.write(
     """
@@ -63,6 +73,7 @@ st.write(
     """
 )
 
+# SQL query for popular courses
 popular_courses_result = session.sql("""
     SELECT N.NOMBRE_CURSO, COUNT(R.ID_USUARIO) AS inscripciones
     FROM LABORATORIO.MONICA_SOBERON.CATALOGO_CURSOS AS N
@@ -76,26 +87,30 @@ popular_courses_result = session.sql("""
 """)
 popular_courses_df = popular_courses_result.to_pandas()
 
-# Create figure for popular courses
+# Create a figure for popular courses
 fig, ax = plt.subplots(figsize=(10, 6))
-sns.barplot(data=popular_courses_df, x='INSCRIPCIONES', y='NOMBRE_CURSO', ax=ax)
-ax.set_title('Top 10 Cursos Más Populares')
+sns.barplot(data=popular_courses_df, x='INSCRIPCIONES', y='NOMBRE_CURSO', ax=ax, palette="Blues_d")
+ax.set_title('Top 10 Cursos Más Populares', fontsize=16, weight='bold')
+ax.set_xlabel('Número de Inscripciones', fontsize=12)
+ax.set_ylabel('Nombre del Curso', fontsize=12)
+plt.xticks(fontsize=10)
+plt.yticks(fontsize=10)
+sns.despine()
 
 # Display the figure in Streamlit
 st.pyplot(fig)
 
-# Course completion rates
+### Section 3: Course Completion Rates ###
 st.write("### Tasas de Finalización de Cursos")
 st.write(
     """
     Esta gráfica compara el número de inscripciones con el número de 
     finalizaciones para cada curso, permitiendo ver qué tan efectivos son 
-    los cursos en mantener a los participantes hasta el final. Un curso con 
-    una alta tasa de finalización indica un buen nivel de compromiso de los 
-    usuarios.
+    los cursos en mantener a los participantes hasta el final.
     """
 )
 
+# SQL query for completion rates
 completion_rates_result = session.sql("""
     SELECT N.NOMBRE_CURSO, COUNT(R.ID_USUARIO) AS inscritos, 
            SUM(CASE WHEN R.CURSO_APROBADO = 'True' THEN 1 ELSE 0 END) AS completados
@@ -112,26 +127,29 @@ completion_rates_df = completion_rates_result.to_pandas()
 # Calculate completion rate
 completion_rates_df['COMPLETION_RATE'] = (completion_rates_df['COMPLETADOS'] / completion_rates_df['INSCRITOS']) * 100
 
-# Create figure for course completion rates
+# Create a figure for course completion rates
 fig, ax = plt.subplots(figsize=(10, 6))
-sns.barplot(data=completion_rates_df, x='COMPLETION_RATE', y='NOMBRE_CURSO', ax=ax)
-ax.set_title('Tasas de Finalización de Cursos')
-ax.set_xlabel('Porcentaje de Finalización (%)')
+sns.barplot(data=completion_rates_df, x='COMPLETION_RATE', y='NOMBRE_CURSO', ax=ax, palette="Greens_d")
+ax.set_title('Tasas de Finalización de Cursos', fontsize=16, weight='bold')
+ax.set_xlabel('Porcentaje de Finalización (%)', fontsize=12)
+ax.set_ylabel('Nombre del Curso', fontsize=12)
+plt.xticks(fontsize=10)
+plt.yticks(fontsize=10)
+sns.despine()
 
 # Display the figure in Streamlit
 st.pyplot(fig)
 
-# User invitation recommendations (users who attended sessions but haven't enrolled in courses)
+### Section 4: User Invitation Recommendations ###
 st.write("### Recomendaciones de Invitación a Cursos")
 st.write(
     """
     Esta tabla muestra a los usuarios que han asistido a sesiones pero 
-    aún no se han inscrito en ningún curso. Este grupo es ideal para 
-    recibir invitaciones a cursos, ya que ya han demostrado interés 
-    al participar en las sesiones.
+    aún no se han inscrito en ningún curso.
     """
 )
 
+# SQL query for users to invite to courses
 invite_recommendations_result = session.sql("""
     SELECT C.NOMBRE, C.APELLIDO, C.CORREO, COUNT(A.ID_USUARIO) AS sesiones_asistidas
     FROM LABORATORIO.MONICA_SOBERON.COMUNIDAD AS C
@@ -139,7 +157,7 @@ invite_recommendations_result = session.sql("""
     ON C.ID_USUARIO = A.ID_USUARIO
     LEFT JOIN LABORATORIO.MONICA_SOBERON.REGISTRADOS_CURSO AS R
     ON C.ID_USUARIO = R.ID_USUARIO
-    WHERE R.ID_USUARIO IS NULL  -- No course registration
+    WHERE R.ID_USUARIO IS NULL
     GROUP BY C.NOMBRE, C.APELLIDO, C.CORREO
     HAVING COUNT(A.ID_USUARIO) > 0
     ORDER BY sesiones_asistidas DESC;
@@ -147,4 +165,63 @@ invite_recommendations_result = session.sql("""
 invite_recommendations_df = invite_recommendations_result.to_pandas()
 
 st.write("**Usuarios a Invitar a Cursos**")
-st.write(invite_recommendations_df)
+st.table(invite_recommendations_df)
+
+### Section 5: Dynamic Course Attendance Information ###
+st.write("### Información Dinámica de Asistencia por Curso")
+
+# Function to get course names
+@st.cache_data
+def get_course_names():
+    nombres_result = session.sql("""
+        SELECT n.NOMBRE_CURSO, c.ID_CURSO, c.FECHA_INICIO, c.FECHA_FIN
+        FROM LABORATORIO.MONICA_SOBERON.CATALOGO_CURSOS AS n 
+        INNER JOIN LABORATORIO.MONICA_SOBERON.CURSO AS c ON n.ID_CATALOGO = c.ID_CATALOGO;
+    """)
+    nombres_df = nombres_result.to_pandas()
+    nombres_df['FECHA_INICIO'] = pd.to_datetime(nombres_df['FECHA_INICIO'], errors='coerce').dt.strftime('%d/%m/%Y')
+    nombres_df['FECHA_FIN'] = pd.to_datetime(nombres_df['FECHA_FIN'], errors='coerce').dt.strftime('%d/%m/%Y')
+    nombres_df['course_name_with_dates'] = nombres_df.apply(
+        lambda row: f"{row['NOMBRE_CURSO']} ({row['FECHA_INICIO']} - {row['FECHA_FIN']})" 
+        if pd.notnull(row['FECHA_INICIO']) and pd.notnull(row['FECHA_FIN']) 
+        else f"{row['NOMBRE_CURSO']} (Fecha no disponible)", axis=1
+    )
+    return nombres_df
+
+# Function to get attendance data for a specific course
+@st.cache_data
+def get_course_attendance(course_id):
+    attendance_result = session.sql(f"""
+        SELECT C.NOMBRE, C.APELLIDO, C.CORREO, A.ASISTENCIA
+        FROM LABORATORIO.MONICA_SOBERON.COMUNIDAD AS C
+        INNER JOIN LABORATORIO.MONICA_SOBERON.ASISTENCIA_CURSO AS A
+        ON C.ID_USUARIO = A.ID_USUARIO
+        WHERE A.ID_CURSO = '{course_id}';
+    """)
+    attendance_df = attendance_result.to_pandas()
+    return attendance_df
+
+# Load course names and create a selectbox for course selection
+courses_df = get_course_names()
+selected_course_name_with_dates = st.selectbox("Selecciona un Curso:", courses_df['course_name_with_dates'])
+selected_course_id = courses_df.loc[courses_df['course_name_with_dates'] == selected_course_name_with_dates, 'ID_CURSO'].values[0]
+
+# Fetch and display attendance data for the selected course
+attendance_df = get_course_attendance(selected_course_id)
+
+if not attendance_df.empty:
+    st.write("### Información de Asistencia")
+    st.table(attendance_df)
+
+    # Create an attendance visualization (horizontal bar chart)
+    attendance_counts = attendance_df['ASISTENCIA'].value_counts()
+    fig, ax = plt.subplots(figsize=(8, 5))
+    sns.barplot(x=attendance_counts.values, y=attendance_counts.index, ax=ax, palette="Oranges_d")
+    ax.set_title('Distribución de Asistencia', fontsize=16, weight='bold')
+    ax.set_xlabel('Número de Usuarios', fontsize=12)
+    ax.set_ylabel('Estado de Asistencia', fontsize=12)
+    sns.despine()
+
+    st.pyplot(fig)
+else:
+    st.write("No hay información de asistencia para este curso.")
