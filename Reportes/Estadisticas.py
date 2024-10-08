@@ -111,7 +111,7 @@ completion_rates_result = session.sql("""
 completion_rates_df = completion_rates_result.to_pandas()
 
 # Calculate completion rate
-completion_rates_df['completion_rate'] = (completion_rates_df['COMPLETADOS'] / completion_rates_df['INSCRITOS']) * 100
+completion_rates_df['COMPLETION_RATE'] = (completion_rates_df['COMPLETADOS'] / completion_rates_df['INSCRITOS']) * 100
 
 # Create figure for course completion rates
 fig, ax = plt.subplots(figsize=(10, 6))
