@@ -169,7 +169,6 @@ st.write(invite_recommendations_df)
 
 ### Section 5: Dynamic Course Attendance Information ###
 st.write("### Información Dinámica de Asistencia por Curso")
-
 # Function to get course names
 @st.cache_data
 def get_course_names():
@@ -188,40 +187,55 @@ def get_course_names():
     )
     return nombres_df
 
-# Function to get attendance data for a specific course
+# Function to get class dates for a specific course
 @st.cache_data
-def get_course_attendance(course_id):
-    attendance_result = session.sql(f"""
-        SELECT C.NOMBRE, C.APELLIDO, C.CORREO, A.ASISTENCIA
-        FROM LABORATORIO.MONICA_SOBERON.COMUNIDAD AS C
-        INNER JOIN LABORATORIO.MONICA_SOBERON.ASISTENCIA_CURSO AS A
-        ON C.ID_USUARIO = A.ID_USUARIO
-        WHERE A.ID_CURSO = '{course_id}';
-    """)
-    attendance_df = attendance_result.to_pandas()
-    return attendance_df
+def get_class_dates(course_id):
+    clases_result = session.sql(f"""
+        SELECT clase.id_clase, clase.fecha 
+        FROM LABORATORIO.MONICA_SOBERON.CLASE clase
+        INNER JOIN LABORATORIO.MONICA_SOBERON.CURSO curso 
+        ON clase.id_curso = curso.id_curso
+        WHERE curso.id_curso = {course_id};
+    """).to_pandas()
+    return clases_result
+
+# Function to get attendance data for a specific class
+@st.cache_data
+def get_class_attendance(class_id):
+    students_result = session.sql(f"""
+        SELECT id_usuario 
+        FROM LABORATORIO.MONICA_SOBERON.ASISTENCIA_CLASE 
+        WHERE id_clase = {class_id};
+    """).to_pandas()
+    return students_result
 
 # Load course names and create a selectbox for course selection
 courses_df = get_course_names()
 selected_course_name_with_dates = st.selectbox("Selecciona un Curso:", courses_df['course_name_with_dates'])
 selected_course_id = courses_df.loc[courses_df['course_name_with_dates'] == selected_course_name_with_dates, 'ID_CURSO'].values[0]
 
-# Fetch and display attendance data for the selected course
-attendance_df = get_course_attendance(selected_course_id)
+# Fetch class dates for the selected course
+class_dates_df = get_class_dates(selected_course_id)
 
-if not attendance_df.empty:
-    st.write("### Información de Asistencia")
-    st.table(attendance_df)
+if not class_dates_df.empty:
+    st.write(f"### Fechas de las Clases para el Curso: {selected_course_name_with_dates}")
+    selected_class_date = st.selectbox("Selecciona una Fecha de Clase:", class_dates_df['FECHA'])
+    
+    # Get the class ID for the selected class date
+    selected_class_id = class_dates_df.loc[class_dates_df['FECHA'] == selected_class_date, 'ID_CLASE'].values[0]
+    
+    # Fetch and display attendance for the selected class
+    attendance_df = get_class_attendance(selected_class_id)
 
-    # Create an attendance visualization (horizontal bar chart)
-    attendance_counts = attendance_df['ASISTENCIA'].value_counts()
-    fig, ax = plt.subplots(figsize=(8, 5))
-    sns.barplot(x=attendance_counts.values, y=attendance_counts.index, ax=ax, palette="Oranges_d")
-    ax.set_title('Distribución de Asistencia', fontsize=16, weight='bold')
-    ax.set_xlabel('Número de Usuarios', fontsize=12)
-    ax.set_ylabel('Estado de Asistencia', fontsize=12)
-    sns.despine()
+    if not attendance_df.empty:
+        st.write("### Asistencia para la Clase Seleccionada")
+        st.table(attendance_df)
 
-    st.pyplot(fig)
+        # Display attendance count for visualization
+        attendance_count = attendance_df['ID_USUARIO'].nunique()
+        st.write(f"**Total de Asistentes:** {attendance_count}")
+
+    else:
+        st.write("No hay información de asistencia para esta clase.")
 else:
-    st.write("No hay información de asistencia para este curso.")
+    st.write(f"No hay clases disponibles para el curso: {selected_course_name_with_dates}")
