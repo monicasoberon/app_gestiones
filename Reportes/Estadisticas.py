@@ -29,7 +29,7 @@ st.write(
 # Corrected SQL query for top users (distinct participation)
 top_users_result = session.sql("""
     SELECT 
-        C.CORREO, 
+        C.CORREO,
         COUNT(DISTINCT A.ID_SESION) AS sesiones_asistidas, 
         COUNT(DISTINCT R.ID_CURSO) AS cursos_inscritos, 
         COUNT(DISTINCT A.ID_SESION) + COUNT(DISTINCT R.ID_CURSO) AS participacion_total
@@ -38,7 +38,7 @@ top_users_result = session.sql("""
     ON C.ID_USUARIO = A.ID_USUARIO
     LEFT JOIN LABORATORIO.MONICA_SOBERON.REGISTRADOS_CURSO AS R
     ON C.ID_USUARIO = R.ID_USUARIO
-    GROUP BY C.NOMBRE, C.APELLIDO
+    GROUP BY C.CORREO
     ORDER BY participacion_total DESC
     LIMIT 10;
 """)
