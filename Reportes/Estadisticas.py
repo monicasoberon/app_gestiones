@@ -1,9 +1,9 @@
 import os
 import streamlit as st
 import pandas as pd
-from snowflake.snowpark.functions import col
-import matplotlib as plt
+import matplotlib.pyplot as plt
 import seaborn as sns
+from snowflake.snowpark.functions import col
 
 cnx = st.connection("snowflake")
 session = cnx.session()
@@ -12,12 +12,9 @@ if "auth_data" not in st.session_state:
     st.write("Please authenticate to access this page.")
     st.stop()  # Stop the execution of this page
 
-st.title("Sección de Estadísticas")
-st.write(
-    """Esta sección brinda información sobre los datos recopilados.
-    """
-)
+st.title("Estadísticas del Centro de Transformación Digital")
 
+# Top 10 most involved users (most sessions + courses attended)
 st.write("### Usuarios Más Involucrados")
 
 top_users_result = session.sql("""
@@ -33,11 +30,13 @@ top_users_result = session.sql("""
 """)
 top_users_df = top_users_result.to_pandas()
 
-# Plot top users
-plt.figure(figsize=(10, 6))
-sns.barplot(data=top_users_df, x='PARTICIPACION_TOTAL', y='NOMBRE')
-plt.title('Top 10 Usuarios Más Involucrados')
-st.pyplot(plt)
+# Create figure for top users
+fig, ax = plt.subplots(figsize=(10, 6))
+sns.barplot(data=top_users_df, x='PARTICIPACION_TOTAL', y='NOMBRE', ax=ax)
+ax.set_title('Top 10 Usuarios Más Involucrados')
+
+# Display the figure in Streamlit
+st.pyplot(fig)
 
 # Most popular courses (highest enrollments)
 st.write("### Cursos Más Populares")
@@ -55,11 +54,13 @@ popular_courses_result = session.sql("""
 """)
 popular_courses_df = popular_courses_result.to_pandas()
 
-# Plot most popular courses
-plt.figure(figsize=(10, 6))
-sns.barplot(data=popular_courses_df, x='INSCRIPCIONES', y='NOMBRE_CURSO')
-plt.title('Top 10 Cursos Más Populares')
-st.pyplot(plt)
+# Create figure for popular courses
+fig, ax = plt.subplots(figsize=(10, 6))
+sns.barplot(data=popular_courses_df, x='INSCRIPCIONES', y='NOMBRE_CURSO', ax=ax)
+ax.set_title('Top 10 Cursos Más Populares')
+
+# Display the figure in Streamlit
+st.pyplot(fig)
 
 # Course completion rates
 st.write("### Tasas de Finalización de Cursos")
@@ -77,13 +78,17 @@ completion_rates_result = session.sql("""
 """)
 completion_rates_df = completion_rates_result.to_pandas()
 
-# Plot completion rates
+# Calculate completion rate
 completion_rates_df['completion_rate'] = (completion_rates_df['COMPLETADOS'] / completion_rates_df['INSCRITOS']) * 100
-plt.figure(figsize=(10, 6))
-sns.barplot(data=completion_rates_df, x='COMPLETION_RATE', y='NOMBRE_CURSO')
-plt.title('Tasas de Finalización de Cursos')
-plt.xlabel('Porcentaje de Finalización (%)')
-st.pyplot(plt)
+
+# Create figure for course completion rates
+fig, ax = plt.subplots(figsize=(10, 6))
+sns.barplot(data=completion_rates_df, x='COMPLETION_RATE', y='NOMBRE_CURSO', ax=ax)
+ax.set_title('Tasas de Finalización de Cursos')
+ax.set_xlabel('Porcentaje de Finalización (%)')
+
+# Display the figure in Streamlit
+st.pyplot(fig)
 
 # User invitation recommendations (users who attended sessions but haven't enrolled in courses)
 st.write("### Recomendaciones de Invitación a Cursos")
