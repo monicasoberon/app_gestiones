@@ -29,8 +29,7 @@ st.write(
 # Corrected SQL query for top users (distinct participation)
 top_users_result = session.sql("""
     SELECT 
-        C.NOMBRE, 
-        C.APELLIDO, 
+        C.CORREO, 
         COUNT(DISTINCT A.ID_SESION) AS sesiones_asistidas, 
         COUNT(DISTINCT R.ID_CURSO) AS cursos_inscritos, 
         COUNT(DISTINCT A.ID_SESION) + COUNT(DISTINCT R.ID_CURSO) AS participacion_total
@@ -47,7 +46,7 @@ top_users_df = top_users_result.to_pandas()
 
 # Create figure for top users
 fig, ax = plt.subplots(figsize=(10, 6))
-sns.barplot(data=top_users_df, x='PARTICIPACION_TOTAL', y='NOMBRE', ax=ax)
+sns.barplot(data=top_users_df, x='PARTICIPACION_TOTAL', y='CORREO', ax=ax)
 ax.set_title('Top 10 Usuarios Más Involucrados')
 
 # Display the figure in Streamlit
