@@ -165,7 +165,7 @@ invite_recommendations_result = session.sql("""
 invite_recommendations_df = invite_recommendations_result.to_pandas()
 
 st.write("**Usuarios a Invitar a Cursos**")
-st.table(invite_recommendations_df)
+st.write(invite_recommendations_df)
 
 ### Section 5: Dynamic Course Attendance Information ###
 st.write("### Información Dinámica de Asistencia por Curso")
