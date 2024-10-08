@@ -229,7 +229,7 @@ if not class_dates_df.empty:
 
     if not attendance_df.empty:
         st.write("### Asistencia para la Clase Seleccionada")
-        st.table(attendance_df)
+        st.write(attendance_df)
 
         # Display attendance count for visualization
         attendance_count = attendance_df['ID_USUARIO'].nunique()
