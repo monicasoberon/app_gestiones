@@ -246,7 +246,7 @@ st.write(
     """
     Aquí se muestra un resumen de las métricas de participación de los 
     usuarios en el Centro de Transformación Digital, incluyendo el número 
-    total de usuarios que han participado, sesiones a las que han asistido, cursos en los que 
+    total de usuarios, el número de usuarios que han participado, sesiones a las que han asistido, cursos en los que 
     se han inscrito, y la tasa de finalización de los cursos.
     """
 )
@@ -270,3 +270,9 @@ st.write(engagement_metrics_df)
 
 ### Cantidades de cursos por tipo de curso (catalogo cursos) ###
 st.write("### Cantidades de cursos por tipo de curso")
+curso_por_tipo = session.sql(f"""
+    SELECT COUNT(C.ID_CURSO), K.NOMBRE_CURSO
+    FROM LABORATORIO.MONICA_SOBERON.CURSO AS C
+    INNER JOIN LABORATORIO.MONICA_SOBERON.CATALOGO_CURSOS AS K
+    ON C.ID_CATALAGO = K.ID_CATALOGO
+    GROUP BY K.NOMBRE_CURSO;""")
