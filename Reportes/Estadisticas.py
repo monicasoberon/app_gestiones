@@ -24,7 +24,7 @@ st.title("Estadísticas del Comunidad Analítica")
 st.write("### Métricas de Participación de Usuarios")
 st.write(
     """
-    Aquí se muestra un resumen de las métricas de participación de los 
+    Resumen de las métricas de participación de los 
     usuarios en el Comunidad Analítica, incluyendo el número 
     total de usuarios, el número de usuarios que han participado, sesiones a las que han asistido, cursos en los que 
     se han inscrito, y la tasa de finalización de los cursos.
@@ -192,7 +192,7 @@ sns.despine()
 # Display the figure in Streamlit
 st.pyplot(fig)
 
-### Section 4: User Invitation Recommendations ###
+### User Invitation Recommendations ###
 st.write("### Recomendaciones de Invitación a Cursos")
 st.write(
     """
@@ -219,8 +219,9 @@ invite_recommendations_df = invite_recommendations_result.to_pandas()
 st.write("**Usuarios a Invitar a Cursos**")
 st.write(invite_recommendations_df)
 
-### Section 5: Dynamic Course Attendance Information ###
+### Dynamic Course Attendance Information ###
 st.write("### Información Dinámica de Asistencia por Curso")
+
 # Function to get course names
 @st.cache_data
 def get_course_names():
@@ -239,57 +240,47 @@ def get_course_names():
     )
     return nombres_df
 
-# Function to get class dates for a specific course
+# Function to get class dates and attendance counts for a specific course
 @st.cache_data
-def get_class_dates(course_id):
-    clases_result = session.sql(f"""
-        SELECT clase.id_clase, clase.fecha 
+def get_class_attendance_for_course(course_id):
+    attendance_result = session.sql(f"""
+        SELECT clase.fecha, COUNT(DISTINCT asistencia.id_usuario) AS NUMERO_ASISTENTES
         FROM LABORATORIO.MONICA_SOBERON.CLASE clase
-        INNER JOIN LABORATORIO.MONICA_SOBERON.CURSO curso 
-        ON clase.id_curso = curso.id_curso
-        WHERE curso.id_curso = {course_id};
+        LEFT JOIN LABORATORIO.MONICA_SOBERON.ASISTENCIA_CLASE asistencia
+        ON clase.id_clase = asistencia.id_clase
+        WHERE clase.id_curso = {course_id}
+        GROUP BY clase.fecha
+        ORDER BY clase.fecha;
     """).to_pandas()
-    return clases_result
-
-# Function to get attendance data for a specific class
-@st.cache_data
-def get_class_attendance(class_id):
-    students_result = session.sql(f"""
-        SELECT id_usuario 
-        FROM LABORATORIO.MONICA_SOBERON.ASISTENCIA_CLASE 
-        WHERE id_clase = {class_id};
-    """).to_pandas()
-    return students_result
+    return attendance_result
 
 # Load course names and create a selectbox for course selection
 courses_df = get_course_names()
 selected_course_name_with_dates = st.selectbox("Selecciona un Curso:", courses_df['course_name_with_dates'])
 selected_course_id = courses_df.loc[courses_df['course_name_with_dates'] == selected_course_name_with_dates, 'ID_CURSO'].values[0]
 
-# Fetch class dates for the selected course
-class_dates_df = get_class_dates(selected_course_id)
+# Fetch attendance data for all classes of the selected course
+attendance_data_df = get_class_attendance_for_course(selected_course_id)
 
-if not class_dates_df.empty:
-    st.write(f"### Fechas de las Clases para el Curso: {selected_course_name_with_dates}")
-    selected_class_date = st.selectbox("Selecciona una Fecha de Clase:", class_dates_df['FECHA'])
+if not attendance_data_df.empty:
+    st.write(f"### Asistencia por Fecha para el Curso: {selected_course_name_with_dates}")
+
+    # Plot the attendance data
+    fig, ax = plt.subplots(figsize=(10, 6))
+    ax.plot(attendance_data_df['FECHA'], attendance_data_df['NUMERO_ASISTENTES'], marker='o', linestyle='-')
+    ax.set_title('Número de Personas que han Asistido a las Clases', fontsize=16, weight='bold')
+    ax.set_xlabel('Fechas de las Clases', fontsize=12)
+    ax.set_ylabel('Número de Asistentes', fontsize=12)
+    ax.tick_params(axis='x', rotation=45)
+    plt.xticks(fontsize=10)
+    plt.yticks(fontsize=10)
+    plt.tight_layout()
     
-    # Get the class ID for the selected class date
-    selected_class_id = class_dates_df.loc[class_dates_df['FECHA'] == selected_class_date, 'ID_CLASE'].values[0]
+    # Display the graph in Streamlit
+    st.pyplot(fig)
     
-    # Fetch and display attendance for the selected class
-    attendance_df = get_class_attendance(selected_class_id)
-
-    if not attendance_df.empty:
-        st.write("### Asistencia para la Clase Seleccionada")
-        st.write(attendance_df)
-
-        # Display attendance count for visualization
-        attendance_count = attendance_df['ID_USUARIO'].nunique()
-        st.write(f"**Total de Asistentes:** {attendance_count}")
-
-    else:
-        st.write("No hay información de asistencia para esta clase.")
 else:
-    st.write(f"No hay clases disponibles para el curso: {selected_course_name_with_dates}")
+    st.write(f"No hay datos de asistencia disponibles para el curso: {selected_course_name_with_dates}")
+
 
 
