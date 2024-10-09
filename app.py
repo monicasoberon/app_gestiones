@@ -26,8 +26,9 @@ def authenticate():
         st.session_state["auth_data"] = auth_data
     else:
         if "auth_data" not in st.session_state:
-            st.image("Imagenes/LogoLamosa.png", width=500)
-            st.title("Bienvenido a la página de Gestiones y Estadísticas de la Comunidad de Analítica.")
+            st.image("Imagenes/LogoLamosa.png", width=400)
+            st.image("Imagenes/LogoOficial.png", width=300)
+            st.header("Bienvenido a la página de Gestiones y Estadísticas de la Comunidad de Analítica.")
             st.write("Por favor autenticate con tu correo de Lamosa.")
             st.stop()
 
