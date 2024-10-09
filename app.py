@@ -46,6 +46,10 @@ if auth_data:
     account = auth_data["account"]
     name = account["name"]
 
+    with st.sidebar:
+        st.image("Imagenes/LogoLamosa.png", width=150)
+        st.image("Imagenes/LogoOficial.png", width=150)
+
     st.markdown(f"**¡Bienvenid@, {name},  a la Plataforma de Gestión y Reportes!**")
     
     sesiones = st.Page("Gestiones/Sesiones.py", title="Sesiones")
