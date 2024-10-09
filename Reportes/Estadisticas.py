@@ -18,14 +18,14 @@ if "auth_data" not in st.session_state:
 sns.set_style("whitegrid")
 color_palette = sns.color_palette("muted")
 
-st.title("Estadísticas del Centro de Transformación Digital")
+st.title("Estadísticas del Rally Digital")
 
 ### Section 1: Top 10 Most Involved Users ###
 st.write("### Usuarios Más Involucrados")
 st.write(
     """
     Esta gráfica muestra los 10 usuarios que han estado más involucrados 
-    en el Centro de Transformación Digital, con base en las sesiones a las 
+    en el Rally Digital, con base en las sesiones a las 
     que han asistido y los cursos en los que se han inscrito.
     """
 )
@@ -245,7 +245,7 @@ st.write("### Métricas de Participación de Usuarios")
 st.write(
     """
     Aquí se muestra un resumen de las métricas de participación de los 
-    usuarios en el Centro de Transformación Digital, incluyendo el número 
+    usuarios en el Rally Digital, incluyendo el número 
     total de usuarios, el número de usuarios que han participado, sesiones a las que han asistido, cursos en los que 
     se han inscrito, y la tasa de finalización de los cursos.
     """
