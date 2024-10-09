@@ -128,7 +128,7 @@ sns.despine()
 st.pyplot(fig)
 
 ### Cantidades de cursos por tipo de curso (catalogo cursos) ###
-st.write("### Cantidades de cursos por tipo de curso")
+st.write("### Cantidades de Cursos por Tipo de Curso")
 curso_por_tipo = session.sql(f"""
     SELECT COUNT(C.ID_CURSO) AS CANTIDAD_CURSOS, K.NOMBRE_CURSO
     FROM LABORATORIO.MONICA_SOBERON.CURSO AS C
