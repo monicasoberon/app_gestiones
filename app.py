@@ -27,25 +27,13 @@ def authenticate():
         st.session_state["auth_data"] = auth_data
     else:
         if "auth_data" not in st.session_state:
-            # Create a placeholder for the authentication message
-            placeholder = st.empty()
-
-            # Display the authentication message inside the placeholder
-            with placeholder.container():
-                col1, col2 = st.columns(2)
-                with col1:
-                    st.image("Imagenes/LogoLamosa.png", width=300)
-                with col2:
-                    st.image("Imagenes/LogoOficial.png", width=300)
-                st.markdown("<h2 style='text-align: center;'>Bienvenido a la página de Gestiones y Estadísticas de la Comunidad de Analítica.</h2>", unsafe_allow_html=True)
-                st.markdown("<p style='text-align: center;'>Por favor autenticate con tu correo de Lamosa.</p>", unsafe_allow_html=True)
-
-            # Wait for 10 seconds
-            time.sleep(10)
-
-            # Clear the placeholder
-            placeholder.empty()
-
+            col1, col2 = st.columns(2)
+            with col1:
+                st.image("Imagenes/LogoLamosa.png", width=300)
+            with col2:
+                st.image("Imagenes/LogoOficial.png", width=300)
+            st.markdown("<h2 style='text-align: center;'>Bienvenido a la página de Gestiones y Estadísticas de la Comunidad de Analítica.</h2>", unsafe_allow_html=True)
+            st.markdown("<p style='text-align: center;'>Por favor autenticate con tu correo de Lamosa.</p>", unsafe_allow_html=True)
             st.stop()
 
     return st.session_state.get("auth_data")
@@ -60,31 +48,25 @@ if auth_data:
 
     st.markdown(f"**¡Bienvenid@, {name},  a la Plataforma de Gestión y Reportes!**")
     
-    # Create a placeholder for the navigation message
-    nav_message_placeholder = st.empty()
-    
-    # Display the navigation message inside the placeholder
-    nav_message_placeholder.write("Ya estás autenticado. Navega las páginas de la aplicación usando los botones en la barra lateral.")
-    
-    # Wait for 10 seconds
-    time.sleep(10)
-    
-    # Clear the navigation message placeholder
-    nav_message_placeholder.empty()
-
-    # Page configuration
     sesiones = st.Page("Gestiones/Sesiones.py", title="Sesiones")
+
     cursos = st.Page("Gestiones/Cursos.py", title="Cursos")
+
     clases = st.Page("Gestiones/Clases.py", title="Clases")
+
     usuarios = st.Page("Gestiones/Usuarios.py", title="Usuarios")
+    
     individual = st.Page("Reportes/Individual.py", title="Individual")
+
     comunidad = st.Page("Reportes/Comunidad.py", title="Comunidad")
+
     estadisticas = st.Page("Reportes/Estadisticas.py", title="Estadísticas")
 
     pg = st.navigation(
-        {
-            "Gestiones": [sesiones, cursos, clases, usuarios],
-            "Reportes": [individual, comunidad, estadisticas],
-        }
+    {
+        "Gestiones": [sesiones, cursos, clases, usuarios],
+        "Reportes": [individual, comunidad, estadisticas],
+    }
     )
     pg.run()
+
