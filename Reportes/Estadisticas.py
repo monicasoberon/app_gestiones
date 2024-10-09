@@ -239,3 +239,27 @@ if not class_dates_df.empty:
         st.write("No hay información de asistencia para esta clase.")
 else:
     st.write(f"No hay clases disponibles para el curso: {selected_course_name_with_dates}")
+
+### Section 6: User Engagement Metrics ###
+st.write("### Métricas de Participación de Usuarios")
+st.write(
+    """
+    Aquí se muestra un resumen de las métricas de participación de los 
+    usuarios en el Centro de Transformación Digital, incluyendo el número 
+    total de usuarios, sesiones a las que han asistido, cursos en los que 
+    se han inscrito, y la tasa de finalización de los cursos.
+    """
+)
+# SQL query for user engagement metrics
+engagement_metrics_result = session.sql("""
+    SELECT 
+        COUNT(DISTINCT ID_USUARIO) AS total_usuarios,
+        COUNT(DISTINCT ID_SESION) AS sesiones_asistidas,
+        COUNT(DISTINCT ID_CURSO) AS cursos_inscritos,
+        SUM(CASE WHEN CURSO_APROBADO = 'True' THEN 1 ELSE 0 END) AS cursos_completados
+    FROM LABORATORIO.MONICA_SOBERON.REGISTRADOS_CURSO;
+""")
+engagement_metrics_df = engagement_metrics_result.to_pandas()
+
+st.write("**Métricas de Participación de Usuarios**")
+st.write(engagement_metrics_df)
