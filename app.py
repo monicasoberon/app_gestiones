@@ -31,10 +31,8 @@ def authenticate():
                 st.image("Imagenes/LogoLamosa.png", width=300)
             with col2:
                 st.image("Imagenes/LogoOficial.png", width=300)
-
-            # Display the header and message below the images
-            st.header("Bienvenido a la página de Gestiones y Estadísticas de la Comunidad de Analítica.")
-            st.write("Por favor autenticate con tu correo de Lamosa.")
+            st.markdown("<h2 style='text-align: center;'>Bienvenido a la página de Gestiones y Estadísticas de la Comunidad de Analítica.</h2>", unsafe_allow_html=True)
+            st.markdown("<p style='text-align: center;'>Por favor autenticate con tu correo de Lamosa.</p>", unsafe_allow_html=True)
             st.stop()
 
     return st.session_state.get("auth_data")
