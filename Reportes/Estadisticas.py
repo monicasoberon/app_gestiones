@@ -253,10 +253,10 @@ st.write(
 # SQL query for user engagement metrics
 engagement_metrics_result = session.sql("""
     SELECT 
-        COUNT(DISTINCT ID_USUARIO) AS total_usuarios,
-        COUNT(DISTINCT ID_SESION) AS sesiones_asistidas,
-        COUNT(DISTINCT ID_CURSO) AS cursos_inscritos,
-        SUM(CASE WHEN CURSO_APROBADO = 'True' THEN 1 ELSE 0 END) AS cursos_completados
+        COUNT(DISTINCT C.ID_USUARIO) AS total_usuarios,
+        COUNT(DISTINCT S.ID_SESION) AS sesiones_asistidas,
+        COUNT(DISTINCT R.ID_CURSO) AS cursos_inscritos,
+        SUM(CASE WHEN R.CURSO_APROBADO = 'True' THEN 1 ELSE 0 END) AS cursos_completados
     FROM LABORATORIO.MONICA_SOBERON.REGISTRADOS_CURSO AS R
     INNER JOIN LABORATORIO.MONICA_SOBERON.COMUNIDAD AS C
     ON R.ID_USUARIO = C.ID_USUARIO
