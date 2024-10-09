@@ -30,7 +30,7 @@ def authenticate():
             with col1:
                 st.image("Imagenes/LogoLamosa.png", width=400)
             with col2:
-                st.image("Imagenes/LogoOficial.png", width=300)
+                st.image("Imagenes/LogoOficial.png", width=400)
 
             # Display the header and message below the images
             st.header("Bienvenido a la página de Gestiones y Estadísticas de la Comunidad de Analítica.")
