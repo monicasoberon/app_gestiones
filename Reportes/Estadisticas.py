@@ -246,7 +246,7 @@ st.write(
     """
     Aquí se muestra un resumen de las métricas de participación de los 
     usuarios en el Centro de Transformación Digital, incluyendo el número 
-    total de usuarios, sesiones a las que han asistido, cursos en los que 
+    total de usuarios que han participado, sesiones a las que han asistido, cursos en los que 
     se han inscrito, y la tasa de finalización de los cursos.
     """
 )
@@ -258,9 +258,9 @@ engagement_metrics_result = session.sql("""
         COUNT(DISTINCT R.ID_CURSO) AS cursos_inscritos,
         SUM(CASE WHEN R.CURSO_APROBADO = 'True' THEN 1 ELSE 0 END) AS cursos_completados
     FROM LABORATORIO.MONICA_SOBERON.REGISTRADOS_CURSO AS R
-    INNER JOIN LABORATORIO.MONICA_SOBERON.COMUNIDAD AS C
+    RIGHT JOIN LABORATORIO.MONICA_SOBERON.COMUNIDAD AS C
     ON R.ID_USUARIO = C.ID_USUARIO
-    INNER JOIN LABORATORIO.MONICA_SOBERON.ASISTENCIA_SESION AS S
+    LEFT JOIN LABORATORIO.MONICA_SOBERON.ASISTENCIA_SESION AS S
     ON C.ID_USUARIO = S.ID_USUARIO;
 """)
 engagement_metrics_df = engagement_metrics_result.to_pandas()
