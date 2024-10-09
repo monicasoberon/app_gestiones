@@ -28,9 +28,9 @@ def authenticate():
         if "auth_data" not in st.session_state:
             col1, col2 = st.columns(2)
             with col1:
-                st.image("Imagenes/LogoLamosa.png", width=400)
+                st.image("Imagenes/LogoLamosa.png", width=300)
             with col2:
-                st.image("Imagenes/LogoOficial.png", width=400)
+                st.image("Imagenes/LogoOficial.png", width=300)
 
             # Display the header and message below the images
             st.header("Bienvenido a la página de Gestiones y Estadísticas de la Comunidad de Analítica.")
