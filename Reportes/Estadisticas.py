@@ -50,7 +50,7 @@ top_users_df = top_users_result.to_pandas()
 
 # Create a figure for top users
 fig, ax = plt.subplots(figsize=(10, 6))
-sns.barplot(data=top_users_df, x='PARTICIPACION_TOTAL', y='CORREO', ax=ax, palette=color_palette)
+sns.barplot(data=top_users_df, x='PARTICIPACION_TOTAL', y='CORREO', ax=ax, hue='CORREO', dodge=False, palette=color_palette, legend=False)
 ax.set_title('Top 10 Usuarios Más Involucrados', fontsize=16, weight='bold')
 ax.set_xlabel('Total de Participaciones (Sesiones + Cursos)', fontsize=12)
 ax.set_ylabel('Correo del Usuario', fontsize=12)
