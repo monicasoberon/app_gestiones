@@ -138,16 +138,22 @@ curso_por_tipo = session.sql(f"""
 
 curso_por_tipo_df = curso_por_tipo.to_pandas()
 
-fig, ax = plt.subplots(figsize=(12,8))
-ax.barh(curso_por_tipo_df['NOMBRE_CURSO'], curso_por_tipo_df['CANTIDAD_CURSOS'], color = 'skyblue')
-ax.set_title('Cantidad de Cursos por Tipo', fontsize =16, weight= 'bold')
-ax.set_xlabel('Cantidad de Cursos', fontsize = 12)
-ax.set_ylabel('Tipo de Curso', fontsize = 12)
-plt.xticks(fontsize = 10)
-plt.yticks(fontsize = 10)
-plt.gca().invert_yaxis()
+fig, ax = plt.subplots(figsize=(12, 8))
+
+# Generate colors from a colormap
+colors = plt.cm.viridis(np.linspace(0, 1, len(curso_por_tipo_df)))
+
+# Plot the bar chart with multiple colors
+ax.barh(curso_por_tipo_df['NOMBRE_CURSO'], curso_por_tipo_df['CANTIDAD_CURSOS'], color=colors)
+ax.set_title('Cantidad de Cursos por Tipo', fontsize=16, weight='bold')
+ax.set_xlabel('Cantidad de Cursos', fontsize=12)
+ax.set_ylabel('Tipo de Curso', fontsize=12)
+plt.xticks(fontsize=10)
+plt.yticks(fontsize=10)
+plt.gca().invert_yaxis()  # Display the highest values at the top
 plt.tight_layout()
 
+# Display the graph in Streamlit
 st.pyplot(fig)
 
 
