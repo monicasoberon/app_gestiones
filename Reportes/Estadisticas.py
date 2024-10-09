@@ -257,9 +257,17 @@ engagement_metrics_result = session.sql("""
         COUNT(DISTINCT ID_SESION) AS sesiones_asistidas,
         COUNT(DISTINCT ID_CURSO) AS cursos_inscritos,
         SUM(CASE WHEN CURSO_APROBADO = 'True' THEN 1 ELSE 0 END) AS cursos_completados
-    FROM LABORATORIO.MONICA_SOBERON.REGISTRADOS_CURSO;
+    FROM LABORATORIO.MONICA_SOBERON.REGISTRADOS_CURSO AS R
+    INNER JOIN LABORATORIO.MONICA_SOBERON.COMUNIDAD AS C
+    ON R.ID_USUARIO = C.ID_USUARIO
+    INNER JOIN LABORATORIO.MONICA_SOBERON.ASISTENCIA_SESION AS S
+    ON C.ID_USUARIO = S.ID_USUARIO;
 """)
 engagement_metrics_df = engagement_metrics_result.to_pandas()
 
 st.write("**Métricas de Participación de Usuarios**")
 st.write(engagement_metrics_df)
+
+
+### Cantidades de cursos por tipo de curso (catalogo cursos) ###
+st.write("### Cantidades de cursos por tipo de curso")
