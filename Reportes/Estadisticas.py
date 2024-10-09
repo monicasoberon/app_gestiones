@@ -250,10 +250,10 @@ st.write(
     se han inscrito, y la tasa de finalización de los cursos.
     """
 )
-# SQL query for user engagement metrics
 engagement_metrics_result = session.sql("""
     SELECT 
         COUNT(DISTINCT C.ID_USUARIO) AS total_usuarios,
+        COUNT(DISTINCT CASE WHEN S.ID_SESION IS NOT NULL OR R.ID_CURSO IS NOT NULL THEN C.ID_USUARIO END) AS usuarios_participantes,
         COUNT(DISTINCT S.ID_SESION) AS sesiones_asistidas,
         COUNT(DISTINCT R.ID_CURSO) AS cursos_inscritos,
         SUM(CASE WHEN R.CURSO_APROBADO = 'True' THEN 1 ELSE 0 END) AS cursos_completados
@@ -267,7 +267,6 @@ engagement_metrics_df = engagement_metrics_result.to_pandas()
 
 st.write("**Métricas de Participación de Usuarios**")
 st.write(engagement_metrics_df)
-
 
 ### Cantidades de cursos por tipo de curso (catalogo cursos) ###
 st.write("### Cantidades de cursos por tipo de curso")
