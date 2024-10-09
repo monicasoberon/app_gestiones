@@ -26,7 +26,7 @@ def authenticate():
         st.session_state["auth_data"] = auth_data
     else:
         if "auth_data" not in st.session_state:
-            st.image("Imagenes/LogoOficial.png", width=300)
+            st.image("Imagenes/LogoOficial.png", width=500)
             st.write("Please authenticate to access the application.")
             st.stop()
 
