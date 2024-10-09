@@ -89,7 +89,7 @@ popular_courses_df = popular_courses_result.to_pandas()
 
 # Create a figure for popular courses
 fig, ax = plt.subplots(figsize=(10, 6))
-sns.barplot(data=popular_courses_df, x='INSCRIPCIONES', y='NOMBRE_CURSO', ax=ax, palette="Blues_d")
+sns.barplot(data=popular_courses_df, x='INSCRIPCIONES', y='NOMBRE_CURSO', ax=ax, hue='NOMBRE_CURSO', dodge=False, palette="Blues_d", legend=False)
 ax.set_title('Top 10 Cursos Más Populares', fontsize=16, weight='bold')
 ax.set_xlabel('Número de Inscripciones', fontsize=12)
 ax.set_ylabel('Nombre del Curso', fontsize=12)
@@ -271,8 +271,22 @@ st.write(engagement_metrics_df)
 ### Cantidades de cursos por tipo de curso (catalogo cursos) ###
 st.write("### Cantidades de cursos por tipo de curso")
 curso_por_tipo = session.sql(f"""
-    SELECT COUNT(C.ID_CURSO), K.NOMBRE_CURSO
+    SELECT COUNT(C.ID_CURSO) AS CANTIDAD_CURSOS, K.NOMBRE_CURSO
     FROM LABORATORIO.MONICA_SOBERON.CURSO AS C
     INNER JOIN LABORATORIO.MONICA_SOBERON.CATALOGO_CURSOS AS K
     ON C.ID_CATALAGO = K.ID_CATALOGO
     GROUP BY K.NOMBRE_CURSO;""")
+
+curso_por_tipo.to_pandas()
+
+fig, ax = plt.subplots(figsize=(12,8))
+ax.barh(curso_por_tipo['NOMBRE_CURSO'], curso_por_tipo['CANTIDAD_CURSOS'], color = 'skyblue')
+ax.set_title('Cantidad de Cursos por Tipo', fontsize =16, weight= 'bold')
+ax.set_xlabel('Cantidad de Cursos', fontsize = 12)
+ax.set_ylabel('Tipo de Curso', fontsize = 12)
+plt.xticks(fontsize = 10)
+plt.yticks(fontsize = 10)
+plt.gca().invert_yaxis()
+plt.tight_layout()
+
+st.pyplot(fig)
