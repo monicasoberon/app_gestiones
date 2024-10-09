@@ -18,14 +18,42 @@ if "auth_data" not in st.session_state:
 sns.set_style("whitegrid")
 color_palette = sns.color_palette("muted")
 
-st.title("Estadísticas del Rally Digital")
+st.title("Estadísticas del Comunidad Analítica")
 
-### Section 1: Top 10 Most Involved Users ###
+### User Engagement Metrics ###
+st.write("### Métricas de Participación de Usuarios")
+st.write(
+    """
+    Aquí se muestra un resumen de las métricas de participación de los 
+    usuarios en el Comunidad Analítica, incluyendo el número 
+    total de usuarios, el número de usuarios que han participado, sesiones a las que han asistido, cursos en los que 
+    se han inscrito, y la tasa de finalización de los cursos.
+    """
+)
+engagement_metrics_result = session.sql("""
+    SELECT 
+        COUNT(DISTINCT C.ID_USUARIO) AS total_usuarios,
+        COUNT(DISTINCT CASE WHEN S.ID_SESION IS NOT NULL OR R.ID_CURSO IS NOT NULL THEN C.ID_USUARIO END) AS usuarios_participantes,
+        COUNT(DISTINCT S.ID_SESION) AS sesiones_asistidas,
+        COUNT(DISTINCT R.ID_CURSO) AS cursos_inscritos,
+        SUM(CASE WHEN R.CURSO_APROBADO = 'True' THEN 1 ELSE 0 END) AS cursos_completados
+    FROM LABORATORIO.MONICA_SOBERON.REGISTRADOS_CURSO AS R
+    RIGHT JOIN LABORATORIO.MONICA_SOBERON.COMUNIDAD AS C
+    ON R.ID_USUARIO = C.ID_USUARIO
+    LEFT JOIN LABORATORIO.MONICA_SOBERON.ASISTENCIA_SESION AS S
+    ON C.ID_USUARIO = S.ID_USUARIO;
+""")
+engagement_metrics_df = engagement_metrics_result.to_pandas()
+
+st.write("**Métricas de Participación de Usuarios**")
+st.write(engagement_metrics_df)
+
+###Top 10 Most Involved Users ###
 st.write("### Usuarios Más Involucrados")
 st.write(
     """
     Esta gráfica muestra los 10 usuarios que han estado más involucrados 
-    en el Rally Digital, con base en las sesiones a las 
+    en el Comunidad Analítica, con base en las sesiones a las 
     que han asistido y los cursos en los que se han inscrito.
     """
 )
@@ -68,8 +96,7 @@ st.write(
     """
     Aquí puedes ver los cursos más populares basados en la cantidad de 
     inscripciones de los usuarios. Esta métrica ayuda a identificar qué 
-    cursos están generando mayor interés entre los miembros del Centro de 
-    Transformación Digital.
+    cursos están generando mayor interés en la Comunidad Analítica.
     """
 )
 
@@ -90,7 +117,7 @@ popular_courses_df = popular_courses_result.to_pandas()
 # Create a figure for popular courses
 fig, ax = plt.subplots(figsize=(10, 6))
 sns.barplot(data=popular_courses_df, x='INSCRIPCIONES', y='NOMBRE_CURSO', ax=ax, hue='NOMBRE_CURSO', dodge=False, palette="Blues_d", legend=False)
-ax.set_title('Top 10 Cursos Más Populares', fontsize=16, weight='bold')
+ax.set_title('Cursos Más Populares por Tipo', fontsize=16, weight='bold')
 ax.set_xlabel('Número de Inscripciones', fontsize=12)
 ax.set_ylabel('Nombre del Curso', fontsize=12)
 plt.xticks(fontsize=10)
@@ -100,7 +127,31 @@ sns.despine()
 # Display the figure in Streamlit
 st.pyplot(fig)
 
-### Section 3: Course Completion Rates ###
+### Cantidades de cursos por tipo de curso (catalogo cursos) ###
+st.write("### Cantidades de cursos por tipo de curso")
+curso_por_tipo = session.sql(f"""
+    SELECT COUNT(C.ID_CURSO) AS CANTIDAD_CURSOS, K.NOMBRE_CURSO
+    FROM LABORATORIO.MONICA_SOBERON.CURSO AS C
+    INNER JOIN LABORATORIO.MONICA_SOBERON.CATALOGO_CURSOS AS K
+    ON C.ID_CATALOGO = K.ID_CATALOGO
+    GROUP BY K.NOMBRE_CURSO;""")
+
+curso_por_tipo_df = curso_por_tipo.to_pandas()
+
+fig, ax = plt.subplots(figsize=(12,8))
+ax.barh(curso_por_tipo_df['NOMBRE_CURSO'], curso_por_tipo_df['CANTIDAD_CURSOS'], color = 'skyblue')
+ax.set_title('Cantidad de Cursos por Tipo', fontsize =16, weight= 'bold')
+ax.set_xlabel('Cantidad de Cursos', fontsize = 12)
+ax.set_ylabel('Tipo de Curso', fontsize = 12)
+plt.xticks(fontsize = 10)
+plt.yticks(fontsize = 10)
+plt.gca().invert_yaxis()
+plt.tight_layout()
+
+st.pyplot(fig)
+
+
+### Course Completion Rates ###
 st.write("### Tasas de Finalización de Cursos")
 st.write(
     """
@@ -133,6 +184,7 @@ sns.barplot(data=completion_rates_df, x='COMPLETION_RATE', y='NOMBRE_CURSO', ax=
 ax.set_title('Tasas de Finalización de Cursos', fontsize=16, weight='bold')
 ax.set_xlabel('Porcentaje de Finalización (%)', fontsize=12)
 ax.set_ylabel('Nombre del Curso', fontsize=12)
+ax.set_xlim(0, 100)
 plt.xticks(fontsize=10)
 plt.yticks(fontsize=10)
 sns.despine()
@@ -240,53 +292,4 @@ if not class_dates_df.empty:
 else:
     st.write(f"No hay clases disponibles para el curso: {selected_course_name_with_dates}")
 
-### Section 6: User Engagement Metrics ###
-st.write("### Métricas de Participación de Usuarios")
-st.write(
-    """
-    Aquí se muestra un resumen de las métricas de participación de los 
-    usuarios en el Rally Digital, incluyendo el número 
-    total de usuarios, el número de usuarios que han participado, sesiones a las que han asistido, cursos en los que 
-    se han inscrito, y la tasa de finalización de los cursos.
-    """
-)
-engagement_metrics_result = session.sql("""
-    SELECT 
-        COUNT(DISTINCT C.ID_USUARIO) AS total_usuarios,
-        COUNT(DISTINCT CASE WHEN S.ID_SESION IS NOT NULL OR R.ID_CURSO IS NOT NULL THEN C.ID_USUARIO END) AS usuarios_participantes,
-        COUNT(DISTINCT S.ID_SESION) AS sesiones_asistidas,
-        COUNT(DISTINCT R.ID_CURSO) AS cursos_inscritos,
-        SUM(CASE WHEN R.CURSO_APROBADO = 'True' THEN 1 ELSE 0 END) AS cursos_completados
-    FROM LABORATORIO.MONICA_SOBERON.REGISTRADOS_CURSO AS R
-    RIGHT JOIN LABORATORIO.MONICA_SOBERON.COMUNIDAD AS C
-    ON R.ID_USUARIO = C.ID_USUARIO
-    LEFT JOIN LABORATORIO.MONICA_SOBERON.ASISTENCIA_SESION AS S
-    ON C.ID_USUARIO = S.ID_USUARIO;
-""")
-engagement_metrics_df = engagement_metrics_result.to_pandas()
 
-st.write("**Métricas de Participación de Usuarios**")
-st.write(engagement_metrics_df)
-
-### Cantidades de cursos por tipo de curso (catalogo cursos) ###
-st.write("### Cantidades de cursos por tipo de curso")
-curso_por_tipo = session.sql(f"""
-    SELECT COUNT(C.ID_CURSO) AS CANTIDAD_CURSOS, K.NOMBRE_CURSO
-    FROM LABORATORIO.MONICA_SOBERON.CURSO AS C
-    INNER JOIN LABORATORIO.MONICA_SOBERON.CATALOGO_CURSOS AS K
-    ON C.ID_CATALOGO = K.ID_CATALOGO
-    GROUP BY K.NOMBRE_CURSO;""")
-
-curso_por_tipo_df = curso_por_tipo.to_pandas()
-
-fig, ax = plt.subplots(figsize=(12,8))
-ax.barh(curso_por_tipo_df['NOMBRE_CURSO'], curso_por_tipo_df['CANTIDAD_CURSOS'], color = 'skyblue')
-ax.set_title('Cantidad de Cursos por Tipo', fontsize =16, weight= 'bold')
-ax.set_xlabel('Cantidad de Cursos', fontsize = 12)
-ax.set_ylabel('Tipo de Curso', fontsize = 12)
-plt.xticks(fontsize = 10)
-plt.yticks(fontsize = 10)
-plt.gca().invert_yaxis()
-plt.tight_layout()
-
-st.pyplot(fig)
