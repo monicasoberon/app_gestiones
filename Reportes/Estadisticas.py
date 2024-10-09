@@ -129,7 +129,7 @@ completion_rates_df['COMPLETION_RATE'] = (completion_rates_df['COMPLETADOS'] / c
 
 # Create a figure for course completion rates
 fig, ax = plt.subplots(figsize=(10, 6))
-sns.barplot(data=completion_rates_df, x='COMPLETION_RATE', y='NOMBRE_CURSO', ax=ax, palette="Greens_d")
+sns.barplot(data=completion_rates_df, x='COMPLETION_RATE', y='NOMBRE_CURSO', ax=ax, hue = 'NOMBRE_CURSO', dodge=False, palette="Greens_d")
 ax.set_title('Tasas de Finalización de Cursos', fontsize=16, weight='bold')
 ax.set_xlabel('Porcentaje de Finalización (%)', fontsize=12)
 ax.set_ylabel('Nombre del Curso', fontsize=12)
