@@ -30,10 +30,10 @@ with tabs[0]:
     
         if submit_button:
             if session_name and session_date:
-            # Insert new session into the database
+                # Insert new session into the database
                 query = f"""
-            INSERT INTO SESION (NOMBRE_SESION, FECHA_SESION, LINK_SESION_INFORMATIVA)
-            VALUES ('{session_name}', '{session_date}', '{link_session_info}');
+                INSERT INTO SESION (NOMBRE_SESION, FECHA_SESION, LINK_SESION_INFORMATIVA)
+                VALUES ('{session_name}', '{session_date}', '{link_session_info}');
                 """
                 session.sql(query).collect()
                 st.success(f"Sesión '{session_name}' creada con éxito.")
@@ -48,27 +48,45 @@ with tabs[1]:
     session_df = session_result.to_pandas()
     session_names = session_df['NOMBRE_SESION'].tolist()
 
-        # Display session select box
+    # Display session select box
     selected_session = st.selectbox('Selecciona una Sesión:', session_names, key="edit")
     if selected_session:
         # Query for session details based on the selected session
-        session_details_result = session.sql(f"SELECT NOMBRE_SESION, FECHA_SESION, LINK_SESION_INFORMATIVA FROM LABORATORIO.MONICA_SOBERON.SESION WHERE NOMBRE_SESION = '{selected_session}';")
-        id_sesion = session.sql(f"select id_sesion FROM LABORATORIO.MONICA_SOBERON.SESION WHERE NOMBRE_SESION = '{selected_session}';")
-    
-        session_details_df = session_details_result.to_pandas()
-        session_id_result = session.sql(f"""
-            SELECT ID_SESION
-            FROM LABORATORIO.MONICA_SOBERON.SESION
+        session_details_result = session.sql(f"""
+            SELECT NOMBRE_SESION, FECHA_SESION, LINK_SESION_INFORMATIVA 
+            FROM LABORATORIO.MONICA_SOBERON.SESION 
             WHERE NOMBRE_SESION = '{selected_session}';
-                """)
+        """)
+        session_details_df = session_details_result.to_pandas()
+        
+        # Query for the session ID
+        session_id_result = session.sql(f"""
+            SELECT ID_SESION 
+            FROM LABORATORIO.MONICA_SOBERON.SESION 
+            WHERE NOMBRE_SESION = '{selected_session}';
+        """)
         session_id_df = session_id_result.to_pandas()
         id_sesion = session_id_df['ID_SESION'].iloc[0]
+        
+        # Display the session details in a form for editing
+        with st.form(key='edit_session_form'):
+            new_session_name = st.text_input("Nombre de la Sesión", session_details_df['NOMBRE_SESION'].iloc[0])
+            new_session_date = st.date_input("Fecha de la Sesión", session_details_df['FECHA_SESION'].iloc[0])
+            new_link_info = st.text_input("Enlace de Información de la Sesión", session_details_df['LINK_SESION_INFORMATIVA'].iloc[0])
             
-            # Display the session details as a list
-        st.write("**Detalles de la Sesión:**")
-        for index, row in session_details_df.iterrows():
-                st.write(f" Nombre de la Sesión: {row['NOMBRE_SESION']}")
-                st.write(f" Fecha de la Sesión: {row['FECHA_SESION']}")
+            update_button = st.form_submit_button(label='Actualizar Sesión')
+            
+            if update_button:
+                # Update the session details in the database
+                update_query = f"""
+                UPDATE LABORATORIO.MONICA_SOBERON.SESION 
+                SET NOMBRE_SESION = '{new_session_name}', 
+                    FECHA_SESION = '{new_session_date}', 
+                    LINK_SESION_INFORMATIVA = '{new_link_info}'
+                WHERE ID_SESION = {id_sesion};
+                """
+                session.sql(update_query).collect()
+                st.success(f"Sesión '{new_session_name}' actualizada con éxito.")
 
 
 with tabs[2]:
