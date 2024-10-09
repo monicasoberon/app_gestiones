@@ -29,7 +29,7 @@ def authenticate():
         if "auth_data" not in st.session_state:
             col1, col2 = st.columns(2)
             with col1:
-                st.image("Imagenes/LogoLamosa.png", width=300)
+                st.image("Imagenes/logo-lamosa.png", width=300)
             with col2:
                 st.image("Imagenes/LogoOficial.png", width=300)
             st.markdown("<h2 style='text-align: center;'>Bienvenido a la página de Gestiones y Estadísticas de la Comunidad de Analítica.</h2>", unsafe_allow_html=True)
@@ -47,7 +47,7 @@ if auth_data:
     name = account["name"]
 
     with st.sidebar:
-        st.image("Imagenes/LogoLamosa.png", width=150)
+        st.image("Imagenes/logo-lamosa.png", width=150)
         st.image("Imagenes/LogoOficial.png", width=150)
 
     st.markdown(f"**¡Bienvenid@, {name},  a la Plataforma de Gestión y Reportes!**")
