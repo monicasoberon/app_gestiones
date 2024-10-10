@@ -198,7 +198,7 @@ with tab2:
                 st.success("Detalles actualizados exitosamente.")
 
         # Fetch registered courses for the member
-        '''registrados = session.sql(f""" 
+        registrados = session.sql(f""" 
             SELECT N.NOMBRE_CURSO, C.FECHA_INICIO, C.FECHA_FIN, R.SOLICITUD_APROBADA, R.CURSO_APROBADO
             FROM LABORATORIO.MONICA_SOBERON.REGISTRADOS_CURSO AS R 
             INNER JOIN LABORATORIO.MONICA_SOBERON.CURSO AS C 
@@ -253,7 +253,7 @@ with tab2:
                 """
                 session.sql(query)
 
-            st.success("Cambios guardados exitosamente.")'''        
+            st.success("Cambios guardados exitosamente.")   
 
 with tab3:
     st.header("Crear Nuevo Instructor")
