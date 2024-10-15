@@ -197,63 +197,7 @@ with tab2:
                 
                 st.success("Detalles actualizados exitosamente.")
 
-        # Fetch registered courses for the member
-        registrados = session.sql(f""" 
-            SELECT N.NOMBRE_CURSO, C.FECHA_INICIO, C.FECHA_FIN, R.SOLICITUD_APROBADA, R.CURSO_APROBADO
-            FROM LABORATORIO.MONICA_SOBERON.REGISTRADOS_CURSO AS R 
-            INNER JOIN LABORATORIO.MONICA_SOBERON.CURSO AS C 
-            ON R.ID_CURSO = C.ID_CURSO 
-            INNER JOIN LABORATORIO.MONICA_SOBERON.CATALOGO_CURSOS AS N
-            ON C.ID_CATALOGO = N.ID_CATALOGO
-            WHERE R.ID_USUARIO = (SELECT ID_USUARIO FROM LABORATORIO.MONICA_SOBERON.COMUNIDAD WHERE CORREO = '{miembro}');
-        """)
-
-        registrados_df = registrados.to_pandas()
-        st.write("**Cursos Registrados:**")
-        st.write(registrados_df)
-
-        updated_rows = []
-
-        # Loop through the DataFrame and create checkboxes for each course
-        for index, row in registrados_df.iterrows():
-            st.write(f"**Curso:** {row['NOMBRE_CURSO']}")
-
-            # Create checkboxes for 'Solicitud Aprobada' and 'Curso Aprobado' and store their state
-            solicitud_aprobada = st.checkbox(
-                'Solicitud Aprobada', 
-                value=bool(row['SOLICITUD_APROBADA']), 
-                key=f'solicitud_{index}'
-            )
-            curso_aprobado = st.checkbox(
-                'Curso Aprobado', 
-                value=bool(row['CURSO_APROBADO']), 
-                key=f'curso_{index}'
-            )
-        
-            # Append the updated data to the list
-            updated_rows.append({
-                'NOMBRE_CURSO': row['NOMBRE_CURSO'],
-                'SOLICITUD_APROBADA': solicitud_aprobada,
-                'CURSO_APROBADO': curso_aprobado
-            })
-
-        # When the user clicks the button, apply all the updates
-        if st.button('Guardar Cambios', key = "process7"):
-            for updated_row in updated_rows:
-                query = f"""
-                UPDATE LABORATORIO.MONICA_SOBERON.REGISTRADOS_CURSO
-                SET SOLICITUD_APROBADA = {1 if updated_row['SOLICITUD_APROBADA'] else 0},
-                    CURSO_APROBADO = {1 if updated_row['CURSO_APROBADO'] else 0}
-                WHERE ID_USUARIO = (SELECT ID_USUARIO FROM LABORATORIO.MONICA_SOBERON.COMUNIDAD WHERE CORREO = '{miembro}')
-                AND ID_CURSO = (SELECT ID_CURSO 
-                    FROM LABORATORIO.MONICA_SOBERON.CURSO AS C
-                    INNER JOIN LABORATORIO.MONICA_SOBERON.CATALOGO_CURSOS AS N
-                    ON C.ID_CATALOGO = N.ID_CATALOGO 
-                    WHERE N.NOMBRE_CURSO = '{updated_row['NOMBRE_CURSO']}');
-                """
-                session.sql(query)
-
-            st.success("Cambios guardados exitosamente.")   
+    
 
 with tab3:
     st.header("Crear Nuevo Instructor")
