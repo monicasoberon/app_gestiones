@@ -26,7 +26,7 @@ def get_user_names():
 
     # Create a formatted column 'USUARIOS' combining 'correo', 'nombre', and 'apellido'
     users_df['USUARIOS'] = users_df.apply(
-        lambda row: f"{row['CORREO']} : {row['NOMBRE']} {row['APELLIDO']}", axis=1)
+        lambda row: f"{row['NOMBRE']} {row['APELLIDO']} : {row['CORREO']}", axis=1)
     return users_df
 
 tab1, tab2, tab5, tab3, tab4 = st.tabs(["Crear Usuario", "Editar Usuario", "Pegar correos Outlook", "Registrar Instructor", "Eliminar Usuario"])
