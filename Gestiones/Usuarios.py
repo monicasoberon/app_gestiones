@@ -283,21 +283,25 @@ with tab4:
         miembro_del = miembro.split(' : ')[0]
     
     if miembro_del:
-        # Query to get individual member details
         miembro_sql_del = session.sql(f"SELECT NOMBRE, APELLIDO, CORREO, STATUS FROM LABORATORIO.MONICA_SOBERON.COMUNIDAD WHERE CORREO = '{miembro_del}';")
         miembro_df_del = miembro_sql_del.to_pandas()
 
-        # Get the user ID
-        miembro_id_result = session.sql(f"SELECT id_usuario FROM LABORATORIO.MONICA_SOBERON.COMUNIDAD WHERE CORREO = '{miembro_del}';")
-        miembro_id = miembro_id_result.to_pandas().iloc[0, 0]  # Extract the id_usuario value
+        if not miembro_df_del.empty:
+            # Display member details
+            st.write("**Estas seguro que deseas eliminar al usuario:**")
+            for index, row in miembro_df_del.iterrows():
+                st.write(f"Nombre: {row['NOMBRE']}")
+                st.write(f"Apellido: {row['APELLIDO']}")
+                st.write(f"Correo: {row['CORREO']}")
+                st.write(f"Estatus: {row['STATUS']}")
 
-        # Display member details
-        st.write("**Estas seguro que deseas eliminar al usuario:**")
-        for index, row in miembro_df_del.iterrows():
-            st.write(f"Nombre: {row['NOMBRE']}")
-            st.write(f"Apellido: {row['APELLIDO']}")
-            st.write(f"Correo: {row['CORREO']}")
-            st.write(f"Estatus: {row['STATUS']}")
+            # Query to get the user ID
+            miembro_id_result = session.sql(f"SELECT id_usuario FROM LABORATORIO.MONICA_SOBERON.COMUNIDAD WHERE CORREO = '{miembro_del}';")
+            miembro_id_df = miembro_id_result.to_pandas()
+
+            # Check if the user ID query returned any results
+            if not miembro_id_df.empty:
+                miembro_id = miembro_id_df.iloc[0, 0] 
 
         # Confirmation checkbox
         seguro = st.checkbox("Estoy seguro de que quiero eliminar este usuario.")
