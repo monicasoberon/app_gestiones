@@ -196,6 +196,59 @@ sns.despine()
 # Display the figure in Streamlit
 st.pyplot(fig)
 
+# SQL query to get all session IDs and names
+session_list_query = session.sql("""
+    SELECT ID_SESION, NOMBRE_SESION
+    FROM LABORATORIO.MONICA_SOBERON.SESIONES;
+""")
+session_list_df = session_list_query.to_pandas()
+
+# Combine session ID and name for display in the dropdown
+session_list_df['session_display'] = session_list_df['NOMBRE_SESION'] + ' (ID: ' + session_list_df['ID_SESION'].astype(str) + ')'
+# Create a session selector
+selected_session = st.selectbox("Selecciona una Sesión:", session_list_df['session_display'])
+
+# Extract the selected session ID
+selected_session_id = session_list_df.loc[session_list_df['session_display'] == selected_session, 'ID_SESION'].values[0]
+# SQL query to calculate attendance percentage for the selected session
+attendance_percentage_query = session.sql(f"""
+    SELECT 
+        S.ID_SESION, 
+        S.NOMBRE_SESION,
+        COUNT(DISTINCT A.ID_USUARIO) AS numero_asistentes, 
+        (COUNT(DISTINCT A.ID_USUARIO) / 
+        (SELECT COUNT(DISTINCT C.ID_USUARIO) 
+         FROM LABORATORIO.MONICA_SOBERON.COMUNIDAD AS C)) * 100 AS porcentaje_asistencia
+    FROM LABORATORIO.MONICA_SOBERON.ASISTENCIA_SESION AS A
+    RIGHT JOIN LABORATORIO.MONICA_SOBERON.SESIONES AS S
+    ON A.ID_SESION = S.ID_SESION
+    WHERE S.ID_SESION = {selected_session_id}
+    GROUP BY S.ID_SESION, S.NOMBRE_SESION;
+""")
+attendance_percentage_df = attendance_percentage_query.to_pandas()
+# Display the attendance percentage for the selected session
+if not attendance_percentage_df.empty:
+    st.write(f"**Porcentaje de Asistencia para la Sesión: {selected_session}**")
+    st.write(attendance_percentage_df)
+
+    # Plot the attendance percentage
+    fig, ax = plt.subplots(figsize=(6, 4))
+    sns.barplot(data=attendance_percentage_df, x='ID_SESION', y='PORCENTAJE_ASISTENCIA', palette="Blues_d", ax=ax)
+    ax.set_title('Porcentaje de Asistencia', fontsize=16, weight='bold')
+    ax.set_xlabel('ID de Sesión', fontsize=12)
+    ax.set_ylabel('Porcentaje de Asistencia (%)', fontsize=12)
+    ax.set_ylim(0, 100)
+    plt.xticks(fontsize=10)
+    plt.yticks(fontsize=10)
+    sns.despine()
+
+    # Display the plot
+    st.pyplot(fig)
+else:
+    st.write("No hay datos de asistencia disponibles para esta sesión.")
+
+
+
 ### User Invitation Recommendations ###
 st.write("### Recomendaciones de Invitación a Cursos")
 st.write(
