@@ -41,9 +41,15 @@ with tab1:
         apellido_nuevo = st.text_input('Apellido:', value='')
         correo_nuevo = st.text_input('Correo:', value='')  # Add an input for the email
         estatus_nuevo = st.checkbox('Estatus (Activo = True, Inactivo = False)', value=False)
-        negocio_nuevo = st.text_input('Negocio (opcional):', value='')  # New optional field
-        area_nueva = st.text_input('Área (opcional):', value='')  # New optional field
-        pais_nuevo = st.text_input('País (opcional):', value='')  # New optional field
+
+        # Dropdown for Negocio with "No Registrar" option
+        negocio_nuevo = st.selectbox('Negocio:', ['Ventas', 'Mercadotecnia', 'Operaciones', 'Finanzas', 'No Registrar'])
+
+        # Dropdown for Área with "No Registrar" option
+        area_nueva = st.selectbox('Área:', ['IT', 'Recursos Humanos', 'Logística', 'Administración', 'Comercial', 'No Registrar'])
+
+        # Dropdown for País with "No Registrar" option
+        pais_nuevo = st.selectbox('País:', ['México', 'Estados Unidos', 'Colombia', 'Argentina', 'No Registrar'])
 
         submit_button = st.form_submit_button(label='Crear Usuario')
 
@@ -51,14 +57,23 @@ with tab1:
             # Convert the checkbox value (True/False) to 1/0 for the database
             estatus_value = 1 if estatus_nuevo else 0
 
-            # Insert the new user into the database
-            session.sql(f"""
-                INSERT INTO LABORATORIO.MONICA_SOBERON.COMUNIDAD (NOMBRE, APELLIDO, CORREO, STATUS, NEGOCIO, AREA, PAIS)
-                VALUES ('{nombre_nuevo}', '{apellido_nuevo}', '{correo_nuevo}', {estatus_value}, 
-                        '{negocio_nuevo}', '{area_nueva}', '{pais_nuevo}');
-            """).collect()
-                
-            st.success("Usuario creado exitosamente.")
+            # Handle "No Registrar" option for Negocio, Área, and País by setting them to None in the database
+            negocio_value = None if negocio_nuevo == 'No Registrar' else negocio_nuevo
+            area_value = None if area_nueva == 'No Registrar' else area_nueva
+            pais_value = None if pais_nuevo == 'No Registrar' else pais_nuevo
+
+            # Use parameterized queries instead of string interpolation
+            insert_query = """
+            INSERT INTO LABORATORIO.MONICA_SOBERON.COMUNIDAD (NOMBRE, APELLIDO, CORREO, STATUS, NEGOCIO, AREA, PAIS)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+            """
+
+            try:
+                session.sql(insert_query, (nombre_nuevo, apellido_nuevo, correo_nuevo, estatus_value, negocio_value, area_value, pais_value)).collect()
+                st.success("Usuario creado exitosamente.")
+            except Exception as e:
+                st.error(f"Error al crear el usuario: {e}")
+
 
 with tab5:
     st.header("Añadir Usuarios Faltantes")
@@ -177,27 +192,41 @@ with tab2:
             apellido_nuevo = st.text_input('Apellido Nuevo:', value=row['APELLIDO'])
             correo_nuevo = st.text_input('Correo Nuevo:', value=row['CORREO'])
             estatus_nuevo = st.checkbox('Estatus (Activo = True, Inactivo = False)', value=bool(row['STATUS']))
-            negocio_nuevo = st.text_input('Negocio Nuevo (opcional):', value=row['NEGOCIO'])  # New optional field
-            area_nueva = st.text_input('Área Nueva (opcional):', value=row['AREA'])  # New optional field
-            pais_nuevo = st.text_input('País Nuevo (opcional):', value=row['PAIS'])  # New optional field
+
+            # Dropdown for Negocio with "No Registrar" option
+            negocio_nuevo = st.selectbox('Negocio Nuevo:', ['Ventas', 'Mercadotecnia', 'Operaciones', 'Finanzas', 'No Registrar'], 
+                                        index=4 if row['NEGOCIO'] is None else ['Ventas', 'Mercadotecnia', 'Operaciones', 'Finanzas'].index(row['NEGOCIO']))
+
+            # Dropdown for Área with "No Registrar" option
+            area_nueva = st.selectbox('Área Nueva:', ['IT', 'Recursos Humanos', 'Logística', 'Administración', 'Comercial', 'No Registrar'], 
+                                    index=5 if row['AREA'] is None else ['IT', 'Recursos Humanos', 'Logística', 'Administración', 'Comercial'].index(row['AREA']))
+
+            # Dropdown for País with "No Registrar" option
+            pais_nuevo = st.selectbox('País Nuevo:', ['México', 'Estados Unidos', 'Colombia', 'Argentina', 'No Registrar'], 
+                                    index=4 if row['PAIS'] is None else ['México', 'Estados Unidos', 'Colombia', 'Argentina'].index(row['PAIS']))
+
             baja_nuevo = st.checkbox('Baja Empresa (Baja de la Empresa = True, En la Empresa = False)', value=bool(row['BAJA_EMPRESA']))
 
             submit_button = st.form_submit_button(label='Actualizar Detalles')
 
             if submit_button:
-                # Update the user details in the database
-                session.sql(f"""
-                    UPDATE LABORATORIO.MONICA_SOBERON.COMUNIDAD
-                    SET NOMBRE = '{nombre_nuevo}', APELLIDO = '{apellido_nuevo}', 
-                        STATUS = {1 if estatus_nuevo else 0}, CORREO = '{correo_nuevo}',
-                        NEGOCIO = '{negocio_nuevo}', AREA = '{area_nueva}', PAIS = '{pais_nuevo}',
-                        BAJA_EMPRESA = {1 if baja_nuevo else 0}
-                    WHERE CORREO = '{miembro}';
-                """).collect()
-                
-                st.success("Detalles actualizados exitosamente.")
+                # Handle "No Registrar" for Negocio, Área, and País by setting them to None in the database
+                negocio_value = None if negocio_nuevo == 'No Registrar' else negocio_nuevo
+                area_value = None if area_nueva == 'No Registrar' else area_nueva
+                pais_value = None if pais_nuevo == 'No Registrar' else pais_nuevo
 
-    
+                # Use parameterized queries to update user details in the database
+                update_query = """
+                UPDATE LABORATORIO.MONICA_SOBERON.COMUNIDAD
+                SET NOMBRE = ?, APELLIDO = ?, STATUS = ?, CORREO = ?, NEGOCIO = ?, AREA = ?, PAIS = ?, BAJA_EMPRESA = ?
+                WHERE CORREO = ?
+                """
+
+                try:
+                    session.sql(update_query, (nombre_nuevo, apellido_nuevo, estatus_value, correo_nuevo, negocio_value, area_value, pais_value, 1 if baja_nuevo else 0, miembro)).collect()
+                    st.success("Detalles actualizados exitosamente.")
+                except Exception as e:
+                    st.error(f"Error al actualizar el usuario: {e}")
 
 with tab3:
     st.header("Crear Nuevo Instructor")
@@ -262,6 +291,14 @@ with tab4:
                 (SELECT COUNT(*) FROM LABORATORIO.MONICA_SOBERON.INVITACION_SESION WHERE ID_USUARIO = {miembro_id}) AS INVITADO_COUNT,
                 (SELECT COUNT(*) FROM LABORATORIO.MONICA_SOBERON.ASISTENCIA_SESION WHERE ID_USUARIO = {miembro_id}) AS ASISTENTES_COUNT
             """).to_pandas()
+
+            if check_data.iloc[0]['INVITADOS_COUNT'] > 0 or check_data.iloc[0]['REGISTRADOS_COUNT'] > 0 or check_data.iloc[0]['INVITADO_COUNT'] > 0 or check_data.iloc[0]['ASISTENTES_COUNT'] > 0:
+                st.error("Este usuario no se puede eliminar porque ha participado en cursos o sesiones.")
+                st.write(f"Invitaciones a Cursos: {check_data.iloc[0]['INVITADOS_COUNT']}")
+                st.write(f"Inscripciones a Cursos: {check_data.iloc[0]['REGISTRADOS_COUNT']}")
+                st.write(f"Invitaciones a Sesiones: {check_data.iloc[0]['INVITADO_COUNT']}")
+                st.write(f"Asistencia a Sesiones: {check_data.iloc[0]['ASISTENTES_COUNT']}")
+
 
             if check_data.iloc[0]['INVITADOS_COUNT'] == 0 and check_data.iloc[0]['REGISTRADOS_COUNT'] == 0 and check_data.iloc[0]['INVITADO_COUNT'] == 0 and check_data.iloc[0]['ASISTENTES_COUNT'] == 0:
                 borrar = st.button('Eliminar Usuario', key="processU")
