@@ -113,7 +113,7 @@ ax.set_xlabel('Total de Participaciones (Sesiones + Cursos)', fontsize=12)
 ax.set_ylabel('Correo del Usuario', fontsize=12)
 plt.xticks(fontsize=10)
 plt.yticks(fontsize=10)
-sns.despine()
+
 
 # Display the figure in Streamlit
 st.pyplot(fig)
