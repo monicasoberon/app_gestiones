@@ -188,45 +188,65 @@ with tab2:
         st.write("**Actualización de Datos Personales:**")
         # Form to update user details
         with st.form(key='update_form'):
-            nombre_nuevo = st.text_input('Nombre Nuevo:', value=row['NOMBRE'])
-            apellido_nuevo = st.text_input('Apellido Nuevo:', value=row['APELLIDO'])
-            correo_nuevo = st.text_input('Correo Nuevo:', value=row['CORREO'])
-            estatus_nuevo = st.checkbox('Estatus (Activo = True, Inactivo = False)', value=bool(row['STATUS']))
+            # Fetch the user data
+            miembro_sql = session.sql(f"""
+                SELECT NOMBRE, APELLIDO, CORREO, STATUS, NEGOCIO, AREA, PAIS, BAJA_EMPRESA
+                FROM LABORATORIO.MONICA_SOBERON.COMUNIDAD 
+                WHERE CORREO = '{miembro}';
+            """)
+            miembro_df = miembro_sql.to_pandas()
 
-            # Dropdown for Negocio with "No Registrar" option
-            negocio_nuevo = st.selectbox('Negocio Nuevo:', ['Ventas', 'Mercadotecnia', 'Operaciones', 'Finanzas', 'No Registrar'], 
-                                        index=4 if row['NEGOCIO'] is None else ['Ventas', 'Mercadotecnia', 'Operaciones', 'Finanzas'].index(row['NEGOCIO']))
+            if not miembro_df.empty:
+                row = miembro_df.iloc[0]  # Get the first row
 
-            # Dropdown for Área with "No Registrar" option
-            area_nueva = st.selectbox('Área Nueva:', ['IT', 'Recursos Humanos', 'Logística', 'Administración', 'Comercial', 'No Registrar'], 
-                                    index=5 if row['AREA'] is None else ['IT', 'Recursos Humanos', 'Logística', 'Administración', 'Comercial'].index(row['AREA']))
+                # Display the form with pre-filled values
+                nombre_nuevo = st.text_input('Nombre Nuevo:', value=row['NOMBRE'])
+                apellido_nuevo = st.text_input('Apellido Nuevo:', value=row['APELLIDO'])
+                correo_nuevo = st.text_input('Correo Nuevo:', value=row['CORREO'])
+                estatus_nuevo = st.checkbox('Estatus (Activo = True, Inactivo = False)', value=bool(row['STATUS']))
 
-            # Dropdown for País with "No Registrar" option
-            pais_nuevo = st.selectbox('País Nuevo:', ['México', 'Estados Unidos', 'Colombia', 'Argentina', 'No Registrar'], 
-                                    index=4 if row['PAIS'] is None else ['México', 'Estados Unidos', 'Colombia', 'Argentina'].index(row['PAIS']))
+                # Dropdowns with current value pre-selected, without "No Registrar"
+                negocio_nuevo = st.selectbox('Negocio Nuevo:', 
+                                            ['Ventas', 'Mercadotecnia', 'Operaciones', 'Finanzas'], 
+                                            index=0 if row['NEGOCIO'] is None else 
+                                            ['Ventas', 'Mercadotecnia', 'Operaciones', 'Finanzas'].index(row['NEGOCIO']) if row['NEGOCIO'] else 0)
 
-            baja_nuevo = st.checkbox('Baja Empresa (Baja de la Empresa = True, En la Empresa = False)', value=bool(row['BAJA_EMPRESA']))
+                area_nueva = st.selectbox('Área Nueva:', 
+                                        ['IT', 'Recursos Humanos', 'Logística', 'Administración', 'Comercial'], 
+                                        index=0 if row['AREA'] is None else 
+                                        ['IT', 'Recursos Humanos', 'Logística', 'Administración', 'Comercial'].index(row['AREA']) if row['AREA'] else 0)
 
-            submit_button = st.form_submit_button(label='Actualizar Detalles')
+                pais_nuevo = st.selectbox('País Nuevo:', 
+                                        ['México', 'Estados Unidos', 'Colombia', 'Argentina'], 
+                                        index=0 if row['PAIS'] is None else 
+                                        ['México', 'Estados Unidos', 'Colombia', 'Argentina'].index(row['PAIS']) if row['PAIS'] else 0)
 
-            if submit_button:
-                # Handle "No Registrar" for Negocio, Área, and País by setting them to None in the database
-                negocio_value = None if negocio_nuevo == 'No Registrar' else negocio_nuevo
-                area_value = None if area_nueva == 'No Registrar' else area_nueva
-                pais_value = None if pais_nuevo == 'No Registrar' else pais_nuevo
+                baja_nuevo = st.checkbox('Baja Empresa (Baja de la Empresa = True, En la Empresa = False)', value=bool(row['BAJA_EMPRESA']))
 
-                # Use parameterized queries to update user details in the database
-                update_query = """
-                UPDATE LABORATORIO.MONICA_SOBERON.COMUNIDAD
-                SET NOMBRE = ?, APELLIDO = ?, STATUS = ?, CORREO = ?, NEGOCIO = ?, AREA = ?, PAIS = ?, BAJA_EMPRESA = ?
-                WHERE CORREO = ?
-                """
+                submit_button = st.form_submit_button(label='Actualizar Detalles')
 
-                try:
-                    session.sql(update_query, (nombre_nuevo, apellido_nuevo, estatus_value, correo_nuevo, negocio_value, area_value, pais_value, 1 if baja_nuevo else 0, miembro)).collect()
-                    st.success("Detalles actualizados exitosamente.")
-                except Exception as e:
-                    st.error(f"Error al actualizar el usuario: {e}")
+                if submit_button:
+                    # Keep values unchanged if they are not updated. NULL fields stay NULL unless changed by the user.
+
+                    negocio_value = row['NEGOCIO'] if row['NEGOCIO'] else None  # Keep original or NULL
+                    area_value = row['AREA'] if row['AREA'] else None  # Keep original or NULL
+                    pais_value = row['PAIS'] if row['PAIS'] else None  # Keep original or NULL
+
+                    # Only update fields if the new value is different from the original
+                    update_query = """
+                    UPDATE LABORATORIO.MONICA_SOBERON.COMUNIDAD
+                    SET NOMBRE = ?, APELLIDO = ?, STATUS = ?, CORREO = ?, NEGOCIO = ?, AREA = ?, PAIS = ?, BAJA_EMPRESA = ?
+                    WHERE CORREO = ?
+                    """
+                    try:
+                        session.sql(update_query, (nombre_nuevo, apellido_nuevo, estatus_nuevo, correo_nuevo, 
+                                                negocio_value, area_value, pais_value, baja_nuevo, miembro)).collect()
+                        st.success("Detalles actualizados exitosamente.")
+                    except Exception as e:
+                        st.error(f"Error al actualizar el usuario: {e}")
+            else:
+                st.error("No se encontraron detalles para el miembro seleccionado.")
+
 
 with tab3:
     st.header("Crear Nuevo Instructor")
