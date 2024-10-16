@@ -271,7 +271,7 @@ st.pyplot(fig)
 # SQL query to get all session IDs and names
 session_list_query = session.sql("""
     SELECT ID_SESION, NOMBRE_SESION
-    FROM LABORATORIO.MONICA_SOBERON.SESIONES;
+    FROM LABORATORIO.MONICA_SOBERON.SESION;
 """)
 session_list_df = session_list_query.to_pandas()
 
@@ -292,7 +292,7 @@ attendance_percentage_query = session.sql(f"""
         (SELECT COUNT(DISTINCT C.ID_USUARIO) 
          FROM LABORATORIO.MONICA_SOBERON.COMUNIDAD AS C)) * 100 AS porcentaje_asistencia
     FROM LABORATORIO.MONICA_SOBERON.ASISTENCIA_SESION AS A
-    RIGHT JOIN LABORATORIO.MONICA_SOBERON.SESIONES AS S
+    RIGHT JOIN LABORATORIO.MONICA_SOBERON.SESION AS S
     ON A.ID_SESION = S.ID_SESION
     WHERE S.ID_SESION = {selected_session_id}
     GROUP BY S.ID_SESION, S.NOMBRE_SESION;
