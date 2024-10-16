@@ -45,26 +45,21 @@ engagement_metrics_result = session.sql("""
 """)
 engagement_metrics_df = engagement_metrics_result.to_pandas()
 
-# Step 1: Pie Chart for Total Usuarios and Participating Usuarios
-total_usuarios = engagement_metrics_df['TOTAL_USUARIOS'].values[0]
-usuarios_participantes = engagement_metrics_df['USUARIOS_PARTICIPANTES'].values[0]
-non_participating_users = total_usuarios - usuarios_participantes
+# Step 1: Display Total Usuarios and Participating Usuarios as a DataFrame
+st.write("**Resumen de Usuarios**")
 
-# Create labels and values for the pie chart
-labels = ['Usuarios Participantes', 'Usuarios No Participantes']
-sizes = [usuarios_participantes, non_participating_users]
-colors = ['#4CAF50', '#FF6347']  # Green for participants, red for non-participants
+# Create a DataFrame for total users and participating users
+usuarios_df = pd.DataFrame({
+    'Métrica': ['Total Usuarios', 'Usuarios Participantes', 'Usuarios No Participantes'],
+    'Cantidad': [
+        engagement_metrics_df['TOTAL_USUARIOS'].values[0],
+        engagement_metrics_df['USUARIOS_PARTICIPANTES'].values[0],
+        engagement_metrics_df['TOTAL_USUARIOS'].values[0] - engagement_metrics_df['USUARIOS_PARTICIPANTES'].values[0]
+    ]
+})
 
-# Create the pie chart
-fig, ax = plt.subplots(figsize=(6, 6))
-ax.pie(sizes, labels=labels, autopct='%1.1f%%', startangle=90, colors=colors, wedgeprops={'edgecolor': 'black'})
-ax.set_title('Distribución de Usuarios Participantes vs No Participantes', fontsize=16)
-
-# Equal aspect ratio ensures that pie chart is drawn as a circle.
-ax.axis('equal')
-
-# Display the figure in Streamlit
-st.pyplot(fig)
+# Display the DataFrame in Streamlit
+st.write(usuarios_df)
 
 # Step 2: Simple DataFrame for Sessions with Attendance, Courses with Registrations, and Passed Courses
 st.write("**Resumen de Sesiones con asistencia registrada, Cursos con estudiantes y Cursos completados**")
