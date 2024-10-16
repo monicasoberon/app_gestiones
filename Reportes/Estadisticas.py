@@ -45,46 +45,43 @@ engagement_metrics_result = session.sql("""
 """)
 engagement_metrics_df = engagement_metrics_result.to_pandas()
 
-# Step 1: Visualization for Total Usuarios and Participating Usuarios
+# Step 1: Pie Chart for Total Usuarios and Participating Usuarios
 total_usuarios = engagement_metrics_df['TOTAL_USUARIOS'].values[0]
 usuarios_participantes = engagement_metrics_df['USUARIOS_PARTICIPANTES'].values[0]
+non_participating_users = total_usuarios - usuarios_participantes
 
-fig, ax = plt.subplots(figsize=(6, 4))
-sns.barplot(x=['Total Usuarios', 'Usuarios Participantes'], y=[total_usuarios, usuarios_participantes], palette="Blues_d", ax=ax)
-ax.set_title('Total Usuarios vs Usuarios Participantes', fontsize=16)
-ax.set_ylabel('Cantidad de Usuarios', fontsize=12)
-plt.xticks(fontsize=10)
-plt.yticks(fontsize=10)
-sns.despine()
+# Create labels and values for the pie chart
+labels = ['Usuarios Participantes', 'Usuarios No Participantes']
+sizes = [usuarios_participantes, non_participating_users]
+colors = ['#4CAF50', '#FF6347']  # Green for participants, red for non-participants
 
-# Add numbers on top of each bar
-for i, value in enumerate([total_usuarios, usuarios_participantes]):
-    ax.text(i, value + 5, f'{int(value)}', ha='center', va='bottom', fontsize=12, fontweight='bold')
+# Create the pie chart
+fig, ax = plt.subplots(figsize=(6, 6))
+ax.pie(sizes, labels=labels, autopct='%1.1f%%', startangle=90, colors=colors, wedgeprops={'edgecolor': 'black'})
+ax.set_title('Distribución de Usuarios Participantes vs No Participantes', fontsize=16)
 
-# Display the figure in Streamlit
-st.pyplot(fig)
-
-# Step 2: Visualization for Sessions with Attendance, Courses with Registrations, and Passed Courses
-total_sesiones_asistidas = engagement_metrics_df['SESIONES_ASISTIDAS'].values[0]
-total_cursos_inscritos = engagement_metrics_df['CURSOS_INSCRITOS'].values[0]
-total_cursos_completados = engagement_metrics_df['CURSOS_COMPLETADOS'].values[0]
-
-fig, ax = plt.subplots(figsize=(8, 5))
-sns.barplot(x=['Sesiones Asistidas', 'Cursos Inscritos', 'Cursos Completados'], 
-            y=[total_sesiones_asistidas, total_cursos_inscritos, total_cursos_completados], 
-            palette="Greens_d", ax=ax)
-ax.set_title('Sesiones, Cursos Inscritos y Completados', fontsize=16)
-ax.set_ylabel('Cantidad', fontsize=12)
-plt.xticks(fontsize=10)
-plt.yticks(fontsize=10)
-sns.despine()
-
-# Add numbers on top of each bar
-for i, value in enumerate([total_sesiones_asistidas, total_cursos_inscritos, total_cursos_completados]):
-    ax.text(i, value + 5, f'{int(value)}', ha='center', va='bottom', fontsize=12, fontweight='bold')
+# Equal aspect ratio ensures that pie chart is drawn as a circle.
+ax.axis('equal')
 
 # Display the figure in Streamlit
 st.pyplot(fig)
+
+# Step 2: Simple DataFrame for Sessions with Attendance, Courses with Registrations, and Passed Courses
+st.write("**Resumen de Sesiones con asistencia registrada, Cursos con estudiantes y Cursos completados**")
+
+# Extract the relevant metrics into a new DataFrame for display
+metrics_df = pd.DataFrame({
+    'Métrica': ['Sesiones Asistidas', 'Cursos Inscritos', 'Cursos Completados'],
+    'Cantidad': [
+        engagement_metrics_df['SESIONES_ASISTIDAS'].values[0],
+        engagement_metrics_df['CURSOS_INSCRITOS'].values[0],
+        engagement_metrics_df['CURSOS_COMPLETADOS'].values[0]
+    ]
+})
+
+# Display the DataFrame in Streamlit
+st.write(metrics_df)
+
 
 
 ###Top 10 Most Involved Users ###
