@@ -30,6 +30,20 @@ st.write(
     se han inscrito, y la tasa de finalización de los cursos.
     """
 )
+engagement_metrics_result = session.sql("""
+    SELECT 
+        COUNT(DISTINCT C.ID_USUARIO) AS total_usuarios,
+        COUNT(DISTINCT CASE WHEN S.ID_SESION IS NOT NULL OR R.ID_CURSO IS NOT NULL THEN C.ID_USUARIO END) AS usuarios_participantes,
+        COUNT(DISTINCT S.ID_SESION) AS sesiones_asistidas,
+        COUNT(DISTINCT R.ID_CURSO) AS cursos_inscritos,
+        SUM(CASE WHEN R.CURSO_APROBADO = 'True' THEN 1 ELSE 0 END) AS cursos_completados
+    FROM LABORATORIO.MONICA_SOBERON.REGISTRADOS_CURSO AS R
+    RIGHT JOIN LABORATORIO.MONICA_SOBERON.COMUNIDAD AS C
+    ON R.ID_USUARIO = C.ID_USUARIO
+    LEFT JOIN LABORATORIO.MONICA_SOBERON.ASISTENCIA_SESION AS S
+    ON C.ID_USUARIO = S.ID_USUARIO;
+""")
+engagement_metrics_df = engagement_metrics_result.to_pandas()
 
 # Step 1: Visualization for Total Usuarios and Participating Usuarios
 total_usuarios = engagement_metrics_df['TOTAL_USUARIOS'].values[0]
