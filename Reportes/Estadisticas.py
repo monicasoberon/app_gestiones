@@ -58,37 +58,70 @@ st.write(
     """
 )
 
-# SQL query for top involved users
-top_users_result = session.sql("""
-    SELECT 
-        C.CORREO,
-        COUNT(DISTINCT A.ID_SESION) AS sesiones_asistidas, 
-        COUNT(DISTINCT R.ID_CURSO) AS cursos_inscritos, 
-        COUNT(DISTINCT A.ID_SESION) + COUNT(DISTINCT R.ID_CURSO) AS participacion_total
-    FROM LABORATORIO.MONICA_SOBERON.COMUNIDAD AS C
-    LEFT JOIN LABORATORIO.MONICA_SOBERON.ASISTENCIA_SESION AS A
-    ON C.ID_USUARIO = A.ID_USUARIO
-    LEFT JOIN LABORATORIO.MONICA_SOBERON.REGISTRADOS_CURSO AS R
-    ON C.ID_USUARIO = R.ID_USUARIO
-    GROUP BY C.CORREO
-    ORDER BY participacion_total DESC
-    LIMIT 10;
-""")
+# Add a selectbox for area selection, including "Todos" to include everyone
+areas = ['Todos', 'Mercadotecnia', 'Comercial', 'Logistica', 'Operaciones', 'Administración', 'Recursos Humanos', 'IT']
+selected_area = st.selectbox("Selecciona un Área:", areas)
+
+# Modify the SQL query based on the selected area
+if selected_area == 'Todos':
+    # If "Todos" is selected, do not filter by area and handle null areas with 'Sin área'
+    top_users_query = """
+        SELECT 
+            C.CORREO,
+            COALESCE(C.AREA, 'Sin área') AS AREA,  -- Handle null areas
+            COUNT(DISTINCT A.ID_SESION) AS sesiones_asistidas, 
+            COUNT(DISTINCT R.ID_CURSO) AS cursos_inscritos, 
+            COUNT(DISTINCT A.ID_SESION) + COUNT(DISTINCT R.ID_CURSO) AS participacion_total
+        FROM LABORATORIO.MONICA_SOBERON.COMUNIDAD AS C
+        LEFT JOIN LABORATORIO.MONICA_SOBERON.ASISTENCIA_SESION AS A
+        ON C.ID_USUARIO = A.ID_USUARIO
+        LEFT JOIN LABORATORIO.MONICA_SOBERON.REGISTRADOS_CURSO AS R
+        ON C.ID_USUARIO = R.ID_USUARIO
+        GROUP BY C.CORREO, C.AREA
+        ORDER BY participacion_total DESC
+        LIMIT 10;
+    """
+else:
+    # If a specific area is selected, filter by that area, handling nulls
+    top_users_query = f"""
+        SELECT 
+            C.CORREO,
+            COALESCE(C.AREA, 'Sin área') AS AREA,  -- Handle null areas
+            COUNT(DISTINCT A.ID_SESION) AS sesiones_asistidas, 
+            COUNT(DISTINCT R.ID_CURSO) AS cursos_inscritos, 
+            COUNT(DISTINCT A.ID_SESION) + COUNT(DISTINCT R.ID_CURSO) AS participacion_total
+        FROM LABORATORIO.MONICA_SOBERON.COMUNIDAD AS C
+        LEFT JOIN LABORATORIO.MONICA_SOBERON.ASISTENCIA_SESION AS A
+        ON C.ID_USUARIO = A.ID_USUARIO
+        LEFT JOIN LABORATORIO.MONICA_SOBERON.REGISTRADOS_CURSO AS R
+        ON C.ID_USUARIO = R.ID_USUARIO
+        WHERE COALESCE(C.AREA, 'Sin área') = '{selected_area}'
+        GROUP BY C.CORREO, C.AREA
+        ORDER BY participacion_total DESC
+        LIMIT 10;
+    """
+
+# Execute the query and fetch the results
+top_users_result = session.sql(top_users_query)
 top_users_df = top_users_result.to_pandas()
 
-# Create a figure for top users
+# Create a figure for top users with the area filter applied
 fig, ax = plt.subplots(figsize=(10, 6))
-sns.barplot(data=top_users_df, x='PARTICIPACION_TOTAL', y='CORREO', ax=ax, hue='CORREO', dodge=False, palette=color_palette, legend=False)
-ax.set_title('Top 10 Usuarios Más Involucrados', fontsize=16, weight='bold')
+sns.barplot(data=top_users_df, x='PARTICIPACION_TOTAL', y='CORREO', ax=ax, palette=color_palette, dodge=False)
+ax.set_title(f'Top 10 Usuarios Más Involucrados en {selected_area if selected_area != "Todos" else "Todas las Áreas"}', fontsize=16, weight='bold')
 ax.set_xlabel('Total de Participaciones (Sesiones + Cursos)', fontsize=12)
 ax.set_ylabel('Correo del Usuario', fontsize=12)
-ax.set_xticks(ax.get_xticks())
 plt.xticks(fontsize=10)
 plt.yticks(fontsize=10)
 sns.despine()
 
 # Display the figure in Streamlit
 st.pyplot(fig)
+
+# Optionally, display the filtered data in a table as well
+st.write(f"**Usuarios del Área: {selected_area if selected_area != 'Todos' else 'Todas las Áreas'}**")
+st.write(top_users_df)
+
 
 ### Section 2: Most Popular Courses ###
 st.write("### Cursos Más Populares")
