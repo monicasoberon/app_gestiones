@@ -30,23 +30,48 @@ st.write(
     se han inscrito, y la tasa de finalización de los cursos.
     """
 )
-engagement_metrics_result = session.sql("""
-    SELECT 
-        COUNT(DISTINCT C.ID_USUARIO) AS total_usuarios,
-        COUNT(DISTINCT CASE WHEN S.ID_SESION IS NOT NULL OR R.ID_CURSO IS NOT NULL THEN C.ID_USUARIO END) AS usuarios_participantes,
-        COUNT(DISTINCT S.ID_SESION) AS sesiones_asistidas,
-        COUNT(DISTINCT R.ID_CURSO) AS cursos_inscritos,
-        SUM(CASE WHEN R.CURSO_APROBADO = 'True' THEN 1 ELSE 0 END) AS cursos_completados
-    FROM LABORATORIO.MONICA_SOBERON.REGISTRADOS_CURSO AS R
-    RIGHT JOIN LABORATORIO.MONICA_SOBERON.COMUNIDAD AS C
-    ON R.ID_USUARIO = C.ID_USUARIO
-    LEFT JOIN LABORATORIO.MONICA_SOBERON.ASISTENCIA_SESION AS S
-    ON C.ID_USUARIO = S.ID_USUARIO;
-""")
-engagement_metrics_df = engagement_metrics_result.to_pandas()
 
-st.write("**Métricas de Participación de Usuarios**")
-st.write(engagement_metrics_df)
+# Step 1: Visualization for Total Usuarios and Participating Usuarios
+total_usuarios = engagement_metrics_df['TOTAL_USUARIOS'].values[0]
+usuarios_participantes = engagement_metrics_df['USUARIOS_PARTICIPANTES'].values[0]
+
+fig, ax = plt.subplots(figsize=(6, 4))
+sns.barplot(x=['Total Usuarios', 'Usuarios Participantes'], y=[total_usuarios, usuarios_participantes], palette="Blues_d", ax=ax)
+ax.set_title('Total Usuarios vs Usuarios Participantes', fontsize=16)
+ax.set_ylabel('Cantidad de Usuarios', fontsize=12)
+plt.xticks(fontsize=10)
+plt.yticks(fontsize=10)
+sns.despine()
+
+# Add numbers on top of each bar
+for i, value in enumerate([total_usuarios, usuarios_participantes]):
+    ax.text(i, value + 5, f'{int(value)}', ha='center', va='bottom', fontsize=12, fontweight='bold')
+
+# Display the figure in Streamlit
+st.pyplot(fig)
+
+# Step 2: Visualization for Sessions with Attendance, Courses with Registrations, and Passed Courses
+total_sesiones_asistidas = engagement_metrics_df['SESIONES_ASISTIDAS'].values[0]
+total_cursos_inscritos = engagement_metrics_df['CURSOS_INSCRITOS'].values[0]
+total_cursos_completados = engagement_metrics_df['CURSOS_COMPLETADOS'].values[0]
+
+fig, ax = plt.subplots(figsize=(8, 5))
+sns.barplot(x=['Sesiones Asistidas', 'Cursos Inscritos', 'Cursos Completados'], 
+            y=[total_sesiones_asistidas, total_cursos_inscritos, total_cursos_completados], 
+            palette="Greens_d", ax=ax)
+ax.set_title('Sesiones, Cursos Inscritos y Completados', fontsize=16)
+ax.set_ylabel('Cantidad', fontsize=12)
+plt.xticks(fontsize=10)
+plt.yticks(fontsize=10)
+sns.despine()
+
+# Add numbers on top of each bar
+for i, value in enumerate([total_sesiones_asistidas, total_cursos_inscritos, total_cursos_completados]):
+    ax.text(i, value + 5, f'{int(value)}', ha='center', va='bottom', fontsize=12, fontweight='bold')
+
+# Display the figure in Streamlit
+st.pyplot(fig)
+
 
 ###Top 10 Most Involved Users ###
 st.write("### Usuarios Más Involucrados")
