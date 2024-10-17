@@ -165,7 +165,7 @@ with tab2:
     miembro = st.selectbox('Selecciona un miembro:', users_df['USUARIOS'])
     if miembro:
         # Query to get individual member details
-        miembro = miembro.split(' : ')[0]
+        miembro = miembro.split(' : ')[1]
         miembro_sql = session.sql(f"""
             SELECT NOMBRE, APELLIDO, CORREO, STATUS, NEGOCIO, AREA, PAIS, BAJA_EMPRESA
             FROM LABORATORIO.MONICA_SOBERON.COMUNIDAD 
@@ -286,7 +286,7 @@ with tab4:
         miembro_sql_del = session.sql("""
             SELECT NOMBRE, APELLIDO, CORREO, STATUS
             FROM LABORATORIO.MONICA_SOBERON.COMUNIDAD
-            WHERE CORREO = ?;
+            WHERE CORREO = ?;       
         """, [miembro_del])
         miembro_df_del = miembro_sql_del.to_pandas()
 
