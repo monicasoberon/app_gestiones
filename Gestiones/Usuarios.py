@@ -282,12 +282,12 @@ with tab4:
         # Extract the email from the selected member
         miembro_del = miembro.split(' : ')[0]
 
-        # Query to get individual member details
+        # Query to get individual member details using parameterized query
         miembro_sql_del = session.sql("""
             SELECT NOMBRE, APELLIDO, CORREO, STATUS
             FROM LABORATORIO.MONICA_SOBERON.COMUNIDAD
-            WHERE CORREO = %s;
-        """, (miembro_del,))
+            WHERE CORREO = ?;
+        """, [miembro_del])
         miembro_df_del = miembro_sql_del.to_pandas()
 
         if not miembro_df_del.empty:
@@ -299,12 +299,12 @@ with tab4:
             st.write(f"Correo: {row['CORREO']}")
             st.write(f"Estatus: {row['STATUS']}")
 
-            # Query to get the user ID
+            # Query to get the user ID using parameterized query
             miembro_id_result = session.sql("""
                 SELECT id_usuario
                 FROM LABORATORIO.MONICA_SOBERON.COMUNIDAD
-                WHERE CORREO = %s;
-            """, (miembro_del,))
+                WHERE CORREO = ?;
+            """, [miembro_del])
             miembro_id_df = miembro_id_result.to_pandas()
 
             if not miembro_id_df.empty:
@@ -315,13 +315,13 @@ with tab4:
 
                 if seguro:
                     # Check if the user has participated in any courses or sessions
-                    check_data = session.sql(f"""
+                    check_data = session.sql("""
                         SELECT 
-                            (SELECT COUNT(*) FROM LABORATORIO.MONICA_SOBERON.INVITACION_CURSO WHERE ID_USUARIO = %s) AS INVITADOS_COUNT,
-                            (SELECT COUNT(*) FROM LABORATORIO.MONICA_SOBERON.REGISTRADOS_CURSO WHERE ID_USUARIO = %s) AS REGISTRADOS_COUNT,
-                            (SELECT COUNT(*) FROM LABORATORIO.MONICA_SOBERON.INVITACION_SESION WHERE ID_USUARIO = %s) AS INVITADO_COUNT,
-                            (SELECT COUNT(*) FROM LABORATORIO.MONICA_SOBERON.ASISTENCIA_SESION WHERE ID_USUARIO = %s) AS ASISTENTES_COUNT
-                    """, (miembro_id, miembro_id, miembro_id, miembro_id)).to_pandas()
+                            (SELECT COUNT(*) FROM LABORATORIO.MONICA_SOBERON.INVITACION_CURSO WHERE ID_USUARIO = ?) AS INVITADOS_COUNT,
+                            (SELECT COUNT(*) FROM LABORATORIO.MONICA_SOBERON.REGISTRADOS_CURSO WHERE ID_USUARIO = ?) AS REGISTRADOS_COUNT,
+                            (SELECT COUNT(*) FROM LABORATORIO.MONICA_SOBERON.INVITACION_SESION WHERE ID_USUARIO = ?) AS INVITADO_COUNT,
+                            (SELECT COUNT(*) FROM LABORATORIO.MONICA_SOBERON.ASISTENCIA_SESION WHERE ID_USUARIO = ?) AS ASISTENTES_COUNT
+                    """, [miembro_id, miembro_id, miembro_id, miembro_id]).to_pandas()
 
                     counts = check_data.iloc[0]
 
@@ -336,8 +336,8 @@ with tab4:
                         borrar = st.button('Eliminar Usuario', key="processU")
                         if borrar:
                             session.sql("""
-                                DELETE FROM LABORATORIO.MONICA_SOBERON.COMUNIDAD WHERE ID_USUARIO = %s;
-                            """, (miembro_id,)).collect()
+                                DELETE FROM LABORATORIO.MONICA_SOBERON.COMUNIDAD WHERE ID_USUARIO = ?;
+                            """, [miembro_id]).collect()
                             st.success("El usuario ha sido eliminado exitosamente.")
             else:
                 st.error("No se pudo obtener el ID del usuario seleccionado.")
