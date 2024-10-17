@@ -280,7 +280,7 @@ with tab4:
     miembro = st.selectbox('Selecciona un miembro:', users_df['USUARIOS'], key='del')
     if miembro:
         # Extract the email from the selected member
-        miembro_del = miembro.split(' : ')[0]
+        miembro_del = miembro.split(' : ')[1]
 
         # Query to get individual member details using parameterized query
         miembro_sql_del = session.sql("""
